@@ -1,33 +1,48 @@
-## Berkshelf
-Berkshelf is similar to Librarian-Chef, it uses the contents of a
-`Berksfile` (as in `Cheffile` for Librarian-Chef) to load all the cookbooks
-identified in the file, as well as all their respective dependencies. But
-on top of this, it replaces many portions of Knife, and acts like a
-package manager for chef cookbooks. For the docs, look at Berkshelf's
-[website](http://berkshelf.com/) for more information.
+# How This Works
 
-#### The Berksfile
-`[bundle exec] berks install` depends on follows the directives in your `Berksfile` to load
-cookbooks (from community API, local system, or git repo). You can also groups
-cookbooks together and use this grouping at installation time
-(when you perform `berks install`), to exclude or include certain
-cookbooks. For example, you can run `[bundle exec] berks install --without
-<group-name>`, or other options like `--only`.
+## Cookbook (Dependency) Management
+
+#### Berkshelf vs Librarian-Chef
+
+[Berkshelf](http://berkshelf.com/) provides the same functionality as
+[Librarian-Chef](https://github.com/applicationsonline/librarian-chef) in that it follows
+the information provided in a `Berksfile` (almost equivalent of Librarian-Chef's
+`Cheffile`) and loads all the required cookbooks. The main difference between
+the two, aside from Berkshelf's [superior
+integration](https://github.com/RiotGames/vagrant-berkshelf) with Vagrant, is
+that Berkshelf has more awareness of its surrounding environment and is
+integrated more smoothly within a cookbook.
+
+#### The `Berksfile`
+`berks install` follows the directives in your `Berksfile` to load cookbooks
+(from community API, local system, or git repo). You can also group cookbooks
+together (using `group` blocks) and use this grouping at installation time (when
+you perform `berks install`), to exclude or include certain cookbooks using
+options like `--without` and `--only`. 
 
 You can use the `site` directive in your `Berksfile` to indicate a community
 site API to be used by Berkshelf. For using the Opscode's newest community API
 you can simply use `:opscode` (instead of
-`http://cookbooks.opscode.com/api/v1/cookbooks`). Individual cookbooks can be
-loaded from other sources (local, git repo) by the `:path` and `:git` options.
+`http://cookbooks.opscode.com/api/v1/cookbooks`). Cookbooks can also be loaded
+from other sources using `:path` (local) and `:git` (and potentially `:rel`)
+options.
+
+The convention has become to leave a `Berksfile` in the root of the cookbook,
+even when there is no provisioning setup. The immediate use case for this is to
+provide alternative (non-community) sources for specific dependencies. But also
+to use the `metadata` keyword to tell Berkshelf that it should also load the
+dependencies mentioned in the `metadata.rb` file of the cookbook (this only
+works if `Berksfile` is in the cookbook root).
 
 #### Berkshelf Workflow
 
 Berks, as opposed to Librarian-Chef, maintains some sort of state of its own by
 installing cookbooks to **its** directory (stored in `BERKSHELF_PATH`, by
-default `~/.berkshelf/`). All the
-cookbooks that are installed in this way can be catalogued using `berks shelf
-list`. Although apparently you can get `berks install` to put the cookbooks in a
-custom folder (relative to the directory where install is invoked). In the
+default `~/.berkshelf/`). All cookbooks installed in this way can be 
+catalogued using `berks shelf list`. Although apparently you can get 
+`berks install` to put the cookbooks in a
+custom folder (relative to the directory where install is invoked `berks install
+-p /path/to/cookbooks`). In the
 latter case, Berkshelf will leave a copy of all cookbooks it installs in the
 path you specify, **in addition** to installing them, for further reuse, in its
 directory.
@@ -37,34 +52,54 @@ dependencies on the node as needed. So you provide the node with all *your*
 cookbooks and use Berkshelf on the node to load all external dependencies
 before provisioning with Chef.
 
-If you wish place your Berksfile in the root of a cookbook, then you can use the
-keyword `metdata` in your `Berksfile` to let Berkshelf know that you want it to 
-go through the dependencies indicated in the `metadata.rb` file of your cookbook
-and load all its dependencies as well. This way, you do not have to indicate the
-cookbook within which you have placed your `Berksfile` in your `cookbook`
-directives.
-
 #### Berkshelf and Vagrant
+
 Berkshelf works easily with Vagrant through a plugin (`vagrant plugin install
 vagrant-berkshelf`). If you want Vagrant to actually use this plugin you should
 indicate so in the `Vagrantfile` by adding `config.berkshelf.enabled = true` to
-your `Vagrant.configure("2")` block.
-Once you have done that, the plugin would
+your `Vagrant.configure("2")` block.  Once you have done that, the plugin would
 allow vagrant to access Berkshelf's cookbook directory without the `Vagrantfile`
 having to contain a `chef.cookbooks_path` directive (this attribute is, in fact,
-hijacked by the Vagrant-Berkshelf plugin). All the cookbooks that Berkshelf has
-installed (in `~/.berkshelf/`) can be used, and any non-installed cookbooks
-indicated in the `Berksfile` will be downloaded and available, as usual, to the VM
-at `/tmp/vagrant-chef-1/chef-solo-1/cookbooks/`.
+[hijacked](http://berkshelf.com/#chef_solo_provisioner) by Vagrant-Berkshelf in
+solo provisioning). All cookbooks that Berkshelf has installed (in
+`~/.berkshelf/`) can be used, and any non-installed cookbooks indicated in the
+`Berksfile` will be downloaded and available to the VM, as usual, at
+`/tmp/vagrant-chef-1/chef-solo-1/cookbooks/`.
 
-Note that for Vagrant, Berkshelf, and Chef to be able to load up a configured
-virtual machine the only configuration files you need is a `Berksfile` and a
-`Vagrantfile`. Within your `Berksfile` you can indicate all the cookbooks you
-want Chef to use from community API, github, or local filesystem.
+#### Minimal Setup
 
-## Post-Provisioning Drupal issues
+Using Vagrant, Berkshelf, and Chef you can create a configured
+virtual machine using only [two configuration
+files](http://github.com/dergachev/vagrant-drupal); all you need is a `Berksfile` and a
+`Vagrantfile`. 
 
-## Drupal's issues with port forwarding
+## Note on Software Versions
+
+#### Vagrant v1, v2
+
+Vagrant v1 refers to `v1.0.x` and Vagrant v2 refers to
+anything late, i.e `v1.1+`. Furthermore, Vagrant v1 is provided as a Rubygem (soon to be
+[discontinuted](http://mitchellh.com/abandoning-rubygems)) but as of v2, Vagrant is only provided as a system package. You
+can install two Vagrants (using `gem install` and `apt-get install`), both of
+which registering a linux command, and
+[confuse](https://github.com/RiotGames/berkshelf/issues/368#issuecomment-13736368)
+yourself! 
+
+The `Vagrantfile` here is written for Vagrant v2. To
+rollback to Vagrant v1 apply the following to it:
+- use `Vagrant.configure("1")` or `Vagrant::Config.run`
+- for port forwarding use `config.vm.forwarded\_port, guest: 80, host: 8080`
+- `config.vm.customize ["modifyvm", :id, "--memory", "512"]` instead of the
+  provider specific block (`config.vm.provider :virtualbox do`) 
+
+#### Chef versions
+Chef 11 introduced many backward incompatible features. But Ubuntu 12.04
+(precise) comes with an older version of Chef that cannot make sense of many
+mainstream cookbooks. Therefore, for now, we are installing a modern version of
+Chef using an inline shell provision command.
+## Post-Provisioning Drupal 7
+
+#### Port forwarding issue
 In a port forwarded setup, Drupal would not realize its own true host port,
 since it the global variable `$base_url` is read off of `http_host` which
 contains the information before port forwarding. Due to this problem the
@@ -73,12 +108,12 @@ in status reports.
 
 Notice that in no other setting but this, the error can be avoided and Drupal
 should be able to resolve its own FQDN properly. For example,
-if you are using a proxy, since it is an HTTP layer mechanism, you can use the
-`UseCanonicalName` in Apache. Even in the port forwarded setup, with this
-directive, Apache sets the right `HTTP_PORT`, but Drupal only looks at
-`HTTP_HOST` that contains the wrong port.
+if you are using a proxy, you can use the
+`UseCanonicalName` and `UseCanonicalPhysicalPort` directives in Apache. Even in
+the port forwarded setup, with this directive, Apache sets the right
+`HTTP_PORT`, but Drupal only looks at `HTTP_HOST` that contains the wrong port.
 
-## Update status problem
+#### Update status problem
 Upon fresh installation, and only sometimes, Drupal shows an
 error: "There was a problem checking available updates for Drupal", in the
 status report and when trying to access the Modules page. But once you
@@ -100,16 +135,178 @@ notes:
   although technically it should have had the exact same effect as owning the
   entire directory at once.
 
-## Usage
-the three use cases: 
-- Quick Drupal: `vagrant up`
-- Configure dev/prod enviornment: Berkshelf + Chef provisioner
-- Extending/Debugging deploy\_drupal: Vagrant + Test-Kitchen (for multiple
-  platform testing)
+#### Note on Linux file permissions 
+Permission rules take precedence in order of specifity. For example, assume user
+`bob` is in group `smith`, and file `foo` is owned by `bob:smith` with
+permissoins `r--,rw-,---`. User `bob` cannot write on the file, despite
+the fact that all other members of `smith` have write access to it.
+
+## Testing 
+
+#### Travis
+
+Right now, [Travis-CI](https://travis-ci.org/) is being used only minimally;
+only `foodcritic` and `knife cookbook test` are run against the cookbook. I
+tried to setup a simple convergence test using minitest.
+[Here](https://gist.github.com/amirkdv/5880307) is the `Rakefile` I used.
+
+The first thing to remember is that Travis workers have (an old version) of Chef
+[running](http://about.travis-ci.org/docs/user/ci-environment/#How-VM-images-are-upgraded-and-deployed),
+so the `Gemfile` should specifically ask for a modern version of Chef to be
+installed alongside (say `11.2.0`) the original one. 
+
+Fixing that, Chef would get stuck while trying
+to perform `action :restart` on `mysql`. Since Travis workers have MySQL running [on
+boot](http://about.travis-ci.org/docs/user/database-setup/#MySQL), I tried
+running the following as a `before_script` in `.travis.yml`:
+
+``` bash
+sudo apt-get purge mysql-client mysql-server mysql-common mysql-server-core
+```
+
+This resulted in Chef throwing an error at the same spot.
+[Here](https://s3.amazonaws.com/amir-bin/travis-chef-log.txt) is the last
+recorded log of the failed attempt to configure a Travis worker using only the
+[mysql cookbook](https://github.com/opscode-cookbooks/mysql).
+
+Ideally, at least the "fresh Drupal install" use case (see [below](#Scope))
+should be tested on Travis.
+
+#### Minitest
+
+Tests are written using the
+[minitest-handler](https://github.com/btm/minitest-handler-cookbook) cookbook.
+Look at this
+[example](https://github.com/calavera/minitest-chef-handler/blob/v0.4.0/examples/spec_examples/files/default/tests/minitest/example_test.rb)
+for an example of how it works. Once test recipes are written, all that needs to
+be done is first, add `minitest-handler` to Berkshelf's dependencies (in the
+`Berksfile`), and second, add `recipe[minitest-handler]` to Chef's run list.
+
+Also, keep in mind that the path where test
+recipes are looked up has changed in recent versions (refer to repo).
+Currently, they are expected to be found at `files/default/test/*_test.rb`
+
+#### Test-Kitchen
+Automated testing of different combinations of provisioning and minitest recipes
+on multiple platforms is done by
+[Test-Kitchen](https://github.com/opscode/test-kitchen).  Currently, this
+cookbook is using Test-Kitchen's [Vagrant
+driver](https://github.com/portertech/kitchen-vagrant). The only other official
+Opscode alternative is [EC2](https://github.com/opscode/kitchen-ec2), but
+portertech has written drivers for
+[LXC](https://github.com/portertech/kitchen-lxc) and
+[Docker](https://github.com/portertech/kitchen-docker).
+
+For a good introduction to Test-Kitchen, look at jtimberman's
+[two](http://jtimberman.housepub.org/blog/2013/03/19/anatomy-of-a-test-kitchen-1-dot-0-cookbook-part-1/)
+[part](http://jtimberman.housepub.org/blog/2013/03/19/anatomy-of-a-test-kitchen-1-dot-0-cookbook-part-2/)
+blog post. 
+
+# Workflow and Main Use Cases
+
+## Scope
+
+The use cases of the cookbook should be defined in a broader sense than the
+example Vagrant setup. The following are all potential use cases for the
+cookbook:
+
+1. The curious: **play** with Drupal with minimal effort and cruft
+(`Vagrantfile` + `Berksfile` orgnized in a usable way; [Vagrant-Drupal](http://github.com/dergachev/vagrant-drupal)).
+1. The developer/designer: **develop** a Drupal project, continuously, in an
+environment that is consistent over **time**. This use case has requirements for
+being able to perform version control in the VM.
+1. The dev-team: **collaborate** on a Drupal project in an environment that is
+consistent for all members of the team. This use case has requirements for
+**remote** version control.
+1. The sysadmin: **configure** a development/production environment to serve
+a Drupal site. This requires a bootstrap script to configure a server from
+scratch as such:
+
+``` bash
+apt-get install ruby1.9.3 libxml2-dev libxslt-dev git
+gem install chef berkshelf
+# load Berksfile, dna.json, and solo.rb somehow ...
+berks install -p /tmp/cookbooks
+cd tmp
+chef-solo -c solo.rb -j dna.json
+```
+
+The differences between the requirements of the use cases above should be
+understood, and the use cases to be supported should be identified before
+reasonable test cases can be defined.
+
+In any case, one major question must be resolved: 
+  Is the cookbook expected to deduce on its own whether it should load an existing
+  site or create a new one? And if yes (the alternative being that this switch is
+  controlled via an attribute) what should happen if there is any discrepancy
+  between the code base (specifically `settings.php`), the sql dump, the
+  attributes provided to the cookbook, and the potentially non-trivial state of
+  the Chef node (after the first round of provisioning).
+
+## Current Thoughts on Scope
+
+#### Recipe Decomposition
+
+This might be a better recipe decomposition of the existing workflow:
+
+1. `deploy_drupal::lamp_stack`
+1. `deploy_drupal::pear_dependencies`
+1. `deploy_drupal::load_existing_site`
+1. `deploy_drupal::create_new_site`
+1. `deploy_drupal::default` (minimal)
+
+#### Drush custom command(s)
+
+One good solution for implementing the ability to fully understand the state of
+a Drupal site (sys-admin-vise) and spot (and deal with) discrepancies mentioned
+above is native PHP code as a Drush command. 
+[Here](https://gist.github.com/amirkdv/5879996) is a Ruby script
+that parses the output of `drush status`, which in the latest version (6.x)
+accepts a significantly wider array of options.
+
+The current release of Drush (test on earlier stable versions?) has the
+following issue in `drush status`. If **all** the following conditions hold:
+
+1. credentials exist in `settings.php`,
+2. database with specified name exists,
+3. specified user has access to the database,
+4. specified database is empty
+
+then drush throws an exception (not if any of the conditions above does not hold).
+
+#### Reset functionality
+Currently, reset functionality is provided through setting an environment
+varible in the Vagrant run
+If the solo-provisioner script is to be used, Right now the `Vagrantfile` does two things regarding chef attributes:
+
+``` ruby
+chef.json = JSON.parse( IO.read("dna.json") )
+chef.json.merge!({
+    :deploy_drupal => { 
+      :destroy_existing => ENV["destroy"]
+    }   
+}) 
+```
+
+The issue is that if the second part is run as above, the configuration in
+`dna.json` will be ignored since the following block would be added to the end
+of `dna.json`:
+
+``` ruby
+"deploy_drupal" : { 
+  "destroy_existing" : "true" 
+}
+```
+
+and Chef will ignore the initial `"deploy_drupal"` block.  If it is run using
+`merge` (instead of `merge!`) it will not merge at all (no `destroy_existing`
+inside `dna.json` in VM).
+
 
 ## Changes in password attributes:
 
 1. **MySQL** password (for the Drupal MySQL user):
+
 [Apparently](http://dev.mysql.com/doc/refman/5.1/en/grant.html) as far as MySQL
 is concerned, all we need to do is to get read of our `create user` statements
 and only use this:
@@ -117,6 +314,7 @@ and only use this:
 ``` sql
 GRANT ALL ON <drupal_db_name>.* TO '<user>'@'<host>' IDENTIFIED BY '<password>'
 ```
+
 and this will ensure the following:
 > When the IDENTIFIED BY clause is present and you have global grant
 > privileges, the password becomes the new password for the account, even if the
@@ -136,64 +334,3 @@ database! A more crafty workaround has to be developed for password resetting.
 
 2. Drupal **admin** pasword
 
-
-## Testing 
-minitest
-
-## Drupal Permissions 
-
-Permission rules take precedence in order of specifity (Bob is in group G and file x
-is owned by Bob:G with permissoins r-- rw- --- Bob cannot write on the file, despite
-the fact that all other members of G have write access)
-
-## Reset functionality
-Right now the `Vagrantfile` does two things regarding chef attributes:
-``` ruby
-chef.json = JSON.parse( IO.read("dna.json") )
-chef.json.merge!({
-    :deploy_drupal => { 
-      :destroy_existing => ENV["destroy"]
-    }   
-}) 
-```
-The issue is that if the second part is run as above, the configuration in `dna.json` will be ignored since `"deploy_drupal" : { "destroy_existing" : "true" }` will be added to the end of `dna.json` (in VM) and Chef will ignore the initial `"deploy_drupal"` block.
-If it is run using `merge` (instead of `merge!`) it will not merge at all (no `destroy_existing` inside `dna.json` in VM)
-## Chef 
-
-## Travis
-
-## Rakefile
-
-## drush status
-Here is a drush [status
-parser](https://gist.github.com/amirkdv/ce7eedf0814f32568922) in Ruby. This
-functionality should potentially be moved into a drush module that checks the
-Drupal site status in a directory.
-
-The current release of Drush (test on earlier stable versions?) has the
-following issue in `drush status`. If **all** the following conditions hold:
-
-1. credentials exist in `settings.php`,
-2. database with specified name exists,
-3. specified user has access to the database,
-4. specified database is empty
-
-then drush throws an exception (not if any of the conditions above does not hold).
-
-## Vagrant versions
-Vagrant v1 refers to `v1.0.x` and Vagrant v2 refers to
-anything late, i.e `v1.1+`. The `Vagrantfile` here is written for Vagrant v2. To
-rollback to Vagrant v1 apply the following:
-- use `Vagrant.configure("1")` or `Vagrant::Config.run`
-- for port forwarding use `config.vm.forwarded\_port, guest: 80, host: 8080`
-- `config.vm.customize ["modifyvm", :id, "--memory", "512"]` instead of the
-  provider specific block (`config.vm.provider :virtualbox do`) 
-
-## Chef versions
-  Ubuntu 12.04 (precise) comes with a version of Chef that cannot apparently
-  make sense of Librarian-Chef's output. Therefore, we do it using an inline
-  shell provision command.
-
-## Debugging
-Look at https://gist.github.com/3798773 for a trick to speed up package
-installation in vagrant.
