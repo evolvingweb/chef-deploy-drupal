@@ -6,7 +6,6 @@ description      "Installs/Configures drupal"
 long_description IO.read(File.join(File.dirname(__FILE__), 'README.md'))
 version          "0.0.1"
 
-# Chef 11 requires that all dependencies are explicitly mentioned
 depends "apt"
 depends "git"
 depends "apache2"

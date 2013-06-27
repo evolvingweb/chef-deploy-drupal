@@ -35,10 +35,3 @@ private
 def sandbox_path
     File.join(File.dirname(__FILE__), %w{tmp vagrant-chef-drupal})
 end
-
-begin
-  require 'kitchen/rake_tasks'
-  Kitchen::RakeTasks.new
-rescue LoadError
-  puts ">>>>> Kitchen gem not loaded, omitting tasks" unless ENV['CI']
-end

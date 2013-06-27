@@ -143,9 +143,35 @@ the fact that all other members of `smith` have write access to it.
 
 ## Testing 
 
+#### Minitest
+
+Tests are written using the
+[minitest-handler](https://github.com/btm/minitest-handler-cookbook) cookbook.
 Look at this
-[blogpost](http://www.iflowfor8hours.info/2012/11/chef-testing-stratagies-compared/)
-about different testing strategies for testing Chef cookbooks.
+[example](https://github.com/calavera/minitest-chef-handler/blob/v0.4.0/examples/spec_examples/files/default/tests/minitest/example_test.rb)
+for an example of how it works. Once test recipes are written, all that needs to
+be done is first, add `minitest-handler` to Berkshelf's dependencies (in the
+`Berksfile`), and second, add `recipe[minitest-handler]` to Chef's run list.
+
+Also, keep in mind that the path where test
+recipes are looked up has changed in recent versions (refer to repo).
+Currently, they are expected to be found at `files/default/test/*_test.rb`
+
+#### Test-Kitchen
+Automated testing of different combinations of provisioning and minitest recipes
+on multiple platforms is done by
+[Test-Kitchen](https://github.com/opscode/test-kitchen).  Currently, this
+cookbook is using Test-Kitchen's [Vagrant
+driver](https://github.com/portertech/kitchen-vagrant). The only other official
+Opscode alternative is [EC2](https://github.com/opscode/kitchen-ec2), but
+portertech has written drivers for
+[LXC](https://github.com/portertech/kitchen-lxc) and
+[Docker](https://github.com/portertech/kitchen-docker).
+
+For a good introduction to Test-Kitchen, look at jtimberman's
+[two](http://jtimberman.housepub.org/blog/2013/03/19/anatomy-of-a-test-kitchen-1-dot-0-cookbook-part-1/)
+[part](http://jtimberman.housepub.org/blog/2013/03/19/anatomy-of-a-test-kitchen-1-dot-0-cookbook-part-2/)
+blog post. 
 
 #### Travis
 
@@ -177,35 +203,14 @@ recorded log of the failed attempt to configure a Travis worker using only the
 Ideally, at least the "fresh Drupal install" use case (see [below](#Scope))
 should be tested on Travis.
 
-#### Minitest
+#### Alternatives
+Take a look at mlafeldt's [skeleton
+cookbook](https://github.com/mlafeldt/skeleton-cookbook) for ChefSpec Unit
+testing on Travis.
 
-Tests are written using the
-[minitest-handler](https://github.com/btm/minitest-handler-cookbook) cookbook.
-Look at this
-[example](https://github.com/calavera/minitest-chef-handler/blob/v0.4.0/examples/spec_examples/files/default/tests/minitest/example_test.rb)
-for an example of how it works. Once test recipes are written, all that needs to
-be done is first, add `minitest-handler` to Berkshelf's dependencies (in the
-`Berksfile`), and second, add `recipe[minitest-handler]` to Chef's run list.
-
-Also, keep in mind that the path where test
-recipes are looked up has changed in recent versions (refer to repo).
-Currently, they are expected to be found at `files/default/test/*_test.rb`
-
-#### Test-Kitchen
-Automated testing of different combinations of provisioning and minitest recipes
-on multiple platforms is done by
-[Test-Kitchen](https://github.com/opscode/test-kitchen).  Currently, this
-cookbook is using Test-Kitchen's [Vagrant
-driver](https://github.com/portertech/kitchen-vagrant). The only other official
-Opscode alternative is [EC2](https://github.com/opscode/kitchen-ec2), but
-portertech has written drivers for
-[LXC](https://github.com/portertech/kitchen-lxc) and
-[Docker](https://github.com/portertech/kitchen-docker).
-
-For a good introduction to Test-Kitchen, look at jtimberman's
-[two](http://jtimberman.housepub.org/blog/2013/03/19/anatomy-of-a-test-kitchen-1-dot-0-cookbook-part-1/)
-[part](http://jtimberman.housepub.org/blog/2013/03/19/anatomy-of-a-test-kitchen-1-dot-0-cookbook-part-2/)
-blog post. 
+Also, look at this
+[blogpost](http://www.iflowfor8hours.info/2012/11/chef-testing-stratagies-compared/)
+about different testing strategies for testing Chef cookbooks.
 
 # Workflow and Main Use Cases
 
