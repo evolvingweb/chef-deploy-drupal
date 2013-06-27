@@ -143,6 +143,10 @@ the fact that all other members of `smith` have write access to it.
 
 ## Testing 
 
+Look at this
+[blogpost](http://www.iflowfor8hours.info/2012/11/chef-testing-stratagies-compared/)
+about different testing strategies for testing Chef cookbooks.
+
 #### Travis
 
 Right now, [Travis-CI](https://travis-ci.org/) is being used only minimally;
