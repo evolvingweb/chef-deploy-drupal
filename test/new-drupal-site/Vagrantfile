@@ -1,0 +1,46 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+  # config.vm.box = "precise32"
+  config.vm.box = "precise64"
+ 
+  config.vm.network :forwarded_port, guest: 80, host: 8080
+
+  config.vm.provision :shell, :inline => "gem install chef --version 11.0.0 --no-rdoc --no-ri --conservative"
+  config.vm.provision :shell, :inline => "apt-get install -y git curl vim"
+
+  # installs all dependencies and drush
+  config.vm.provision :chef_solo do |chef|
+    chef.cookbooks_path = ["cookbooks"]
+    chef.add_recipe 'deploy_drupal::lamp_stack'
+    chef.add_recipe 'deploy_drupal::pear_dependencies'
+    chef.add_recipe 'deploy_drupal::default'
+
+    chef.json.merge!({
+      :deploy_drupal => { 
+        :site_name => 'new-drupal-site',
+        :apache_port => '80'
+      },
+      :mysql => {
+        :server_root_password => "root",
+        :server_debian_password => "root",
+        :server_repl_password => "root"
+      }
+    })
+  end 
+  # next ## SNAPSHOT: CLEAN
+  
+  # Installs the previously exported site code and SQL dump via deploy_drupal::default
+  config.vm.provision :chef_solo do |chef|
+    chef.cookbooks_path = ["site-cookbooks", "cookbooks"]
+    chef.add_recipe 'deploy_drupal::default'
+   
+  end
+  # next ## SNAPSHOT:DONE
+  
+  # Test that site and SQL dump were installed correctly and are being served by Apache
+  # TODO: ensure cooked.drupal is exposed as an attribute (or use something else to test)
+  config.vm.provision :shell, :inline => "curl --silent localhost:80 | grep '<title>' | grep 'cooked.drupal'"
+  
+end

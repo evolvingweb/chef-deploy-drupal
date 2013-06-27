@@ -1,0 +1,9 @@
+#!/usr/bin/env ruby
+#^syntax detection
+
+site 'http://community.opscode.com/api/v1'
+cookbook "deploy_drupal", :git => "git://github.com/amirkdv/vagrant_drupal.git", :path => "site-cookbooks/deploy_drupal"
+
+cookbook "xhprof", :git => "git://github.com/msonnabaum/chef-xhprof.git"
+cookbook "drush", :git => "git://github.com/homemade/chef-drush.git"
+

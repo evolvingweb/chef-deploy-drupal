@@ -1,0 +1,30 @@
+---
+driver_plugin: vagrant
+driver_config:
+  require_chef_omnibus: true
+
+platforms:
+- name: ubuntu-12.04
+  driver_config:
+    box: precise64
+
+suites:
+- name: default
+  run_list: 
+  - recipe[deploy_drupal]
+  - recipe[minitest-handler]
+  attributes: {
+    "deploy_drupal": {
+      "sql_load_file": "/vagrant/db/fga.sql.gz",
+      "sql_post_load_script": "/vagrant/db/fga-sql-post-load.sh",
+      "codebase_source_path": "/vagrant/public"
+    },
+    "mysql": {
+      "server_root_password": "root",
+      "server_debian_password": "root",
+      "server_repl_password": "root"
+    },
+    "minitest": {
+      "recipes": ["deploy_drupal"]
+    }
+  }
