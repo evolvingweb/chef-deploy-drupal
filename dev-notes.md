@@ -152,7 +152,8 @@ about different testing strategies for testing Chef cookbooks.
 Right now, [Travis-CI](https://travis-ci.org/) is being used only minimally;
 only `foodcritic` and `knife cookbook test` are run against the cookbook. I
 tried to setup a simple convergence test using minitest.
-[Here](https://gist.github.com/amirkdv/5880307) is the `Rakefile` I used.
+[Here](https://gist.github.com/amirkdv/5880307) is the `Rakefile` and
+[here](https://gist.github.com/amirkdv/5880656) is the `Gemfile` I used.
 
 The first thing to remember is that Travis workers have (an old version) of Chef
 [running](http://about.travis-ci.org/docs/user/ci-environment/#How-VM-images-are-upgraded-and-deployed),
@@ -264,7 +265,7 @@ This might be a better recipe decomposition of the existing workflow:
 One good solution for implementing the ability to fully understand the state of
 a Drupal site (sys-admin-vise) and spot (and deal with) discrepancies mentioned
 above is native PHP code as a Drush command. 
-[Here](https://gist.github.com/amirkdv/5879996) is a Ruby script
+[Here](https://gist.github.com/amirkdv/5880641) is a Ruby script
 that parses the output of `drush status`, which in the latest version (6.x)
 accepts a significantly wider array of options.
 
