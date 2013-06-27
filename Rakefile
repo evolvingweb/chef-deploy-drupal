@@ -15,7 +15,7 @@ end
 desc "Runs knife test"
 task :knife_test do
   Rake::Task[:prepare_sandbox].execute
-  sh "bundle exec knife cookbook test -a -c test/.chef/knife.rb  -o #{sandbox_path}/"
+  sh "bundle exec knife cookbook test -a -c .knife.rb  -o #{sandbox_path}/"
   Rake::Task[:destroy_sandbox].execute
 end
 

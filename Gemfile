@@ -8,8 +8,5 @@ gem "chef", ">=11.0.0"
 gem "moneta", '~> 0.6.0'
 gem "foodcritic"
 
-gem "berkshelf"
-gem "vagrant-berkshelf"
-
 gem "test-kitchen", "1.0.0.alpha.7"
 gem "kitchen-vagrant", "0.10.0"
