@@ -297,8 +297,8 @@ If the solo-provisioner script is to be used, Right now the `Vagrantfile` does t
 ``` ruby
 chef.json = JSON.parse( IO.read("dna.json") )
 chef.json.merge!({
-    :deploy-drupal => { 
-      :destroy_existing => ENV["destroy"]
+    "deploy-drupal" => { 
+      "destroy_existing" => ENV["destroy"]
     }   
 }) 
 ```
