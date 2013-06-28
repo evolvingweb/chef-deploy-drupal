@@ -1,9 +1,9 @@
 require 'minitest/spec'
 # Very simple minitest recipe
-# Cookbook Name:: deploy_drupal
+# Cookbook Name:: deploy-drupal
 # Spec:: default
 #
-describe_recipe 'deploy_drupal::default' do
+describe_recipe 'deploy-drupal::default' do
 
   include MiniTest::Chef::Assertions
   include MiniTest::Chef::Context

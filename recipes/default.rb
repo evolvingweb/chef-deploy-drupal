@@ -1,32 +1,16 @@
-#
-## Author:: Alex Dergachev
-## Cookbook Name:: deploy_drupal
+## Cookbook Name:: deploy-drupal
 ## Recipe:: default
-##
-## Copyright 2012, Evolving Web Inc.
-##
-## Licensed under the Apache License, Version 2.0 (the "License");
-## you may not use this file except in compliance with the License.
-## You may obtain a copy of the License at
-##
-##     http://www.apache.org/licenses/LICENSE-2.0
-##
-## Unless required by applicable law or agreed to in writing, software
-## distributed under the License is distributed on an "AS IS" BASIS,
-## WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-## See the License for the specific language governing permissions and
-## limitations under the License.
 ##
 #
 
-include_recipe 'deploy_drupal::lamp_stack'
-include_recipe 'deploy_drupal::pear_dependencies'
+include_recipe 'deploy-drupal::lamp_stack'
+include_recipe 'deploy-drupal::pear_dependencies'
 
 
 MYSQL_ROOT_PASS = node['mysql']['server_root_password']
-MYSQL_DRUPAL_USER = node['deploy_drupal']['mysql_user']
-MYSQL_DRUPAL_PASS = node['deploy_drupal']['mysql_pass']
-DRUPAL_DB_NAME = node['deploy_drupal']['db_name']
+MYSQL_DRUPAL_USER = node['deploy-drupal']['mysql_user']
+MYSQL_DRUPAL_PASS = node['deploy-drupal']['mysql_pass']
+DRUPAL_DB_NAME = node['deploy-drupal']['db_name']
 
 # the format mysql -u <user> -p<password> ... causes errors when password is empty
 # Note that the mysql url with an empty password (password=''), as used in drush site-install, does not cause an error
@@ -40,21 +24,21 @@ MYSQL_ROOT_CONNECTION =    "mysql  --user='root'\
                                    --host='localhost'\
                                    --password='#{MYSQL_ROOT_PASS}'"
 
-SQL_LOAD_FILE = node['deploy_drupal']['sql_load_file']
-SQL_POST_LOAD_SCRIPT = node['deploy_drupal']['sql_post_load_script']
+SQL_LOAD_FILE = node['deploy-drupal']['sql_load_file']
+SQL_POST_LOAD_SCRIPT = node['deploy-drupal']['sql_post_load_script']
 
-DRUPAL_ADMIN_PASS = node['deploy_drupal']['admin_pass']
-DRUPAL_SITE_NAME = node['deploy_drupal']['site_name']
-DRUPAL_TRUSTEES = node['deploy_drupal']['dev_group']
+DRUPAL_ADMIN_PASS = node['deploy-drupal']['admin_pass']
+DRUPAL_SITE_NAME = node['deploy-drupal']['site_name']
+DRUPAL_TRUSTEES = node['deploy-drupal']['dev_group']
 
-DRUPAL_SOURCE_PATH = node['deploy_drupal']['codebase_source_path']
-DRUPAL_DEPLOY_DIR = node['deploy_drupal']['deploy_directory']
+DRUPAL_SOURCE_PATH = node['deploy-drupal']['codebase_source_path']
+DRUPAL_DEPLOY_DIR = node['deploy-drupal']['deploy_directory']
 
-APACHE_PORT = node['deploy_drupal']['apache_port']
-APACHE_USER = node['deploy_drupal']['apache_user']
-APACHE_GROUP = node['deploy_drupal']['apache_group']
+APACHE_PORT = node['deploy-drupal']['apache_port']
+APACHE_USER = node['deploy-drupal']['apache_user']
+APACHE_GROUP = node['deploy-drupal']['apache_group']
 
-DESTROY_EXISTING = node['deploy_drupal']['destroy_existing']
+DESTROY_EXISTING = node['deploy-drupal']['destroy_existing']
 
 directory DRUPAL_DEPLOY_DIR do
   owner APACHE_USER
@@ -193,7 +177,7 @@ template "/usr/local/bin/drupal-perm.sh" do
   owner "root"
   group "root"
   variables({
-    :files_path => node['deploy_drupal']['files_path'],
+    :files_path => node['deploy-drupal']['files_path'],
     :user  => APACHE_USER,
     :group => DRUPAL_TRUSTEES 
   })

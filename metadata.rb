@@ -1,8 +1,8 @@
-name             "deploy_drupal"
+name             "deploy-drupal"
 maintainer       "Alex Dergachev"
 maintainer_email "alex@evolvingweb.ca"
 license          "Apache 2.0"
-description      "Installs/Configures drupal"
+description      "Installs/Configures/Bootsraps Drupal"
 long_description IO.read(File.join(File.dirname(__FILE__), 'README.md'))
 version          "0.0.1"
 

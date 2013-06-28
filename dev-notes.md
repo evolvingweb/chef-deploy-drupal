@@ -265,11 +265,11 @@ case=[fresh,reset,load] vagrant [up,provision]
 #### Recipe Decomposition
 This might be a better recipe decomposition of the existing workflow:
 
-1. `deploy_drupal::lamp_stack`
-1. `deploy_drupal::pear_dependencies`
-1. `deploy_drupal::load_existing_site`
-1. `deploy_drupal::create_new_site`
-1. `deploy_drupal::default` (minimal)
+1. `deploy-drupal::lamp_stack`
+1. `deploy-drupal::pear_dependencies`
+1. `deploy-drupal::load_existing_site`
+1. `deploy-drupal::create_new_site`
+1. `deploy-drupal::default` (minimal)
 
 #### Drush custom command(s)
 One good solution for implementing the ability to fully understand the state of
@@ -297,7 +297,7 @@ If the solo-provisioner script is to be used, Right now the `Vagrantfile` does t
 ``` ruby
 chef.json = JSON.parse( IO.read("dna.json") )
 chef.json.merge!({
-    :deploy_drupal => { 
+    :deploy-drupal => { 
       :destroy_existing => ENV["destroy"]
     }   
 }) 
@@ -308,12 +308,12 @@ The issue is that if the second part is run as above, the configuration in
 of `dna.json`:
 
 ``` ruby
-"deploy_drupal" : { 
+"deploy-drupal" : { 
   "destroy_existing" : "true" 
 }
 ```
 
-and Chef will ignore the initial `"deploy_drupal"` block.  If it is run using
+and Chef will ignore the initial `"deploy-drupal"` block.  If it is run using
 `merge` (instead of `merge!`) it will not merge at all (no `destroy_existing`
 inside `dna.json` in VM).
 

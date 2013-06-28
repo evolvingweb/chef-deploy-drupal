@@ -11,10 +11,10 @@ platforms:
 suites:
 - name: default
   run_list: 
-  - recipe[deploy_drupal]
+  - recipe[deploy-drupal]
   - recipe[minitest-handler]
   attributes: {
-    "deploy_drupal": {
+    "deploy-drupal": {
       "dev_group" : "sudo"
     },
     "mysql": {
@@ -23,6 +23,6 @@ suites:
       "server_repl_password": "root"
     },
     "minitest": {
-      "recipes": ["deploy_drupal"]
+      "recipes": ["deploy-drupal"]
     }
   }
