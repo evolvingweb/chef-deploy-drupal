@@ -82,12 +82,29 @@ a bootstrapped site (no manual installation required).
 
 The expected state after provisioning is as follows:
 
+1. The cookbook tries to build a 
+1. The following directory structure holds in the provisioned machine:
+  - <deploy_base_path>
+      - <site_name>
+          - <source_site_path>
+              - index.php
+              - includes
+              - modules
+              - sites
+              - themes
+          - db
+              - dump.sql.gz
+          - scripts
+              - post-install-script.sh
+Note that `db` and `scripts` subdirectories are not controlled by the cookbook,
+and will be copied over along with everything else that might exist under
+`source_project_path`.
 1. MySQL recognizes a user with username `mysql_user`, identified by
 `mysql_password`. The user is granted **all** privileges on the database
 `db_name`.
 1. Apache has a virtual host bound to port `apache_port` with the name
 `site_name`. The virtual host has its root directory at
-`<deploy_base_path>/<site_name>`.
+`<deploy_base_path>/<site_name>/<source_site_path>`.
 1. This directory is the root of the installed Drupal site. Ownership and
 permission settings of this directory are set as follows:
   1. The user and group owners of all current files and subdirectories are
