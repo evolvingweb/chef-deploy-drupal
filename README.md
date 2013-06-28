@@ -74,6 +74,8 @@ a bootstrapped site (no manual installation required).
 
 The expected state after provisioning is as follows:
 
+1. MySQL recognizes a user with provided credentials. The user is granted all privileges on the
+database used by Drupal.
 1. Apache has a virtual host bound to port
 `node['deploy_drupal']['apache_port']` with the name
 `node['deploy_drupal']['site_name']` with root directory at
@@ -92,3 +94,6 @@ permission settings of this directory are set as follows:
   and `r-x rwx ---`, respectively. The only exception is the `files`
   directories (attribute `node['deploy_drupal']['files_path']`) and all its
   contents, which has its permissions set to `rwx rwx ---`.
+1. A bash utility `drupal-perm.sh` is installed at `/usr/local/bin` that
+when invoked from the Drupal root directory, ensures that the ownership and
+permission settings described above are in place.

@@ -34,7 +34,7 @@ Vagrant.configure("2") do |config|
       :minitest =>{
         :recipes => [ "deploy_drupal" ]
       },
-      :run_list =>[ "minitest-handler" ]
+      :run_list =>[ "deploy_drupal", "minitest-handler" ]
     })
   end
 end
