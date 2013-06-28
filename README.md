@@ -1,66 +1,94 @@
-Deploy Drupal Cookbook
-================
+## Deploy Drupal Cookbook
 
-Installs and configures a Drupal 7 site running on MySQL and Apache. The cookbook
-supports two main use cases:
+[![BuildStatus](https://secure.travis-ci.org/amirkdv/chef-deploy-drupal.png)](http://travis-ci.org/amirkdv/chef-deploy-drupal)
 
-- You **have** a Drupal site and want to deploy it over a virtual server,
-  potentially the setup with Vagrant [here](../../). 
+#### Description
+Installs, configures, and bootsraps a [Drupal 7](https://drupal.org/drupal-7.0)
+site running on MySQL and Apache. The cookbook supports two main use cases:
 
-- You want to configure a server, virtual or not, to run a fresh installation of
-  Drupal.
+- You have an **existing** Drupal site (code base and potentially a database SQL dump) and want to
+  configure a server to serve your site.
+- You want the server to download, bootstrap, and serve a **fresh** installation of
+  Drupal 7.
 
-Description
------------ 
-The cookbook first checks out the following from the Vagrant root directory 
-(the directory containing your `Vagrantfile`):
+The repository includes an example `Vagrantfile` to test the cookbook. To use
+this file:
 
-1. A Drupal site in `./public`
-2. A database dump at `./db/fga.sql.gz`, and 
-3. post-installation SQL script at `./db/fga-sql-post-load.sh`.
+``` bash
 
-If you have a bootstrapped drupal site in the `./public` directory and no
-database dump, the cookbook will try to initialize the database with the
-credentials provided in `settings.php`. These credentials must be identically
-reflected in the cookbook attributes, otherwise the cookbook will not proceed
-(**it does now, but it should not**).
+apt-get install vagrant
+vagrant plugin install vagrant-berkshelf
+vagrant up
 
-If the cookbook fails to build a site with the provided resources, it will
-download a fresh stable release of Drupal 7 from [drupal.org](http://drupal.org)
-and configures MySQL and Apache according to your attributes (described below).
+```
 
-Recipes
------------ 
+To test/debug the cookbook you can use `Test-Kitchen` which simply runs the
+minitest test cases defined at `files/default/test/*_test.rb`. To get
+Test-Kitchen running:
+
+``` bash
+bundle install
+kitchen test
+```
+
+#### Recipes
 
 - `deploy\_drupal::lamp\_stack`: installs infrastructure packages to support
   Apache, MySQL, PHP, and Drush. 
 - `deploy\_drupal::pear\_dependencies`: installs PEAR, PECL, and other PHP
   enhancement packages.
-- `deploy\_drupal::default`: is the main recipe that loads and installs Drupal
+- `deploy\_drupal::default`: is the main recipe that loads and installs Drupal 7
   and configures MySQL and Apache to serve the site.
 
-Attributes
------------ 
-This cookbook defines the following default attributes under
-`node['default']['deploy_drupal']`:
+#### Platform
+Tested on:
+* Ubuntu 12.04
 
-<table> <tr> <th> Attribute </th> <th> Default value </th> <th> Notes </th>
-</tr> <tr> <td> codebase_source_path </td> <td>  </td> <td> required attribute,
-absolute path to drupal folder containing index.php and settings.php </td> </tr>
-<tr> <td> site_name </td> <td> cooked.drupal </td> <td> vhost server name </td>
-</tr> <tr> <td> deploy_directory </td> <td>
-'/var/shared/sites/cooked.drupal/site' </td> <td> can be same as
-codebase_source_path </td> </tr> <tr> <td> apache_port</td> <td>  80 </td> <td>
-should be consistent with  node['apache']['listen_ports'] </td> </tr> <tr> <td>
-apache_user </td> <td>  www-data </td> <td> user owning drupal codebase files
-</td> </tr> <tr> <td> apache_group </td> <td>  www-data </td> <td> </td> </tr>
-<tr> <td> sql_load_file </td> <td>  </td> <td> absolute path to drupal SQL dump
-(can be .gz) </td> </tr> <tr> <td> sql_post_load_script </td> <td>  </td> <td>
-absolute path to bash script to run after loading SQL dump </td> </tr> </table>
+#### Attributes
+The following are the main attributes that this cookbook uses:
 
-TODO ====
+|     Attribute         |    Default Value    |           Description                   |
+| ----------------------|:-------------------:|:--------------------------------------: |
+| `codebase_source_path`|      none           | absolute path to existing site codebase
+| `site_name`           |   cooked.drupal     | Virtual Host name
+| `deploy_directory`    |`/var/shared/sites/[site_name]/site` | Root of served Drupal site
+| `apache_port`         |       80            | must be consistent with`node['apache']['listen_ports']`
+| `apache_user`         |    `www-data`       |
+| `apache_group`        |    `www-data`       |
+| `sql_load_file`       |     `''`            | absolute path to existing site SQL dump
+| `sql_post_load_script`|     `''`            | absolute path to bash script to be executed after loading SQL dump
+| `dev_group`           |     `sudo`          | System group owning site root(excludes `apache_user`)
+| `files_path`          |`sites/default/files`| Drupal files directory, relative to site root
+| `admin_pass`          |     `admin`         | Drupal site administrator password
+| `db_name`             |     `drupal`        | MySQL database used by Drupal
+| `mysql_user`          |     `drupal_db`     | MySQL user used by Drupal (`settings.php`)
+| `mysql_pass`          |     `drupal_db`     | MySQL password used by Drupal (`settings.php`)
 
-- Support multi-site Drupal
-- Build deploy\_drupal::cron, see:
-  - https://github.com/mdxp/drupal-cookbook/blob/master/recipes/cron.rb
-  - http://drupal.org/node/23714
+#### Behavior
+
+Currently, the cookbook tries to load an existing site and if it fails due to
+the absence of codebase or discrepancies in credentials, it will
+download a fresh stable release of Drupal 7 from [drupal.org](http://drupal.org)
+and will configure MySQL and Apache, according to cookbook attributes, to serve
+a bootstrapped site (no manual installation required).
+
+The expected state after provisioning is as follows:
+
+1. Apache has a virtual host bound to port
+`node['deploy_drupal']['apache_port']` with the name
+`node['deploy_drupal']['site_name']` with root directory at
+`node['deploy_drupal']['deploy_dir']`.
+1. This directory is the root of the installed Drupal site. Ownership and
+permission settings of this directory are set as follows:
+  1. The user and group owners of all current files and subdirectories are
+  `node['deploy_drupal']['apache_user']` and
+  `node['deploy_drupal']['dev_group']`, respectively.
+  1. The group owner of all files and subdirectories created in the future will be
+  `node['deploy_drupal']['dev_group']` (`setgid` flag is set for all files and
+  subdirectories). The user owner of future files and directories will depend on the
+  default behavior of the system (in all major distributions of Linux `setuid`
+  is ignored, and this cookbook, therefore, does not use it).
+  1. The permissions for all files and subdirectories are set to `r-- rw- ---`
+  and `r-x rwx ---`, respectively. The only exception is the `files`
+  directories (attribute `node['deploy_drupal']['files_path']`) and all its
+  contents, which has its permissions set to `rwx rwx ---`.

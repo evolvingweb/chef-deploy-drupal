@@ -15,9 +15,9 @@ suites:
   - recipe[minitest-handler]
   attributes: {
     "deploy_drupal": {
-      "sql_load_file": "/vagrant/db/fga.sql.gz",
-      "sql_post_load_script": "/vagrant/db/fga-sql-post-load.sh",
-      "codebase_source_path": "/vagrant/public"
+      "sql_load_file": "/vagrant/db/dump.sql.gz",
+      "codebase_source_path": "/vagrant/site",
+      "dev_group" : "sudo"
     },
     "mysql": {
       "server_root_password": "root",
