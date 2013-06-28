@@ -62,7 +62,7 @@ below can be accessed in the cookbook via
 |`post_script_file`   |`''`|path to post-install script, relative to project path
 |`site_files_path`    |`sites/default/files`| Drupal "files", relative to site root
 |`deploy_base_path`   |`/var/shared/sites`| Directory containing differentDrupal projects
-|`site_name`          |'cooked.drupal'| Virtual Host name and directory in deploy base path
+|`site_name`          |`'cooked.drupal'`| Virtual Host name and directory in deploy base path
 |`apache_port`        |80      | must be consistent with`node['apache']['listen_ports']`
 |`apache_user`        |`www-data` |
 |`apache_group`       |`www-data` |
@@ -84,41 +84,42 @@ The expected state after provisioning is as follows:
 
 1. The cookbook tries to build a 
 1. The following directory structure holds in the provisioned machine:
-  - <deploy_base_path>
-      - <site_name>
-          - <source_site_path>
-              - index.php
-              - includes
-              - modules
-              - sites
-              - themes
-          - db
-              - dump.sql.gz
-          - scripts
-              - post-install-script.sh
+  - `deploy_base_path`
+      - `site_name`
+          - `site` (copied from `<source_project_path>/<source_site_path>`)
+              - `index.php`
+              - `includes`
+              - `modules`
+              - `sites`
+              - `themes`
+              - ...
+          - `db`
+              - `dump.sql.gz`
+          - `scripts`
+              - `post-install-script.sh`
 Note that `db` and `scripts` subdirectories are not controlled by the cookbook,
-and will be copied over along with everything else that might exist under
-`source_project_path`.
+and will be copied over along with everything else that might exist in the
+`source_project_path` directory.
 1. MySQL recognizes a user with username `mysql_user`, identified by
 `mysql_password`. The user is granted **all** privileges on the database
 `db_name`.
 1. Apache has a virtual host bound to port `apache_port` with the name
 `site_name`. The virtual host has its root directory at
-`<deploy_base_path>/<site_name>/<source_site_path>`.
-1. This directory is the root of the installed Drupal site. Ownership and
+`<deploy_base_path>/<site_name>/source`.
+1. The `<deploy_base_path>/<site_name>` directory is the root of the installed Drupal 
+project (the actual site is in the `site` subdirectory). Ownership and
 permission settings of this directory are set as follows:
   1. The user and group owners of all current files and subdirectories are
-  `node['deploy-drupal']['apache_user']` and
-  `node['deploy-drupal']['dev_group']`, respectively.
+  `apache_user` and `dev_group`, respectively.
   1. The group owner of all files and subdirectories created in the future will be
-  `node['deploy-drupal']['dev_group']` (`setgid` flag is set for all files and
-  subdirectories). The user owner of future files and directories will depend on the
+  `dev_group` (the `setgid` flag is set for all subdirectories). The user owner 
+  of future files and directories will depend on the
   default behavior of the system (in all major distributions of Linux `setuid`
   is ignored, and this cookbook, therefore, does not use it).
   1. The permissions for all files and subdirectories are set to `r-- rw- ---`
-  and `r-x rwx ---`, respectively. The only exception is the `files`
-  directories (attribute `node['deploy-drupal']['files_path']`) and all its
+  and `r-x rwx ---`, respectively. The only exception is the "files"
+  directories (refer to the `site_files_path` attribute) and all its
   contents, which has its permissions set to `rwx rwx ---`.
 1. A bash utility `drupal-perm.sh` is installed at `/usr/local/bin` that
-when invoked from the Drupal root directory, ensures that the ownership and
+when invoked from the project root directory, ensures that the ownership and
 permission settings described above are in place.
