@@ -49,20 +49,20 @@ Tested on:
 * Ubuntu 12.04
 
 #### Attributes
-The following are the main attributes that this cookbook uses (available in
-`node['deploy-drupal']`:
+The following are the main attributes that this cookbook uses. All attributes mentioned
+below can be accessed in the cookbook via 
+`node['deploy_drupal']['<attribute_name>']`:
+
 
 |   Attribute Name    |Default |           Description           |
 | --------------------|:------:|:------------------------------: |
 |`source_project_path`| `''`   | absolute path to existing project
 |`source_site_path`   | `''`   | Drupal site root, relative to project path
 |`sql_load_file`      |`''`    | path to SQL dump, relative to project path
-|`post_script_file`   |`''`    | path to post-install script, relative to
-project path
+|`post_script_file`   |`''`|path to post-install script, relative to project path
 |`site_files_path`    |`sites/default/files`| Drupal "files", relative to site root
 |`deploy_base_path`   |`/var/shared/sites`| Directory containing differentDrupal projects
-|`site_name`          |'cooked.drupal'| Virtual Host name
-"cooked" projects
+|`site_name`          |'cooked.drupal'| Virtual Host name and directory in deploy base path
 |`apache_port`        |80      | must be consistent with`node['apache']['listen_ports']`
 |`apache_user`        |`www-data` |
 |`apache_group`       |`www-data` |
@@ -82,12 +82,12 @@ a bootstrapped site (no manual installation required).
 
 The expected state after provisioning is as follows:
 
-1. MySQL recognizes a user with provided credentials. The user is granted all privileges on the
-database used by Drupal.
-1. Apache has a virtual host bound to port
-`node['deploy-drupal']['apache_port']` with the name
-`node['deploy-drupal']['site_name']` with root directory at
-`node['deploy-drupal']['deploy_dir']`.
+1. MySQL recognizes a user with username `mysql_user`, identified by
+`mysql_password`. The user is granted **all** privileges on the database
+`db_name`.
+1. Apache has a virtual host bound to port `apache_port` with the name
+`site_name`. The virtual host has its root directory at
+`<deploy_base_path>/<site_name>`.
 1. This directory is the root of the installed Drupal site. Ownership and
 permission settings of this directory are set as follows:
   1. The user and group owners of all current files and subdirectories are
