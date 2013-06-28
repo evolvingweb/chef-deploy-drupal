@@ -1,9 +1,6 @@
 # How This Works
 
 ## Cookbook (Dependency) Management
-
-#### Berkshelf vs Librarian-Chef
-
 [Berkshelf](http://berkshelf.com/) provides the same functionality as
 [Librarian-Chef](https://github.com/applicationsonline/librarian-chef) in that it follows
 the information provided in a `Berksfile` (almost equivalent of Librarian-Chef's
@@ -35,7 +32,6 @@ dependencies mentioned in the `metadata.rb` file of the cookbook (this only
 works if `Berksfile` is in the cookbook root).
 
 #### Berkshelf Workflow
-
 Berks, as opposed to Librarian-Chef, maintains some sort of state of its own by
 installing cookbooks to **its** directory (stored in `BERKSHELF_PATH`, by
 default `~/.berkshelf/`). All cookbooks installed in this way can be 
@@ -53,7 +49,6 @@ cookbooks and use Berkshelf on the node to load all external dependencies
 before provisioning with Chef.
 
 #### Berkshelf and Vagrant
-
 Berkshelf works easily with Vagrant through a plugin (`vagrant plugin install
 vagrant-berkshelf`). If you want Vagrant to actually use this plugin you should
 indicate so in the `Vagrantfile` by adding `config.berkshelf.enabled = true` to
@@ -67,7 +62,6 @@ solo provisioning). All cookbooks that Berkshelf has installed (in
 `/tmp/vagrant-chef-1/chef-solo-1/cookbooks/`.
 
 #### Minimal Setup
-
 Using Vagrant, Berkshelf, and Chef you can create a configured
 virtual machine using only [two configuration
 files](http://github.com/dergachev/vagrant-drupal); all you need is a `Berksfile` and a
@@ -76,7 +70,6 @@ files](http://github.com/dergachev/vagrant-drupal); all you need is a `Berksfile
 ## Note on Software Versions
 
 #### Vagrant v1, v2
-
 Vagrant v1 refers to `v1.0.x` and Vagrant v2 refers to
 anything late, i.e `v1.1+`. Furthermore, Vagrant v1 is provided as a Rubygem (soon to be
 [discontinuted](http://mitchellh.com/abandoning-rubygems)) but as of v2, Vagrant is only provided as a system package. You
@@ -97,6 +90,7 @@ Chef 11 introduced many backward incompatible features. But Ubuntu 12.04
 (precise) comes with an older version of Chef that cannot make sense of many
 mainstream cookbooks. Therefore, for now, we are installing a modern version of
 Chef using an inline shell provision command.
+
 ## Post-Provisioning Drupal 7
 
 #### Port forwarding issue
@@ -173,21 +167,21 @@ For a good introduction to Test-Kitchen, look at jtimberman's
 [part](http://jtimberman.housepub.org/blog/2013/03/19/anatomy-of-a-test-kitchen-1-dot-0-cookbook-part-2/)
 blog post. 
 
-#### Travis
-
+#### Travis CI
 Right now, [Travis-CI](https://travis-ci.org/) is being used only minimally;
 only `foodcritic` and `knife cookbook test` are run against the cookbook. I
 tried to setup a simple convergence test using minitest.
 [Here](https://gist.github.com/amirkdv/5880307) is the `Rakefile` and
 [here](https://gist.github.com/amirkdv/5880656) is the `Gemfile` I used.
 
-The first thing to remember is that Travis workers have (an old version) of Chef
+The first thing to remember is that Travis workers have (an old version of) Chef
 [running](http://about.travis-ci.org/docs/user/ci-environment/#How-VM-images-are-upgraded-and-deployed),
-so the `Gemfile` should specifically ask for a modern version of Chef to be
-installed alongside (say `11.2.0`) the original one. 
+which is used by Travis itself to provision them. So, the `Gemfile` should
+specifically ask for a modern version of Chef to be installed alongside (say
+`11.2.0`) the original one. 
 
-Fixing that, Chef would get stuck while trying
-to perform `action :restart` on `mysql`. Since Travis workers have MySQL running [on
+Fixing that, Chef would get stuck while trying to perform `action :restart` on
+`mysql`. Since Travis workers have MySQL running [on
 boot](http://about.travis-ci.org/docs/user/database-setup/#MySQL), I tried
 running the following as a `before_script` in `.travis.yml`:
 
@@ -215,13 +209,13 @@ about different testing strategies for testing Chef cookbooks.
 # Workflow and Main Use Cases
 
 ## Scope
-
-The use cases of the cookbook should be defined in a broader sense than the
+The use cases for the cookbook should be defined in a broader sense than the
 example Vagrant setup. The following are all potential use cases for the
 cookbook:
 
 1. The curious: **play** with Drupal with minimal effort and cruft
-(`Vagrantfile` + `Berksfile` orgnized in a usable way; [Vagrant-Drupal](http://github.com/dergachev/vagrant-drupal)).
+(`Vagrantfile` + `Berksfile` orgnized in a usable way;
+[Vagrant-Drupal](http://github.com/dergachev/vagrant-drupal)).  
 1. The developer/designer: **develop** a Drupal project, continuously, in an
 environment that is consistent over **time**. This use case has requirements for
 being able to perform version control in the VM.
@@ -256,7 +250,6 @@ In any case, one major question must be resolved:
 ## Current Thoughts on Scope
 
 #### Recipe Decomposition
-
 This might be a better recipe decomposition of the existing workflow:
 
 1. `deploy_drupal::lamp_stack`
@@ -266,7 +259,6 @@ This might be a better recipe decomposition of the existing workflow:
 1. `deploy_drupal::default` (minimal)
 
 #### Drush custom command(s)
-
 One good solution for implementing the ability to fully understand the state of
 a Drupal site (sys-admin-vise) and spot (and deal with) discrepancies mentioned
 above is native PHP code as a Drush command. 
@@ -286,7 +278,7 @@ then drush throws an exception (not if any of the conditions above does not hold
 
 #### Reset functionality
 Currently, reset functionality is provided through setting an environment
-varible in the Vagrant run
+varible in the Vagrant run like this `destroy=true vagrant [up,provision]`
 If the solo-provisioner script is to be used, Right now the `Vagrantfile` does two things regarding chef attributes:
 
 ``` ruby
@@ -314,11 +306,10 @@ inside `dna.json` in VM).
 
 
 ## Changes in password attributes:
-
 1. **MySQL** password (for the Drupal MySQL user):
 
 [Apparently](http://dev.mysql.com/doc/refman/5.1/en/grant.html) as far as MySQL
-is concerned, all we need to do is to get read of our `create user` statements
+is concerned, all we need to do is to get read of our `CREATE USER` statements
 and only use this:
 
 ``` sql
@@ -341,6 +332,3 @@ changes the database credentials, `drush status` would show the connection
 failure and
 the cookbook would fire up `drush site-install` and that would drop the entire
 database! A more crafty workaround has to be developed for password resetting.
-
-2. Drupal **admin** pasword
-
