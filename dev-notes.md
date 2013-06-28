@@ -142,7 +142,6 @@ the fact that all other members of `smith` have write access to it.
 ## Testing 
 
 #### Minitest
-
 Tests are written using the
 [minitest-handler](https://github.com/btm/minitest-handler-cookbook) cookbook.
 Look at this
@@ -198,7 +197,7 @@ This resulted in Chef throwing an error at the same spot.
 recorded log of the failed attempt to configure a Travis worker using only the
 [mysql cookbook](https://github.com/opscode-cookbooks/mysql).
 
-Ideally, at least the "fresh Drupal install" use case (see [below](#Scope))
+Ideally, at least the "fresh Drupal install" use case (see [Scope][] below)
 should be tested on Travis.
 
 #### Alternatives
@@ -252,6 +251,16 @@ In any case, one major question must be resolved:
   the Chef node (after the first round of provisioning).
 
 ## Current Thoughts on Scope
+#### Use Case Attributes
+One obvious solution to the complication described above is to use Chef
+attributes to decide between the different use cases (fresh install, load
+existing site, bootstrap existing codebase). These attributes can be set in
+`dna.json`, and in the virtualization case can be passed to Chef using
+environment variables (see [Reset-Functionality][] below):
+
+```bash
+case=[fresh,reset,load] vagrant [up,provision]
+```
 
 #### Recipe Decomposition
 This might be a better recipe decomposition of the existing workflow:
