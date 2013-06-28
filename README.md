@@ -37,11 +37,11 @@ kitchen test
 
 #### Recipes
 
-- `deploy\_drupal::lamp\_stack`: installs infrastructure packages to support
+- `deploy-drupal::lamp_stack`: installs infrastructure packages to support
   Apache, MySQL, PHP, and Drush. 
-- `deploy\_drupal::pear\_dependencies`: installs PEAR, PECL, and other PHP
+- `deploy-drupal::pear_dependencies`: installs PEAR, PECL, and other PHP
   enhancement packages.
-- `deploy\_drupal::default`: is the main recipe that loads and installs Drupal 7
+- `deploy-drupal::default`: is the main recipe that loads and installs Drupal 7
   and configures MySQL and Apache to serve the site.
 
 #### Platform
@@ -52,22 +52,25 @@ Tested on:
 The following are the main attributes that this cookbook uses (available in
 `node['deploy-drupal']`:
 
-|     Attribute     |Default Value    |           Description           |
-| ------------------|:---------------:|:------------------------------: |
-| `codebase_source_path`| `''`        | absolute path to existing site codebase
-| `site_name`           |cooked.drupal| Virtual Host name
-| `deploy_directory`    |`/var/shared/sites/[site_name]/site` | Root of served Drupal site
-| `apache_port`         |80      | must be consistent with`node['apache']['listen_ports']`
-| `apache_user`         |`www-data` |
-| `apache_group`        |`www-data` |
-| `sql_load_file`       |`''`       | absolute path to existing site SQL dump
-| `sql_post_load_script`|`''`       | absolute path to bash script to be executed after loading SQL dump
-| `dev_group`           |`sudo`     | System group owning site root(excludes `apache_user`)
-| `files_path`          |`sites/default/files`| Drupal files directory, relative to site root
-| `admin_pass`          |`admin`    | Drupal site administrator password
-| `db_name`             |`drupal`   | MySQL database used by Drupal
-| `mysql_user`          |`drupal_db`| MySQL user used by Drupal
-| `mysql_pass`          |`drupal_db`| MySQL password used by Drupal
+|   Attribute Name    |Default |           Description           |
+| --------------------|:------:|:------------------------------: |
+|`source_project_path`| `''`   | absolute path to existing project
+|`source_site_path`   | `''`   | Drupal site root, relative to project path
+|`sql_load_file`      |`''`    | path to SQL dump, relative to project path
+|`post_script_file`   |`''`    | path to post-install script, relative to
+project path
+|`site_files_path`    |`sites/default/files`| Drupal "files", relative to site root
+|`deploy_base_path`   |`/var/shared/sites`| Directory containing differentDrupal projects
+|`site_name`          |'cooked.drupal'| Virtual Host name
+"cooked" projects
+|`apache_port`        |80      | must be consistent with`node['apache']['listen_ports']`
+|`apache_user`        |`www-data` |
+|`apache_group`       |`www-data` |
+|`dev_group`          |`sudo`     | System group owning site root(excludes `apache_user`)
+|`admin_pass`         |`admin`    | Drupal site administrator password
+|`db_name`            |`drupal`   | MySQL database used by Drupal
+|`mysql_user`         |`drupal_db`| MySQL user used by Drupal
+|`mysql_pass`         |`drupal_db`| MySQL password used by Drupal
 
 #### Behavior
 
