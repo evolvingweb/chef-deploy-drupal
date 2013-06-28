@@ -21,7 +21,7 @@ default['deploy-drupal']['apache_user']           = 'www-data'
 default['deploy-drupal']['apache_group']          = 'www-data' 
 
 # group owning drupal codebase files
-default['deploy-drupal']['dev_group']             = 'drupal-dev'
+default['deploy-drupal']['dev_group']             = 'sudo'
 
 #required attribute to drupal folder containing index.php and settings.php
 default['deploy-drupal']['codebase_source_path']  = ''  
