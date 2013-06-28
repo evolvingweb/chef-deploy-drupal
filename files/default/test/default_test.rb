@@ -1,19 +1,16 @@
 require 'minitest/spec'
-# Super simplistic minitest recipe
+# Very simple minitest recipe
 # Cookbook Name:: deploy_drupal
 # Spec:: default
 #
 describe_recipe 'deploy_drupal::default' do
 
-  # It's often convenient to load these includes in a separate helper along with
-  # your own helper methods, but here we just include them directly:
   include MiniTest::Chef::Assertions
   include MiniTest::Chef::Context
   include MiniTest::Chef::Resources
 
   describe "files" do
 
-    # = Testing that a file exists =
     it "creates the index.php file" do
       file("/var/shared/sites/cooked.drupal/site/index.php").must_exist
     end
@@ -29,13 +26,15 @@ describe_recipe 'deploy_drupal::default' do
     # And you can chain attributes together if you are asserting several.
     # You don't want to get too carried away doing this but it can be useful.
     it "files folder must be appropriately set" do
-      file("/var/shared/sites/cooked.drupal/site/index.php").must_have(:mode, "460").with(:owner, "www-data").and(:group, "drupal-dev")
+      site_code= file("/var/shared/sites/cooked.drupal/site/index.php")
+      site_code.must_have(:mode, "460").with(:owner, "www-data").and(:group, "sudo")
     end
     # = Directories =
     # The file existence and permissions matchers are also valid for
     # directories:
     it "has appropriate folder permissions in drupal site" do
-      directory("/var/shared/sites/cooked.drupal/site/includes").must_have(:mode, "2570").must_exist.with(:owner, "www-data").and(:group,"drupal-dev")
+      site_dir = directory("/var/shared/sites/cooked.drupal/site/includes")
+      site_dir.must_have(:mode, "2570").must_exist.with(:owner, "www-data").and(:group,"sudo")
     end
 
   end
@@ -59,20 +58,18 @@ describe_recipe 'deploy_drupal::default' do
       user("www-data").must_exist
     end
     
-    # = Groups =
-    it "creates the dev group" do
-      group("drupal-dev").must_exist
-    end
-
     # Check for group membership, you can pass a single user or an array of
     # users:
     it "grants group membership to the expected users" do
-      group("drupal-dev").wont_include('www-data')
+      group("sudo").wont_include('www-data')
     end
   end
-  
-  describe "drupal site" do
-    # check if the served page on localhost:80 is the intended drupal site
-    assert_sh "curl --silent localhost:80 | grep '<title>' | grep 'cooked.drupal'"
+end
+
+# TODO This is a traditional Minitest test case, has to be somehow merged with
+# chef-handler style test cases (above)
+class TestDrupal < MiniTest::Chef::TestCase
+  def test_that_drupal_is_served
+    assert system("curl --silent localhost:80 | grep '<title>' | grep 'cooked.drupal'")
   end
 end

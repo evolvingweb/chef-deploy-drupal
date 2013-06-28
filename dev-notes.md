@@ -205,9 +205,9 @@ Take a look at mlafeldt's [skeleton
 cookbook](https://github.com/mlafeldt/skeleton-cookbook) for ChefSpec Unit
 testing on Travis.
 
-Also, look at this
-[blogpost](http://www.iflowfor8hours.info/2012/11/chef-testing-stratagies-compared/)
-about different testing strategies for testing Chef cookbooks.
+Also, look at [these](http://www.iflowfor8hours.info/2012/11/chef-testing-stratagies-compared/)
+[two](http://technology.customink.com/blog/2012/08/03/testing-chef-cookbooks/)
+about different strategies for testing Chef cookbooks.
 
 # Workflow and Main Use Cases
 
