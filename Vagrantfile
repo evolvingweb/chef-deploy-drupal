@@ -11,20 +11,12 @@ Vagrant.configure("2") do |config|
   config.vm.provision :shell, :inline => <<-HEREDOC
     gem install chef --version 11.0.0 --no-rdoc --no-ri --conservative
   HEREDOC
-
-  # install some convenience tools
-  config.vm.provision :shell, :inline => <<-HEREDOC
-    apt-get update
-    apt-get install -y curl vim git
-  HEREDOC
-
-  # Installs the previously exported site code and SQL dump via deploy-drupal::default
+  
   config.vm.provision :chef_solo do |chef|
     chef.json.merge!({
       "deploy-drupal" => { 
-        "sql_load_file" => "/vagrant/db/dump.sql.gz", # if non-existant, DB will be initialized via 'drush si'
-        "codebase_source_path" =>  "/vagrant/site", # if folder is empty, will download D7 instead
-        "dev_group" => 'sudo' # TODO: 'sudo' should be default (group that owns Drupal codebase; vagrant user must be in it)
+        "sql_load_file" => "/vagrant/db/dump.sql.gz",
+        "codebase_source_path" =>  "/vagrant/site",
       },
       "mysql" => {
         "server_root_password" => "root",
