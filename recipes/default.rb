@@ -52,6 +52,18 @@ DB_ROOT_CONNECTION  ="mysql --user='root'\
                             --host='localhost'\
                             --password='#{DB_ROOT_PASS}'"
 
+Chef::Log.info("source project path is #{SOURCE_PROJECT_DIR}")
+Chef::Log.info("source site path is #{SOURCE_SITE_DIR}")
+Chef::Log.info("source db file path is #{SOURCE_DB_FILE}")
+Chef::Log.info("source post-install script path is #{SOURCE_SCRIPT_PATH}")
+Chef::Log.info("deploy project path is #{DEPLOY_PROJECT_DIR}")
+Chef::Log.info("deploy site path is #{DEPLOY_SITE_DIR}")
+Chef::Log.info("deploy db dump path is #{DEPLOY_SQL_LOAD_FILE}")
+Chef::Log.info("deploy post-install script path is #{DEPLOY_SCRIPT_FILE}")
+Chef::Log.info("Drupal files path is #{DEPLOY_FILES_DIR}")
+
+
+
 directory DEPLOY_PROJECT_DIR do
   owner DRUPAL_TRUSTEES
   group DRUPAL_TRUSTEES
@@ -93,9 +105,10 @@ bash "copy-drupal-site" do
   # This is great if you want to deploy directly to Vagrant shared folder
   creates "#{DEPLOY_SITE_DIR}/index.php"
   notifies :restart, "service[apache2]", :delayed
-  only_if 
+  only_if(
     "test -d '#{SOURCE_SITE_DIR}' && \
      test -f '#{SOURCE_SITE_DIR}/index.php'"
+  )
 end
 
 bash "download-drupal" do
@@ -108,9 +121,10 @@ bash "download-drupal" do
   creates "#{DEPLOY_SITE_DIR}/index.php"
   notifies :restart, "service[apache2]", :delayed
   # not if there is already stuff copied over to deployment directory
-  not_if 
+  not_if( 
     "test -d '#{DEPLOY_SITE_DIR}' && \
      test -f '#{DEPLOY_SITE_DIR}/index.php'"
+  )
 end
 
 web_app DRUPAL_SITE_NAME do
@@ -149,8 +163,7 @@ execute "load-drupal-db-from-sql" do
   mysql_empty_check_cmd = "drush sql-query 'show tables;' | wc -l | xargs test 0 -eq"
 
   # SQL_LOAD_FILE might be nil, must be quoted
-  only_if 
-    "test -f '#{DEPLOY_SQL_LOAD_FILE}' && #{mysql_empty_check_cmd}"
+  only_if  "test -f '#{DEPLOY_SQL_LOAD_FILE}' && #{mysql_empty_check_cmd}"
   
   # Using zless instead of cat/zcat to optionally support gzipped files 
   # "`drush sql-connect`" because "drush sqlc" returns 0 even on connection failure
@@ -170,9 +183,10 @@ execute "drush-site-install" do
                 --clean-url=0"
   
   # requires drush 6
-  only_if 
+  only_if( 
     "drush status --fields=db-status | grep Connected | wc -l | xargs test 0 -eq",
     :cwd => DEPLOY_SITE_DIR
+  )
   notifies :run, "execute[drush-suppress-http-status-error]"
 end
 
@@ -216,6 +230,5 @@ end
 
 execute "fix-drupal-permissions" do
   cwd DEPLOY_SITE_DIR
-  Chef::Log.info(DEPLOY_SITE_DIR)
   command "bash drupal-perm.sh"
 end
