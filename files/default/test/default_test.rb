@@ -70,4 +70,9 @@ describe_recipe 'deploy_drupal::default' do
       group("drupal-dev").wont_include('www-data')
     end
   end
+  
+  describe "drupal site" do
+    # check if the served page on localhost:80 is the intended drupal site
+    assert_sh "curl --silent localhost:80 | grep '<title>' | grep 'cooked.drupal'"
+  end
 end

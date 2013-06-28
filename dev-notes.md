@@ -50,8 +50,12 @@ before provisioning with Chef.
 
 #### Berkshelf and Vagrant
 Berkshelf works easily with Vagrant through a plugin (`vagrant plugin install
-vagrant-berkshelf`). If you want Vagrant to actually use this plugin you should
-indicate so in the `Vagrantfile` by adding `config.berkshelf.enabled = true` to
+vagrant-berkshelf`). Note that this does install a gem named
+`vagrant-berkshelf`, but installing the gem directly (without `vagrant plugin
+install` would not let Vagrant know about the plugin.
+Once the plugin is installed, Vagrant **by default** calls Berkshelf before
+provisioning. If you want Vagrant to not use the plugin you should
+indicate so in the `Vagrantfile` by adding `config.berkshelf.enabled = false` to
 your `Vagrant.configure("2")` block.  Once you have done that, the plugin would
 allow vagrant to access Berkshelf's cookbook directory without the `Vagrantfile`
 having to contain a `chef.cookbooks_path` directive (this attribute is, in fact,
