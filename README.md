@@ -12,18 +12,20 @@ site running on MySQL and Apache. The cookbook supports two main use cases:
 - You want the server to download, bootstrap, and serve a **fresh** installation of
   Drupal 7.
 
-Look at [Attributes][] to see how to use each of the use cases.
+Look at [Attributes]() to see how to use each of these use cases.
 
 #### Testing
 This repository includes an example `Vagrantfile` to test the cookbook. To use
 this file, make sure you have [Vagrant
-v2](http://docs.vagrantup.com/v2/installation/) and Vagrant-Berkshelf (`vagrant
-plugin install vagrant-berkshelf`) installed.
+v2](http://docs.vagrantup.com/v2/installation/) and the
+[Vagrant-Berkshelf](https://github.com/riotgames/vagrant-berkshelf) plugin
+installed. For the latter, use `vagrant plugin install vagrant-berkshelf`.
 
 Refer to [Vagrant-Drupal](http://github.com/dergachev/vagrant-drupal) for a more
 detailed description of how to use this cookbook with Vagrant.
 
-To test/debug the cookbook you can use `Test-Kitchen` which simply runs the
+To test/debug the cookbook you can use [Test-Kitchen](https://github.com/opscode/test-kitchen)
+which simply runs the
 minitest test cases defined at `files/default/test/*_test.rb`. To get
 Test-Kitchen running:
 
@@ -50,22 +52,22 @@ Tested on:
 The following are the main attributes that this cookbook uses (available in
 `node['deploy-drupal']`:
 
-|     Attribute         |    Default Value    |           Description                   |
-| ----------------------|:-------------------:|:--------------------------------------: |
-| `codebase_source_path`|      none           | absolute path to existing site codebase
-| `site_name`           |   cooked.drupal     | Virtual Host name
+|     Attribute     |Default Value    |           Description           |
+| ------------------|:---------------:|:------------------------------: |
+| `codebase_source_path`| `''`        | absolute path to existing site codebase
+| `site_name`           |cooked.drupal| Virtual Host name
 | `deploy_directory`    |`/var/shared/sites/[site_name]/site` | Root of served Drupal site
-| `apache_port`         |       80            | must be consistent with`node['apache']['listen_ports']`
-| `apache_user`         |    `www-data`       |
-| `apache_group`        |    `www-data`       |
-| `sql_load_file`       |     `''`            | absolute path to existing site SQL dump
-| `sql_post_load_script`|     `''`            | absolute path to bash script to be executed after loading SQL dump
-| `dev_group`           |     `sudo`          | System group owning site root(excludes `apache_user`)
+| `apache_port`         |80      | must be consistent with`node['apache']['listen_ports']`
+| `apache_user`         |`www-data` |
+| `apache_group`        |`www-data` |
+| `sql_load_file`       |`''`       | absolute path to existing site SQL dump
+| `sql_post_load_script`|`''`       | absolute path to bash script to be executed after loading SQL dump
+| `dev_group`           |`sudo`     | System group owning site root(excludes `apache_user`)
 | `files_path`          |`sites/default/files`| Drupal files directory, relative to site root
-| `admin_pass`          |     `admin`         | Drupal site administrator password
-| `db_name`             |     `drupal`        | MySQL database used by Drupal
-| `mysql_user`          |     `drupal_db`     | MySQL user used by Drupal (`settings.php`)
-| `mysql_pass`          |     `drupal_db`     | MySQL password used by Drupal (`settings.php`)
+| `admin_pass`          |`admin`    | Drupal site administrator password
+| `db_name`             |`drupal`   | MySQL database used by Drupal
+| `mysql_user`          |`drupal_db`| MySQL user used by Drupal
+| `mysql_pass`          |`drupal_db`| MySQL password used by Drupal
 
 #### Behavior
 
