@@ -10,7 +10,7 @@ include_recipe 'deploy-drupal::pear_dependencies'
 DRUPAL_TRUSTEES     = node['deploy-drupal']['dev_group']
 
 SOURCE_PROJECT_DIR  = node['deploy-drupal']['source_project_path']
-SOURCE_SITE_DIR     = SOURCE_PROJECT_DIR + "/"
+SOURCE_SITE_DIR     = SOURCE_PROJECT_DIR + "/" +
                       node['deploy-drupal']['source_site_path']
 
 SOURCE_DB_FILE      = SOURCE_PROJECT_DIR + "/" +
@@ -24,7 +24,7 @@ DEPLOY_PROJECT_DIR  = node['deploy-drupal']['deploy_base_path']+
                       "/#{DRUPAL_SITE_NAME}"
 DEPLOY_SITE_DIR     = "#{DEPLOY_PROJECT_DIR}/site"
 DEPLOY_FILES_DIR    = DEPLOY_SITE_DIR + "/" +
-                      node['deploy-drupal']['site-files-path']
+                      node['deploy-drupal']['site_files_path']
 DEPLOY_SQL_LOAD_FILE= DEPLOY_PROJECT_DIR + "/" +
                       node['deploy-drupal']['sql_load_file']
 DEPLOY_SCRIPT_FILE  = DEPLOY_PROJECT_DIR + "/" +
@@ -55,7 +55,7 @@ DB_ROOT_CONNECTION  ="mysql --user='root'\
 Chef::Log.info("source project path is #{SOURCE_PROJECT_DIR}")
 Chef::Log.info("source site path is #{SOURCE_SITE_DIR}")
 Chef::Log.info("source db file path is #{SOURCE_DB_FILE}")
-Chef::Log.info("source post-install script path is #{SOURCE_SCRIPT_PATH}")
+Chef::Log.info("source post-install script path is #{SOURCE_SCRIPT_FILE}")
 Chef::Log.info("deploy project path is #{DEPLOY_PROJECT_DIR}")
 Chef::Log.info("deploy site path is #{DEPLOY_SITE_DIR}")
 Chef::Log.info("deploy db dump path is #{DEPLOY_SQL_LOAD_FILE}")
@@ -72,7 +72,7 @@ end
 
 directory DEPLOY_SITE_DIR do
   owner APACHE_USER
-  group DRUPAL_TRUESTEES 
+  group DRUPAL_TRUSTEES 
   recursive true
 end
 
@@ -183,10 +183,7 @@ execute "drush-site-install" do
                 --clean-url=0"
   
   # requires drush 6
-  only_if( 
-    "drush status --fields=db-status | grep Connected | wc -l | xargs test 0 -eq",
-    :cwd => DEPLOY_SITE_DIR
-  )
+  only_if "drush status --fields=db-status | grep Connected | wc -l | xargs test 0 -eq", :cwd => DEPLOY_SITE_DIR
   notifies :run, "execute[drush-suppress-http-status-error]"
 end
 
@@ -222,7 +219,7 @@ template "/usr/local/bin/drupal-perm.sh" do
   owner "root"
   group "root"
   variables({
-    :files_path => DEPLOY_FILES_PATH, 
+    :files_path => DEPLOY_FILES_DIR, 
     :user  => APACHE_USER,
     :group => DRUPAL_TRUSTEES 
   })
