@@ -182,9 +182,7 @@ execute "customized-sql-post-load-script" do
   subscribes :run, "execute[load-drupal-db-from-sql]"
 end
 
-# create a group named 'trustees' and add vagrant to the group
-# the group trustees has full access over drupal root folder (set by
-
+# the group has full access over drupal root folder, should not include www-data
 group DRUPAL_TRUSTEES do
   append true
 end
