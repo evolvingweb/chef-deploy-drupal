@@ -1,0 +1,16 @@
+{
+  "deploy_drupal": {
+    "sql_load_file": "test/db/dump.sql.gz",
+    "codebase_source_path": "/test/site",
+    "dev_group" : "sudo"
+  },
+  "mysql": {
+    "server_root_password": "root",
+    "server_debian_password": "root",
+    "server_repl_password": "root"
+  },
+  "minitest": {
+    "recipes": ["deploy_drupal"]
+  },
+  "run_list": [ "recipe[deploy_drupal]", "recipe[minitest-handler]" ]
+}
