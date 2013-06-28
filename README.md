@@ -12,7 +12,7 @@ site running on MySQL and Apache. The cookbook supports two main use cases:
 - You want the server to download, bootstrap, and serve a **fresh** installation of
   Drupal 7.
 
-Look at [Attributes]() to see how to use each of these use cases.
+Look at [Attributes](#Attributes) to see how to use each of these use cases.
 
 #### Testing
 This repository includes an example `Vagrantfile` to test the cookbook. To use
