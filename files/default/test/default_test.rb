@@ -27,7 +27,7 @@ describe_recipe 'deploy-drupal::default' do
     # You don't want to get too carried away doing this but it can be useful.
     it "files folder must be appropriately set" do
       site_code= file("/var/shared/sites/cooked.drupal/site/index.php")
-      site_code.must_have(:mode, "460").with(:owner, "www-data").and(:group, "sudo")
+      site_code.must_have(:mode, "460").with(:owner, "www-data").and(:group,"sudo")
     end
     # = Directories =
     # The file existence and permissions matchers are also valid for

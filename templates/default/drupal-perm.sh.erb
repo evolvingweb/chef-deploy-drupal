@@ -13,9 +13,9 @@ find . -type d -exec chmod u=rx,g=rwx,o-rwx '{}' \;
 chmod ug=rwx,o-rwx <%= @files_path %>
 
 
-ls -ld | awk '{print $3":"$4, "Drupal root ownership"}'
-ls -ld | awk '{print $1, "permissions for Drupal root directory"}'
+ls -ld | awk '{print $3":"$4, "Project root ownership"}'
+ls -ld | awk '{print $1, "permissions for the Project root"}'
 ls -l index.php | awk '{print $1, "permissions for all files"}'
 ls -ld includes | awk '{print $1, "permissions for all directories"}'
-ls -ld sites/default/files | awk '{print $1,"permission for files folder at"}'
+ls -ld sites/default/files | awk '{print $1,"permissions for the Drupal "files" folder"}'
 

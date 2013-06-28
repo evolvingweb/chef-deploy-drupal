@@ -35,7 +35,7 @@ default['deploy-drupal']['deploy_base_path']      = '/var/shared/sites'
 default['deploy-drupal']['site_files_path']       = 'sites/default/files'
 
 # path to drupal SQL dump (can be .gz), relative to source_project_path
-default['deploy-drupal']['sql_load_file']         = 'db/dump.sql.gz' 
+default['deploy-drupal']['sql_load_file']         = '' 
 
 # absolute path to bash script to run after loading SQL dump
 default['deploy-drupal']['post_script_file']      = ''

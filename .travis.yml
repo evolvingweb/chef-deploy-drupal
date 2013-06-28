@@ -4,8 +4,8 @@ rvm:
   - 1.9.3
 
 before_install:
-  - sudo apt-get update -qq
-  - sudo apt-get -qq -y install libxml-dev libxslt-dev git
+  - sudo apt-get update
+  - sudo apt-get -y install libxml2-dev libxslt-dev git
 script: 
   - bundle exec rake foodcritic
   - bundle exec rake knife_test

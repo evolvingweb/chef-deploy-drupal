@@ -6,9 +6,31 @@
 include_recipe 'deploy-drupal::lamp_stack'
 include_recipe 'deploy-drupal::pear_dependencies'
 
-
 DRUPAL_TRUSTEES     = node['deploy-drupal']['dev_group']
+APACHE_PORT         = node['deploy-drupal']['apache_port']
+APACHE_USER         = node['deploy-drupal']['apache_user']
+APACHE_GROUP        = node['deploy-drupal']['apache_group']
 
+DESTROY_EXISTING    = node['deploy-drupal']['destroy_existing']
+
+DB_ROOT_PASS        = node['mysql']['server_root_password']
+DRUPAL_DB_USER      = node['deploy-drupal']['mysql_user']
+DRUPAL_DB_PASS      = node['deploy-drupal']['mysql_pass']
+DRUPAL_DB_NAME      = node['deploy-drupal']['db_name']
+DRUPAL_ADMIN_PASS   = node['deploy-drupal']['admin_pass']
+
+# the format mysql -u <user> -p<password> ... causes errors when password is empty
+# Note that the mysql url with an empty password (password=''), as used in drush site-install, does not cause an error
+DB_DRUPAL_CONNECTION= "mysql  --user='#{DRUPAL_DB_USER}'\
+                              --host='localhost'\
+                              --password='#{DRUPAL_DB_PASS}'\
+                              --database='#{DRUPAL_DB_NAME}'"
+DB_ROOT_CONNECTION  = "mysql  --user='root'\
+                              --host='localhost'\
+                              --password='#{DB_ROOT_PASS}'"
+
+
+# Convert all paths to absolute equivalents
 SOURCE_PROJECT_DIR  = node['deploy-drupal']['source_project_path']
 SOURCE_SITE_DIR     = SOURCE_PROJECT_DIR + "/" +
                       node['deploy-drupal']['source_site_path']
@@ -30,28 +52,6 @@ DEPLOY_SQL_LOAD_FILE= DEPLOY_PROJECT_DIR + "/" +
 DEPLOY_SCRIPT_FILE  = DEPLOY_PROJECT_DIR + "/" +
                       node['deploy-drupal']['post_script_file']
 
-APACHE_PORT         = node['deploy-drupal']['apache_port']
-APACHE_USER         = node['deploy-drupal']['apache_user']
-APACHE_GROUP        = node['deploy-drupal']['apache_group']
-
-DESTROY_EXISTING    = node['deploy-drupal']['destroy_existing']
-
-DB_ROOT_PASS        = node['mysql']['server_root_password']
-DRUPAL_DB_USER      = node['deploy-drupal']['mysql_user']
-DRUPAL_DB_PASS      = node['deploy-drupal']['mysql_pass']
-DRUPAL_DB_NAME      = node['deploy-drupal']['db_name']
-DRUPAL_ADMIN_PASS   = node['deploy-drupal']['admin_pass']
-
-# the format mysql -u <user> -p<password> ... causes errors when password is empty
-# Note that the mysql url with an empty password (password=''), as used in drush site-install, does not cause an error
-DB_DRUPAL_CONNECTION="mysql --user='#{DRUPAL_DB_USER}'\
-                            --host='localhost'\
-                            --password='#{DRUPAL_DB_PASS}'\
-                            --database='#{DRUPAL_DB_NAME}'"
-DB_ROOT_CONNECTION  ="mysql --user='root'\
-                            --host='localhost'\
-                            --password='#{DB_ROOT_PASS}'"
-
 Chef::Log.info("source project path is #{SOURCE_PROJECT_DIR}")
 Chef::Log.info("source site path is #{SOURCE_SITE_DIR}")
 Chef::Log.info("source db file path is #{SOURCE_DB_FILE}")
@@ -61,11 +61,15 @@ Chef::Log.info("deploy site path is #{DEPLOY_SITE_DIR}")
 Chef::Log.info("deploy db dump path is #{DEPLOY_SQL_LOAD_FILE}")
 Chef::Log.info("deploy post-install script path is #{DEPLOY_SCRIPT_FILE}")
 Chef::Log.info("Drupal files path is #{DEPLOY_FILES_DIR}")
+Chef::Log.info("copy would be  cp -Rf  #{SOURCE_PROJECT_DIR}/. '#{DEPLOY_PROJECT_DIR}'")
 
-
+# the group has full access over drupal root folder, should not include www-data
+group DRUPAL_TRUSTEES do
+  append true
+end
 
 directory DEPLOY_PROJECT_DIR do
-  owner DRUPAL_TRUSTEES
+  owner APACHE_USER
   group DRUPAL_TRUSTEES
   recursive true 
 end
@@ -84,7 +88,6 @@ end
 # destroy contents of drupal root folder if DESTROY_EXISTING is set
 # keeps a drush archive-dump in vagrant shared folder (/vagrant/ hardcoded)
 bash "destroy-existing-site" do
-  cwd DEPLOY_PROJECT_DIR
   code <<-EOH
     cd #{DEPLOY_SITE_DIR}
     drush archive-dump --tar-options="--exclude=.git" --destination=/vagrant/drupal_archive_dump.tar
@@ -99,7 +102,7 @@ bash "copy-drupal-site" do
   # see http://superuser.com/a/367303 for cp syntax discussion
   # assumes target directory already exists
   code <<-EOH
-    cp -Rf  #{SOURCE_PROJECT_DIR}/.  '#{DEPLOY_PROJECT_DIR}/'
+    cp -Rf  #{SOURCE_PROJECT_DIR}/. '#{DEPLOY_PROJECT_DIR}'
   EOH
   # If identical, `creates "index.php"` will prevent resource execution.
   # This is great if you want to deploy directly to Vagrant shared folder
@@ -113,7 +116,7 @@ end
 
 bash "download-drupal" do
   # download Drupal if there is no index.php in the source path
-  cwd "#{DEPLOY_PROJECT_DIR}/.."
+  cwd "#{DEPLOY_PROJECT_DIR}"
 
   code <<-EOH
     drush dl drupal-7 --destination=. --drupal-project-rename=site -y
@@ -208,11 +211,6 @@ execute "customized-sql-post-load-script" do
   subscribes :run, "execute[load-drupal-db-from-sql]"
 end
 
-# the group has full access over drupal root folder, should not include www-data
-group DRUPAL_TRUSTEES do
-  append true
-end
-
 template "/usr/local/bin/drupal-perm.sh" do
   source "drupal-perm.sh.erb"
   mode 0750
@@ -226,6 +224,6 @@ template "/usr/local/bin/drupal-perm.sh" do
 end
 
 execute "fix-drupal-permissions" do
-  cwd DEPLOY_SITE_DIR
+  cwd DEPLOY_PROJECT_DIR
   command "bash drupal-perm.sh"
 end
