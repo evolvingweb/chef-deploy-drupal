@@ -44,7 +44,8 @@ SOURCE_SCRIPT_FILE  = SOURCE_PROJECT_DIR + "/" +
 DRUPAL_SITE_NAME    = node['deploy-drupal']['site_name']
 DEPLOY_PROJECT_DIR  = node['deploy-drupal']['deploy_base_path']+
                       "/#{DRUPAL_SITE_NAME}"
-DEPLOY_SITE_DIR     = "#{DEPLOY_PROJECT_DIR}/site"
+DEPLOY_SITE_DIR     = DEPLOY_PROJECT_DIR + "/" +
+                      node['deploy-drupal']['source_site_path']
 DEPLOY_FILES_DIR    = DEPLOY_SITE_DIR + "/" +
                       node['deploy-drupal']['site_files_path']
 DEPLOY_SQL_LOAD_FILE= DEPLOY_PROJECT_DIR + "/" +
@@ -102,7 +103,7 @@ bash "copy-drupal-site" do
   # see http://superuser.com/a/367303 for cp syntax discussion
   # assumes target directory already exists
   code <<-EOH
-    cp -Rf  #{SOURCE_PROJECT_DIR}/. '#{DEPLOY_PROJECT_DIR}'
+    cp -Rf #{SOURCE_PROJECT_DIR}/. '#{DEPLOY_PROJECT_DIR}'
   EOH
   # If identical, `creates "index.php"` will prevent resource execution.
   # This is great if you want to deploy directly to Vagrant shared folder
@@ -119,7 +120,7 @@ bash "download-drupal" do
   cwd "#{DEPLOY_PROJECT_DIR}"
 
   code <<-EOH
-    drush dl drupal-7 --destination=. --drupal-project-rename=site -y
+    drush dl drupal-7 --destination=. --drupal-project-rename=#{node['deploy-drupal']['source-site-path']} -y
   EOH
   creates "#{DEPLOY_SITE_DIR}/index.php"
   notifies :restart, "service[apache2]", :delayed
