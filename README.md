@@ -37,11 +37,11 @@ kitchen test
 
 #### Recipes
 
-- `deploy\_drupal::lamp\_stack`: installs infrastructure packages to support
+- `deploy-drupal::lamp_stack`: installs infrastructure packages to support
   Apache, MySQL, PHP, and Drush. 
-- `deploy\_drupal::pear\_dependencies`: installs PEAR, PECL, and other PHP
+- `deploy-drupal::pear_dependencies`: installs PEAR, PECL, and other PHP
   enhancement packages.
-- `deploy\_drupal::default`: is the main recipe that loads and installs Drupal 7
+- `deploy-drupal::default`: is the main recipe that loads and installs Drupal 7
   and configures MySQL and Apache to serve the site.
 
 #### Platform
@@ -49,25 +49,28 @@ Tested on:
 * Ubuntu 12.04
 
 #### Attributes
-The following are the main attributes that this cookbook uses (available in
-`node['deploy-drupal']`:
+The following are the main attributes that this cookbook uses. All attributes mentioned
+below can be accessed in the cookbook via 
+`node['deploy_drupal']['<attribute_name>']`:
 
-|     Attribute     |Default Value    |           Description           |
-| ------------------|:---------------:|:------------------------------: |
-| `codebase_source_path`| `''`        | absolute path to existing site codebase
-| `site_name`           |cooked.drupal| Virtual Host name
-| `deploy_directory`    |`/var/shared/sites/[site_name]/site` | Root of served Drupal site
-| `apache_port`         |80      | must be consistent with`node['apache']['listen_ports']`
-| `apache_user`         |`www-data` |
-| `apache_group`        |`www-data` |
-| `sql_load_file`       |`''`       | absolute path to existing site SQL dump
-| `sql_post_load_script`|`''`       | absolute path to bash script to be executed after loading SQL dump
-| `dev_group`           |`sudo`     | System group owning site root(excludes `apache_user`)
-| `files_path`          |`sites/default/files`| Drupal files directory, relative to site root
-| `admin_pass`          |`admin`    | Drupal site administrator password
-| `db_name`             |`drupal`   | MySQL database used by Drupal
-| `mysql_user`          |`drupal_db`| MySQL user used by Drupal
-| `mysql_pass`          |`drupal_db`| MySQL password used by Drupal
+
+|   Attribute Name    |Default |           Description           |
+| --------------------|:------:|:------------------------------: |
+|`source_project_path`| `''`   | absolute path to existing project
+|`source_site_path`   | `'site'` | Drupal site root (source & deployment), relative to project path
+|`sql_load_file`      |`''`    | path to SQL dump, relative to project path
+|`post_script_file`   |`''`|path to post-install script, relative to project path
+|`site_files_path`    |`sites/default/files`| Drupal "files", relative to site root
+|`deploy_base_path`   |`/var/shared/sites`| Directory containing differentDrupal projects
+|`site_name`          |`'cooked.drupal'`| Virtual Host name and directory in deploy base path
+|`apache_port`        |80      | must be consistent with`node['apache']['listen_ports']`
+|`apache_user`        |`www-data` |
+|`apache_group`       |`www-data` |
+|`dev_group`          |`sudo`     | System group owning site root(excludes `apache_user`)
+|`admin_pass`         |`admin`    | Drupal site administrator password
+|`db_name`            |`drupal`   | MySQL database used by Drupal
+|`mysql_user`         |`drupal_db`| MySQL user used by Drupal
+|`mysql_pass`         |`drupal_db`| MySQL password used by Drupal
 
 #### Behavior
 
@@ -79,26 +82,44 @@ a bootstrapped site (no manual installation required).
 
 The expected state after provisioning is as follows:
 
-1. MySQL recognizes a user with provided credentials. The user is granted all privileges on the
-database used by Drupal.
-1. Apache has a virtual host bound to port
-`node['deploy-drupal']['apache_port']` with the name
-`node['deploy-drupal']['site_name']` with root directory at
-`node['deploy-drupal']['deploy_dir']`.
-1. This directory is the root of the installed Drupal site. Ownership and
+1. The cookbook tries to build a 
+1. The following directory structure holds in the provisioned machine:
+  - `deploy_base_path`
+      - `site_name`
+          - `source_site_path`
+              - `index.php`
+              - `includes`
+              - `modules`
+              - `sites`
+              - `themes`
+              - ...
+          - `db`
+              - `dump.sql.gz`
+          - `scripts`
+              - `post-install-script.sh`
+Note that `db` and `scripts` subdirectories are not controlled by the cookbook,
+and will be copied over along with everything else that might exist in the
+`source_project_path` directory.
+1. MySQL recognizes a user with username `mysql_user`, identified by
+`mysql_password`. The user is granted **all** privileges on the database
+`db_name`.
+1. Apache has a virtual host bound to port `apache_port` with the name
+`site_name`. The virtual host has its root directory at
+`<deploy_base_path>/<site_name>/source`.
+1. The `<deploy_base_path>/<site_name>` directory is the root of the installed Drupal 
+project (the actual site is in the `site` subdirectory). Ownership and
 permission settings of this directory are set as follows:
   1. The user and group owners of all current files and subdirectories are
-  `node['deploy-drupal']['apache_user']` and
-  `node['deploy-drupal']['dev_group']`, respectively.
+  `apache_user` and `dev_group`, respectively.
   1. The group owner of all files and subdirectories created in the future will be
-  `node['deploy-drupal']['dev_group']` (`setgid` flag is set for all files and
-  subdirectories). The user owner of future files and directories will depend on the
+  `dev_group` (the `setgid` flag is set for all subdirectories). The user owner 
+  of future files and directories will depend on the
   default behavior of the system (in all major distributions of Linux `setuid`
   is ignored, and this cookbook, therefore, does not use it).
   1. The permissions for all files and subdirectories are set to `r-- rw- ---`
-  and `r-x rwx ---`, respectively. The only exception is the `files`
-  directories (attribute `node['deploy-drupal']['files_path']`) and all its
+  and `r-x rwx ---`, respectively. The only exception is the "files"
+  directories (refer to the `site_files_path` attribute) and all its
   contents, which has its permissions set to `rwx rwx ---`.
 1. A bash utility `drupal-perm.sh` is installed at `/usr/local/bin` that
-when invoked from the Drupal root directory, ensures that the ownership and
+when invoked from the project root directory, ensures that the ownership and
 permission settings described above are in place.

@@ -3,9 +3,6 @@
 
 default['deploy-drupal']['admin_pass']            = 'admin'
 
-# vhost server name
-default['deploy-drupal']['site_name']             = 'cooked.drupal' 
-
 # apache vhost port should be consistent with 
 # node['apache']['listen_ports']
 default['deploy-drupal']['apache_port']           = "80" 
@@ -17,6 +14,9 @@ default['deploy-drupal']['apache_group']          = 'www-data'
 
 # group owning drupal codebase files
 default['deploy-drupal']['dev_group']             = 'sudo'
+
+# vhost server name
+default['deploy-drupal']['site_name']             = 'cooked.drupal' 
 
 # path to the root of an existing project to be 
 # loaded, the contents of this path will be 
