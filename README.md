@@ -57,7 +57,7 @@ below can be accessed in the cookbook via
 |   Attribute Name    |Default |           Description           |
 | --------------------|:------:|:------------------------------: |
 |`source_project_path`| `''`   | absolute path to existing project
-|`source_site_path`   | `''`   | Drupal site root, relative to project path
+|`source_site_path`   | `'site'` | Drupal site root (source & deployment), relative to project path
 |`sql_load_file`      |`''`    | path to SQL dump, relative to project path
 |`post_script_file`   |`''`|path to post-install script, relative to project path
 |`site_files_path`    |`sites/default/files`| Drupal "files", relative to site root
@@ -86,7 +86,7 @@ The expected state after provisioning is as follows:
 1. The following directory structure holds in the provisioned machine:
   - `deploy_base_path`
       - `site_name`
-          - `site` (copied from `<source_project_path>/<source_site_path>`)
+          - `source_site_path`
               - `index.php`
               - `includes`
               - `modules`
