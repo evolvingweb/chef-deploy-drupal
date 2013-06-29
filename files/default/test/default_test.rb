@@ -9,34 +9,30 @@ describe_recipe 'deploy-drupal::default' do
   include MiniTest::Chef::Context
   include MiniTest::Chef::Resources
 
-  DEPLOY_SITE_DIR = node['deploy-drupal']['deploy_base_path'] + "/" +
-                    node['deploy-drupal']['site_name'] + "/"+
-                    node['deploy-drupal']['source_site_path'] 
-
   describe "files" do
 
     it "creates the index.php file" do
-      file(DEPLOY_SITE_DIR + "/index.php").must_exist
+      file(node['deploy-drupal']['deploy_site_dir'] + "/index.php").must_exist
     end
 
     it "creates the settings.php file" do
-      file(DEPLOY_SITE_DIR + "/sites/default/settings.php").must_exist
+      file(node['deploy-drupal']['deploy_site_dir'] + "/sites/default/settings.php").must_exist
     end
     
     it "has the expected ownership and permissions" do
-      file(DEPLOY_SITE_DIR).must_exist.with(:owner, "www-data")
+      file(node['deploy-drupal']['deploy_site_dir']).must_exist.with(:owner, "www-data")
     end
 
     # And you can chain attributes together if you are asserting several.
     # You don't want to get too carried away doing this but it can be useful.
     it "files folder must be appropriately set" do
-      file(DEPLOY_SITE_DIR+"/index.php").must_have(:mode, "460").with(:owner, "www-data").and(:group,"sudo")
+      file(node['deploy-drupal']['deploy_site_dir']+"/index.php").must_have(:mode, "460").with(:owner, "www-data").and(:group,"sudo")
     end
     # = Directories =
     # The file existence and permissions matchers are also valid for
     # directories:
     it "has appropriate folder permissions in drupal site" do
-      directory(DEPLOY_SITE_DIR+"/includes").must_have(:mode, "2570").must_exist.with(:owner, "www-data").and(:group,"sudo")
+      directory(node['deploy-drupal']['deploy_site_dir']+"/includes").must_have(:mode, "2570").must_exist.with(:owner, "www-data").and(:group,"sudo")
     end
 
   end

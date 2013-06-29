@@ -46,6 +46,8 @@ DEPLOY_PROJECT_DIR  = node['deploy-drupal']['deploy_base_path']+
                       "/#{DRUPAL_SITE_NAME}"
 DEPLOY_SITE_DIR     = DEPLOY_PROJECT_DIR + "/" +
                       node['deploy-drupal']['source_site_path']
+node.normal['deploy-drupal']['deploy_site_dir'] = DEPLOY_SITE_DIR
+
 DEPLOY_FILES_DIR    = DEPLOY_SITE_DIR + "/" +
                       node['deploy-drupal']['site_files_path']
 DEPLOY_SQL_LOAD_FILE= DEPLOY_PROJECT_DIR + "/" +
