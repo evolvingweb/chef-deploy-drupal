@@ -25,7 +25,7 @@ default['deploy-drupal']['source_project_path']   = ''
 
 # root of the Drupal site, relative to project_path
 # this must be such that project_path/drupal_site_path/ contains index.php
-default['deploy-drupal']['source_site_path']      = ''
+default['deploy-drupal']['source_site_path']      = 'site'
 
 # absolute path to deployment directory
 # the Drupal site root would be deploy_path/site_name/site
