@@ -14,6 +14,11 @@ Vagrant.configure("2") do |config|
   
   config.vm.provision :chef_solo do |chef|
     chef.json.merge!({
+      "deploy-drupal" => { 
+        "sql_load_file" => "db/dump.sql.gz",
+        "source_project_path" =>  "/vagrant",
+        "source_site_path"  => "my_site",
+      },  
       "mysql" => {
         "server_root_password" => "root",
         "server_debian_password" => "root",
@@ -23,6 +28,6 @@ Vagrant.configure("2") do |config|
         "recipes" => [ "deploy-drupal" ]
       },  
       "run_list" =>[ "deploy-drupal", "minitest-handler" ]
-    }) 
+    })   
   end
 end

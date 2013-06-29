@@ -57,7 +57,7 @@ below can be accessed in the cookbook via
 |   Attribute Name    |Default |           Description           |
 | --------------------|:------:|:------------------------------: |
 |`source_project_path`| `''`   | absolute path to existing project
-|`source_site_path`   | `'site'` | Drupal site root (source & deployment), relative to project path
+|`source_site_path`   | `'site'` | Drupal site root (in source & in deployment), relative to project path
 |`sql_load_file`      |`''`    | path to SQL dump, relative to project path
 |`post_script_file`   |`''`|path to post-install script, relative to project path
 |`site_files_path`    |`sites/default/files`| Drupal "files", relative to site root
@@ -66,7 +66,7 @@ below can be accessed in the cookbook via
 |`apache_port`        |80      | must be consistent with`node['apache']['listen_ports']`
 |`apache_user`        |`www-data` |
 |`apache_group`       |`www-data` |
-|`dev_group`          |`sudo`     | System group owning site root(excludes `apache_user`)
+|`dev_group`          |`sudo`     | System group owning site root (excludes `apache_user`)
 |`admin_pass`         |`admin`    | Drupal site administrator password
 |`db_name`            |`drupal`   | MySQL database used by Drupal
 |`mysql_user`         |`drupal_db`| MySQL user used by Drupal
@@ -82,7 +82,6 @@ a bootstrapped site (no manual installation required).
 
 The expected state after provisioning is as follows:
 
-1. The cookbook tries to build a 
 1. The following directory structure holds in the provisioned machine:
   - `deploy_base_path`
       - `site_name`
@@ -97,6 +96,7 @@ The expected state after provisioning is as follows:
               - `dump.sql.gz`
           - `scripts`
               - `post-install-script.sh`
+
 Note that `db` and `scripts` subdirectories are not controlled by the cookbook,
 and will be copied over along with everything else that might exist in the
 `source_project_path` directory.
