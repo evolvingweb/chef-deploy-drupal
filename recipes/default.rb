@@ -119,7 +119,7 @@ end
 
 bash "download-drupal" do
   # download Drupal if there is no index.php in the source path
-  cwd "#{DEPLOY_PROJECT_DIR}"
+  cwd DEPLOY_PROJECT_DIR
 
   code <<-EOH
     drush dl drupal-7 --destination=. --drupal-project-rename=#{node['deploy-drupal']['source-site-path']} -y
