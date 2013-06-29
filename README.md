@@ -97,7 +97,7 @@ The expected state after provisioning is as follows:
           - `scripts`
               - `post-install-script.sh`
 
-Note that `db` and `scripts` subdirectories are not controlled by the cookbook,
+1. Note that `db` and `scripts` subdirectories are not controlled by the cookbook,
 and will be copied over along with everything else that might exist in the
 `source_project_path` directory.
 1. MySQL recognizes a user with username `mysql_user`, identified by
