@@ -38,10 +38,12 @@ DRUPAL_SITE_NAME    = node['deploy-drupal']['site_name']
 DEPLOY_PROJECT_DIR  = node['deploy-drupal']['deploy_base_path']+
                       "/#{DRUPAL_SITE_NAME}"
 
-node.normal['deploy-drupal']['deploy_site_dir'] = DEPLOY_PROJECT_DIR + "/" +
-                                                  node['deploy-drupal']['site_path']
+# assemble the deploy_site_dir attribute
+node.normal['deploy-drupal']['deploy_site_dir'] = 
+                      DEPLOY_PROJECT_DIR + "/" +
+                      node['deploy-drupal']['site_path']
 
-DEPLOY_SITE_DIR     =  node['deploy-drupal']['deploy_site_dir']
+DEPLOY_SITE_DIR     = node['deploy-drupal']['deploy_site_dir']
 
 DEPLOY_FILES_DIR    = DEPLOY_SITE_DIR + "/" +
                       node['deploy-drupal']['site_files_path']
@@ -92,14 +94,18 @@ execute "validate-drush-works" do
   command "drush status"
   cwd DEPLOY_SITE_DIR
 end
-# TODO decouple from Vagrant
-# destroy contents of drupal root folder if DESTROY_EXISTING is set
+
+# destroy the project root directory and removes the Drupal database user 
+# if reset attribue is set to "true".
 # keeps a drush archive-dump in vagrant shared folder (/vagrant/ hardcoded)
-bash "destroy-existing-project" do
+bash "reset-project" do
   code <<-EOH
     cd #{DEPLOY_SITE_DIR}
     drush archive-dump --tar-options="--exclude=.git" --destination=/vagrant/drupal_archive_dump.tar
     drush sql-query "DROP DATABASE #{DRUPAL_DB_NAME};"
+    #{DB_ROOT_CONNECTION} -e "DROP DATABASE #{DRUPAL_DB_NAME};"
+    #{DB_ROOT_CONNECTION} -e "REVOKE ALL FROM #{DRUPAL_DB_USER};"
+    #{DB_ROOT_CONNECTION} -e "DROP USER '#{DRUPAL_DB_USER}'@'localhost';"
     rm -rf #{DEPLOY_PROJECT_DIR}/*
   EOH
   only_if { node['deploy-drupal']['reset'] == "true" }

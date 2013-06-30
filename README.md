@@ -67,13 +67,12 @@ below can be accessed in the cookbook via
 |`apache_user`        |`www-data` |
 |`apache_group`       |`www-data` |
 |`dev_group_name`     |`sudo`     | System group owning site root (excludes `apache_user`)
-|`dev_group_members`  |`[]`       | Array of system users that are members of
-the `dev_group_name` user group
+|`dev_group_members`  |`[]`       | Array of system users that are members of the `dev_group_name` user group
 |`admin_pass`         |`admin`    | Drupal site administrator password
 |`db_name`            |`drupal`   | MySQL database used by Drupal
 |`mysql_user`         |`drupal_db`| MySQL user used by Drupal
 |`mysql_pass`         |`drupal_db`| MySQL password used by Drupal
-|`reset`              | `''`| resets the provisioned machine to its state before installation of the Drupal site (project root `<deploy_base_path>/<site_name>` will be removed, and so will the `<db_name>` database and the `<mysql_user>` user from MySQL.
+|`reset`              | `''`| if set to `'true'`, starts provisioning with reseting the system to its state before installation of the Drupal site (project root `<deploy_base_path>/<site_name>` will be removed, and so will the `<db_name>` database and the `<mysql_user>` user from MySQL (and then proceeds by provisioning as usual).
 
 #### Behavior
 
