@@ -52,10 +52,8 @@ default['deploy-drupal']['sql_load_file']         = ''
 # absolute path to bash script to run after loading SQL dump
 default['deploy-drupal']['post_script_file']      = ''
 
-
-# MySQL username and password used by Drupal
+# MySQL credentials
 default['deploy-drupal']['mysql_user']            = 'drupal_db'
 default['deploy-drupal']['mysql_pass']            = 'drupal_db'
-
-# MySQL database used by Drupal
+default['deploy-drupal']['mysql_unsafe_user_pass']= 'newpwd'
 default['deploy-drupal']['db_name']               = 'drupal'

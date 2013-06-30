@@ -57,15 +57,15 @@ below can be accessed in the cookbook via
 |   Attribute Name    |Default |           Description           |
 | --------------------|:------:|:------------------------------: |
 |`source_project_path`| `''`   | absolute path to existing project
-|`site_path`          | `'site'`| Drupal site root (in source & in deployment), relative to project path
+|`site_path`          | `site`| Drupal site root (in source & in deployment), relative to project path
 |`sql_load_file`      |`''`    | path to SQL dump, relative to project path
 |`post_script_file`   |`''`|path to post-install script, relative to project path
-|`admin_user`         |`'admin'`| username for "user one" in the bootstrapped site
-|`admin_user`         |`'admin'`| password for "user one" in the bootstrapped site
+|`admin_user`         |`admin`| username for "user one" in the bootstrapped site
+|`admin_user`         |`admin`| password for "user one" in the bootstrapped site
 |`site_files_path`    |`sites/default/files`| Drupal "files", relative to site root
 |`site_files_path`    |`sites/default/files`| Drupal "files", relative to site root
 |`deploy_base_path`   |`/var/shared/sites`| Directory containing differentDrupal projects
-|`site_name`          |`'cooked.drupal'`| Virtual Host name and directory in deploy base path
+|`site_name`          |`cooked.drupal`| Virtual Host name and directory in deploy base path
 |`apache_port`        |80      | must be consistent with`node['apache']['listen_ports']`
 |`apache_user`        |`www-data` |
 |`apache_group`       |`www-data` |
@@ -75,7 +75,8 @@ below can be accessed in the cookbook via
 |`db_name`            |`drupal`   | MySQL database used by Drupal
 |`mysql_user`         |`drupal_db`| MySQL user used by Drupal
 |`mysql_pass`         |`drupal_db`| MySQL password used by Drupal
-|`reset`              | `''`| if set to `'true'`, starts provisioning with reseting the system to its state before installation of the Drupal site (project root `<deploy_base_path>/<site_name>` will be removed, and so will the `<db_name>` database and the `<mysql_user>` user from MySQL (and then proceeds by provisioning as usual).
+|`mysql_unsafe_user_pass` |`newpwd`| MySQL password assigned to initially unsafe users (all users with empty passwords)
+|`reset`              | `''`| if set to `'true'`, starts provisioning with reseting the system to its state before installation of the Drupal site 
 
 #### Behavior
 
@@ -93,6 +94,10 @@ The expected state after provisioning is as follows:
 `<deploy_base_path>/<site_name>`, which will contain the Apache virtual host
 site root. If an existing site is not found, Drupal 7 will be downloaded,
 installed, and served from the same directory as above.
+1. If `reset` is set to `'true'`, project root (at
+`<deploy_base_path>/<site_name>`) will be entirely removed before provisioning
+starts, and so will the `<db_name>` database and the `<mysql_user>` user from
+MySQL. After this, provisioning proceeds as usual.
 1. The bootstrapped Drupal site recognizes `<admin_user>` (with password
 `<admin_pass>`) as "user one".
 1. The following directory structure holds in the provisioned machine:
@@ -112,8 +117,11 @@ installed, and served from the same directory as above.
 
 1. Note that `db` and `scripts` are just example subdirectories and are not
 controlled by the cookbook. Such subdirectories under the
-`<source_project_path>/<source_site_path>` and will be copied over along with
-everything else that might exist in the `<source_project_path>` directory.
+`<source_project_path>/<source_site_path>` directory and will be copied over along with
+everything else that might exist in the `<source_project_path>` directory (for
+instance, your `.git` directory would be copied over to deployment).
+1. Password is set to `<mysql_unsafe_user_pass>` for all MySQL user accounts
+initially set through MySQL installation to have no password.
 1. MySQL recognizes a user with username `<mysql_user>`, identified by
 `<mysql_password>`. The user is granted **all** privileges on the database
 `db_name`.

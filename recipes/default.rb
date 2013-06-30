@@ -50,20 +50,6 @@ DEPLOY_SQL_LOAD_FILE= DEPLOY_PROJECT_DIR + "/" +
 DEPLOY_SCRIPT_FILE  = DEPLOY_PROJECT_DIR + "/" +
                       node['deploy-drupal']['post_script_file']
 
-Chef::Log.info("source project path is #{node['deploy-drupal']['source_project_path']}")
-Chef::Log.info("source site path is #{SOURCE_SITE_DIR}")
-Chef::Log.info("source db file path is #{SOURCE_DB_FILE}")
-Chef::Log.info("source post-install script path is #{SOURCE_SCRIPT_FILE}")
-Chef::Log.info("deploy project path is #{DEPLOY_PROJECT_DIR}")
-Chef::Log.info("deploy site path is #{node['deploy-drupal']['deploy_site_dir']}")
-Chef::Log.info("deploy db dump path is #{DEPLOY_SQL_LOAD_FILE}")
-Chef::Log.info("deploy post-install script path is #{DEPLOY_SCRIPT_FILE}")
-Chef::Log.info("Drupal files path is #{DEPLOY_FILES_DIR}")
-Chef::Log.info("copy would be  cp -Rf  #{node['deploy-drupal']['source_project_path']}/. '#{DEPLOY_PROJECT_DIR}'")
-node['deploy-drupal']['dev_group_members'].each do |member|
-  Chef::Log.info("*******#{member}*******")
-end
-
 # users defined to be members of the dev_group user group
 node['deploy-drupal']['dev_group_members'].each do |dev_member|
   user dev_member do
@@ -158,14 +144,16 @@ apache_site "000-default" do
   notifies :restart, "service[apache2]", :delayed
 end
 
+execute "secure-initial-mysql-accounts" do
+  command "#{DB_ROOT_CONNECTION} -e \"UPDATE mysql.user SET password= \
+            PASSWORD('#{node['deploy-drupal']['mysql_unsafe_user_pass']}') \
+            WHERE password='';\""
+end
 
-#TODO Secure MySql database (tighten privileges and 
-# remove anonymous and @ % users)
 bash "add-mysql-user" do
   code <<-EOH
     #{DB_ROOT_CONNECTION} -e "CREATE DATABASE IF NOT EXISTS #{node['deploy-drupal']['db_name']};"
-    #{DB_ROOT_CONNECTION} -e "GRANT ALL ON #{node['deploy-drupal']['db_name']}.* TO
-    '#{node['deploy-drupal']['mysql_user']}'@'localhost' IDENTIFIED BY '#{node['deploy-drupal']['mysql_pass']}'; FLUSH PRIVILEGES;"
+    #{DB_ROOT_CONNECTION} -e "GRANT ALL ON #{node['deploy-drupal']['db_name']}.* TO '#{node['deploy-drupal']['mysql_user']}'@'localhost' IDENTIFIED BY '#{node['deploy-drupal']['mysql_pass']}'; FLUSH PRIVILEGES;"
     #{DB_DRUPAL_CONNECTION} -e "SHOW TABLES;"
   EOH
 end
