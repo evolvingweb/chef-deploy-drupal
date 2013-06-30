@@ -6,13 +6,6 @@
 include_recipe 'deploy-drupal::lamp_stack'
 include_recipe 'deploy-drupal::pear_dependencies'
 
-DRUPAL_TRUSTEES     = node['deploy-drupal']['dev_group']
-APACHE_PORT         = node['deploy-drupal']['apache_port']
-APACHE_USER         = node['deploy-drupal']['apache_user']
-APACHE_GROUP        = node['deploy-drupal']['apache_group']
-
-DESTROY_EXISTING    = node['deploy-drupal']['destroy_existing']
-
 DB_ROOT_PASS        = node['mysql']['server_root_password']
 DRUPAL_DB_USER      = node['deploy-drupal']['mysql_user']
 DRUPAL_DB_PASS      = node['deploy-drupal']['mysql_pass']
@@ -33,7 +26,7 @@ DB_ROOT_CONNECTION  = "mysql  --user='root'\
 # Convert all paths to absolute equivalents
 SOURCE_PROJECT_DIR  = node['deploy-drupal']['source_project_path']
 SOURCE_SITE_DIR     = SOURCE_PROJECT_DIR + "/" +
-                      node['deploy-drupal']['source_site_path']
+                      node['deploy-drupal']['site_path']
 
 SOURCE_DB_FILE      = SOURCE_PROJECT_DIR + "/" +
                       node['deploy-drupal']['sql_load_file']
@@ -44,9 +37,11 @@ SOURCE_SCRIPT_FILE  = SOURCE_PROJECT_DIR + "/" +
 DRUPAL_SITE_NAME    = node['deploy-drupal']['site_name']
 DEPLOY_PROJECT_DIR  = node['deploy-drupal']['deploy_base_path']+
                       "/#{DRUPAL_SITE_NAME}"
-DEPLOY_SITE_DIR     = DEPLOY_PROJECT_DIR + "/" +
-                      node['deploy-drupal']['source_site_path']
-node.normal['deploy-drupal']['deploy_site_dir'] = DEPLOY_SITE_DIR
+
+node.normal['deploy-drupal']['deploy_site_dir'] = DEPLOY_PROJECT_DIR + "/" +
+                                                  node['deploy-drupal']['site_path']
+
+DEPLOY_SITE_DIR     =  node['deploy-drupal']['deploy_site_dir']
 
 DEPLOY_FILES_DIR    = DEPLOY_SITE_DIR + "/" +
                       node['deploy-drupal']['site_files_path']
@@ -65,21 +60,31 @@ Chef::Log.info("deploy db dump path is #{DEPLOY_SQL_LOAD_FILE}")
 Chef::Log.info("deploy post-install script path is #{DEPLOY_SCRIPT_FILE}")
 Chef::Log.info("Drupal files path is #{DEPLOY_FILES_DIR}")
 Chef::Log.info("copy would be  cp -Rf  #{SOURCE_PROJECT_DIR}/. '#{DEPLOY_PROJECT_DIR}'")
+node['deploy-drupal']['dev_group_members'].each do |member|
+  Chef::Log.info("*******#{member}*******")
+end
+
+# users defined to be members of the dev_group user group
+node['deploy-drupal']['dev_group_members'].each do |dev_member|
+  user dev_member do
+  end
+end
 
 # the group has full access over drupal root folder, should not include www-data
-group DRUPAL_TRUSTEES do
+group node['deploy-drupal']['dev_group_name'] do
+  members node['deploy-drupal']['dev_group_members']
   append true
 end
 
 directory DEPLOY_PROJECT_DIR do
-  owner APACHE_USER
-  group DRUPAL_TRUSTEES
+  owner node['deploy-drupal']['apache_user']
+  group node['deploy-drupal']['dev_group_name']
   recursive true 
 end
 
 directory DEPLOY_SITE_DIR do
-  owner APACHE_USER
-  group DRUPAL_TRUSTEES 
+  owner node['deploy-drupal']['apache_user']
+  group node['deploy-drupal']['dev_group_name']
   recursive true
 end
 
@@ -90,14 +95,14 @@ end
 # TODO decouple from Vagrant
 # destroy contents of drupal root folder if DESTROY_EXISTING is set
 # keeps a drush archive-dump in vagrant shared folder (/vagrant/ hardcoded)
-bash "destroy-existing-site" do
+bash "destroy-existing-project" do
   code <<-EOH
     cd #{DEPLOY_SITE_DIR}
     drush archive-dump --tar-options="--exclude=.git" --destination=/vagrant/drupal_archive_dump.tar
     drush sql-query "DROP DATABASE #{DRUPAL_DB_NAME};"
     rm -rf #{DEPLOY_PROJECT_DIR}/*
   EOH
-  only_if { DESTROY_EXISTING == "true" }
+  only_if { node['deploy-drupal']['reset'] == "true" }
 end
 
 # Copies drupal codebase from DRUPAL_SOURCE_PATH to DRUPAL_DEPLOY_DIR
@@ -122,7 +127,7 @@ bash "download-drupal" do
   cwd DEPLOY_PROJECT_DIR
 
   code <<-EOH
-    drush dl drupal-7 --destination=. --drupal-project-rename=#{node['deploy-drupal']['source-site-path']} -y
+    drush dl drupal-7 --destination=. --drupal-project-rename=#{node['deploy-drupal']['site_path']} -y
   EOH
   creates "#{DEPLOY_SITE_DIR}/index.php"
   notifies :restart, "service[apache2]", :delayed
@@ -135,7 +140,7 @@ end
 
 web_app DRUPAL_SITE_NAME do
   template "web_app.conf.erb"
-  port APACHE_PORT
+  port node['deploy-drupal']['apache_port']
   server_name DRUPAL_SITE_NAME
   server_aliases [DRUPAL_SITE_NAME]
   docroot DEPLOY_SITE_DIR
@@ -178,15 +183,13 @@ execute "load-drupal-db-from-sql" do
 end
 
 execute "drush-site-install" do
-  cwd DEPLOY_SITE_DIR
-  
+  cwd DEPLOY_SITE_DIR 
   # fixes sendmail error https://drupal.org/node/1826652#comment-6706102
   command "php -d sendmail_path=/bin/true /usr/share/php/drush/drush.php \
                 site-install standard -y \
                 --account-name=admin --account-pass=#{DRUPAL_ADMIN_PASS} \
                 --db-url=mysql://#{DRUPAL_DB_USER}:'#{DRUPAL_DB_PASS}'@localhost/#{DRUPAL_DB_NAME} \
-                --site-name='#{DRUPAL_SITE_NAME}' 
-                --clean-url=0"
+                --site-name='#{DRUPAL_SITE_NAME}'"
   
   # requires drush 6
   only_if "drush status --fields=db-status | grep Connected | wc -l | xargs test 0 -eq", :cwd => DEPLOY_SITE_DIR
@@ -216,13 +219,13 @@ end
 
 template "/usr/local/bin/drupal-perm.sh" do
   source "drupal-perm.sh.erb"
-  mode 0750
+  mode 0755
   owner "root"
   group "root"
   variables({
     :files_path => DEPLOY_FILES_DIR, 
-    :user  => APACHE_USER,
-    :group => DRUPAL_TRUSTEES 
+    :user  => node['deploy-drupal']['apache_user'],
+    :group => node['deploy-drupal']['dev_group_name'] 
   })
 end
 

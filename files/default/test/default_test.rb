@@ -59,7 +59,7 @@ describe_recipe 'deploy-drupal::default' do
     # Check for group membership, you can pass a single user or an array of
     # users:
     it "grants group membership to the expected users" do
-      group(node['deploy-drupal']['dev_group']).wont_include(node['deploy-drupal']['apache_user'])
+      group(node['deploy-drupal']['dev_group_name']).wont_include(node['deploy-drupal']['apache_user'])
     end
   end
 end

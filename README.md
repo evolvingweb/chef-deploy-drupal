@@ -57,7 +57,7 @@ below can be accessed in the cookbook via
 |   Attribute Name    |Default |           Description           |
 | --------------------|:------:|:------------------------------: |
 |`source_project_path`| `''`   | absolute path to existing project
-|`source_site_path`   | `'site'` | Drupal site root (in source & in deployment), relative to project path
+|`site_path`          | `'site'`| Drupal site root (in source & in deployment), relative to project path
 |`sql_load_file`      |`''`    | path to SQL dump, relative to project path
 |`post_script_file`   |`''`|path to post-install script, relative to project path
 |`site_files_path`    |`sites/default/files`| Drupal "files", relative to site root
@@ -66,7 +66,9 @@ below can be accessed in the cookbook via
 |`apache_port`        |80      | must be consistent with`node['apache']['listen_ports']`
 |`apache_user`        |`www-data` |
 |`apache_group`       |`www-data` |
-|`dev_group`          |`sudo`     | System group owning site root (excludes `apache_user`)
+|`dev_group_name`     |`sudo`     | System group owning site root (excludes `apache_user`)
+|`dev_group_members`  |`[]`       | Array of system users that are members of
+the `dev_group_name` user group
 |`admin_pass`         |`admin`    | Drupal site administrator password
 |`db_name`            |`drupal`   | MySQL database used by Drupal
 |`mysql_user`         |`drupal_db`| MySQL user used by Drupal
@@ -82,10 +84,16 @@ a bootstrapped site (no manual installation required).
 
 The expected state after provisioning is as follows:
 
+1. An existing Drupal site is sought at the absolute path
+`<source_project_path>/<source_site_path>`. If such project is found, the entire
+`<source_project_path>` directory will be copied to the directory
+`<deploy_base_path>/<site_name>`, which will contain the Apache virtual host
+site root. If an existing site is not found, Drupal 7 will be downloaded,
+installed, and served from the same directory as above.
 1. The following directory structure holds in the provisioned machine:
-  - `deploy_base_path`
-      - `site_name`
-          - `source_site_path`
+  - `<deploy_base_path>`
+      - `<site_name>`
+          - `<source_site_path>`
               - `index.php`
               - `includes`
               - `modules`
@@ -97,20 +105,26 @@ The expected state after provisioning is as follows:
           - `scripts`
               - `post-install-script.sh`
 
-1. Note that `db` and `scripts` subdirectories are not controlled by the cookbook,
-and will be copied over along with everything else that might exist in the
-`source_project_path` directory.
-1. MySQL recognizes a user with username `mysql_user`, identified by
-`mysql_password`. The user is granted **all** privileges on the database
+1. Note that `db` and `scripts` are just example subdirectories and are not
+controlled by the cookbook. Such subdirectories under the
+`<source_project_path>/<source_site_path>` and will be copied over along with
+everything else that might exist in the `<source_project_path>` directory.
+1. MySQL recognizes a user with username `<mysql_user>`, identified by
+`<mysql_password>`. The user is granted **all** privileges on the database
 `db_name`.
-1. Apache has a virtual host bound to port `apache_port` with the name
+1. Apache has a virtual host bound to port `<apache_port>` with the name
 `site_name`. The virtual host has its root directory at
 `<deploy_base_path>/<site_name>/source`.
 1. The `<deploy_base_path>/<site_name>` directory is the root of the installed Drupal 
-project (the actual site is in the `site` subdirectory). Ownership and
-permission settings of this directory are set as follows:
+project (the actual site is in the `site` subdirectory).
+1. The provisioned operating system recognizes a user group named
+`<dev_group_name>` containing users with usernames in the array
+`<dev_group_members>` (if some of the provided usernames do not exist by
+default, they will be created with an empty password).
+1. Ownership and permission settings of the deployed project root directory
+(loated at `<deploy_base_path>/<site_name>`) are set as follows:
   1. The user and group owners of all current files and subdirectories are
-  `apache_user` and `dev_group`, respectively.
+  `<apache_user>` and `<dev_group_name>`, respectively.
   1. The group owner of all files and subdirectories created in the future will be
   `dev_group` (the `setgid` flag is set for all subdirectories). The user owner 
   of future files and directories will depend on the
@@ -120,6 +134,7 @@ permission settings of this directory are set as follows:
   and `r-x rwx ---`, respectively. The only exception is the "files"
   directories (refer to the `site_files_path` attribute) and all its
   contents, which has its permissions set to `rwx rwx ---`.
-1. A bash utility `drupal-perm.sh` is installed at `/usr/local/bin` that
-when invoked from the project root directory, ensures that the ownership and
+1. A bash utility `drupal-perm.sh` is installed at `/usr/local/bin` with
+execute permission for members of the group `<dev_group_name>`.
+When invoked from the project root directory, the script ensures that the ownership and
 permission settings described above are in place.

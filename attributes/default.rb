@@ -13,10 +13,11 @@ default['deploy-drupal']['apache_user']           = 'www-data'
 default['deploy-drupal']['apache_group']          = 'www-data' 
 
 # group owning drupal codebase files
-default['deploy-drupal']['dev_group']             = 'sudo'
-
+default['deploy-drupal']['dev_group_name']        = 'sudo'
+default['deploy-drupal']['dev_grou_members']      = []
 # vhost server name
 default['deploy-drupal']['site_name']             = 'cooked.drupal' 
+
 
 # path to the root of an existing project to be 
 # loaded, the contents of this path will be 
@@ -30,6 +31,10 @@ default['deploy-drupal']['source_site_path']      = 'site'
 # absolute path to deployment directory
 # the Drupal site root would be deploy_path/site_name/site
 default['deploy-drupal']['deploy_base_path']      = '/var/shared/sites'
+
+# whether to start from scratch (obliterate any
+# potential projects in deploy_base_path/site_name
+default['deploy-drupal']['reset']                 = ''
 
 # path to Drupal "files" directory, relative to site root
 default['deploy-drupal']['site_files_path']       = 'sites/default/files'
