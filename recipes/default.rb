@@ -17,9 +17,10 @@ DB_ROOT_CONNECTION  = "mysql  --user='root'\
                               --host='localhost'\
                               --password='#{node['mysql']['server_root_password']}'"
 
-DRUSH_DB_URL        = "mysql://#{node['deploy-drupal']['mysql_user']}:\
-                              '#{node['deploy-drupal']['mysql_pass']}'\
-                              @localhost/#{node['deploy-drupal']['db_name']}"
+DRUSH_DB_URL        = "mysql://" +
+                          "#{node['deploy-drupal']['mysql_user']}:" +
+                          "'#{node['deploy-drupal']['mysql_pass']}'@localhost/" +
+                          "#{node['deploy-drupal']['db_name']}"
 
 DRUSH_STATUS_CMD    = "drush status --fields=db-status \
                       | grep Connected | wc -l | xargs test 0 -eq"
