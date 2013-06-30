@@ -60,6 +60,9 @@ below can be accessed in the cookbook via
 |`site_path`          | `'site'`| Drupal site root (in source & in deployment), relative to project path
 |`sql_load_file`      |`''`    | path to SQL dump, relative to project path
 |`post_script_file`   |`''`|path to post-install script, relative to project path
+|`admin_user`         |`'admin'`| username for "user one" in the bootstrapped site
+|`admin_user`         |`'admin'`| password for "user one" in the bootstrapped site
+|`site_files_path`    |`sites/default/files`| Drupal "files", relative to site root
 |`site_files_path`    |`sites/default/files`| Drupal "files", relative to site root
 |`deploy_base_path`   |`/var/shared/sites`| Directory containing differentDrupal projects
 |`site_name`          |`'cooked.drupal'`| Virtual Host name and directory in deploy base path
@@ -90,6 +93,8 @@ The expected state after provisioning is as follows:
 `<deploy_base_path>/<site_name>`, which will contain the Apache virtual host
 site root. If an existing site is not found, Drupal 7 will be downloaded,
 installed, and served from the same directory as above.
+1. The bootstrapped Drupal site recognizes `<admin_user>` (with password
+`<admin_pass>`) as "user one".
 1. The following directory structure holds in the provisioned machine:
   - `<deploy_base_path>`
       - `<site_name>`

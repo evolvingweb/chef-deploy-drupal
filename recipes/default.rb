@@ -6,62 +6,60 @@
 include_recipe 'deploy-drupal::lamp_stack'
 include_recipe 'deploy-drupal::pear_dependencies'
 
-DB_ROOT_PASS        = node['mysql']['server_root_password']
-DRUPAL_DB_USER      = node['deploy-drupal']['mysql_user']
-DRUPAL_DB_PASS      = node['deploy-drupal']['mysql_pass']
-DRUPAL_DB_NAME      = node['deploy-drupal']['db_name']
-DRUPAL_ADMIN_PASS   = node['deploy-drupal']['admin_pass']
-
-# the format mysql -u <user> -p<password> ... causes errors when password is empty
-# Note that the mysql url with an empty password (password=''), as used in drush site-install, does not cause an error
-DB_DRUPAL_CONNECTION= "mysql  --user='#{DRUPAL_DB_USER}'\
+# the shorthand format mysql -u <user> -p<password> ... causes errors when
+# password is empty. 
+DB_DRUPAL_CONNECTION= "mysql  --user='#{node['deploy-drupal']['mysql_user']}'\
                               --host='localhost'\
-                              --password='#{DRUPAL_DB_PASS}'\
-                              --database='#{DRUPAL_DB_NAME}'"
+                              --password='#{node['deploy-drupal']['mysql_pass']}'\
+                              --database='#{node['deploy-drupal']['db_name']}'"
+
 DB_ROOT_CONNECTION  = "mysql  --user='root'\
                               --host='localhost'\
-                              --password='#{DB_ROOT_PASS}'"
+                              --password='#{node['mysql']['server_root_password']}'"
 
+DRUSH_DB_URL        = "mysql://#{node['deploy-drupal']['mysql_user']}:\
+                              '#{node['deploy-drupal']['mysql_pass']}'\
+                              @localhost/#{node['deploy-drupal']['db_name']}"
 
+DRUSH_STATUS_CMD    = "drush status --fields=db-status \
+                      | grep Connected | wc -l | xargs test 0 -eq"
 # Convert all paths to absolute equivalents
-SOURCE_PROJECT_DIR  = node['deploy-drupal']['source_project_path']
-SOURCE_SITE_DIR     = SOURCE_PROJECT_DIR + "/" +
+SOURCE_SITE_DIR     = node['deploy-drupal']['source_project_path'] + "/" +
                       node['deploy-drupal']['site_path']
 
-SOURCE_DB_FILE      = SOURCE_PROJECT_DIR + "/" +
+SOURCE_DB_FILE      = node['deploy-drupal']['source_project_path'] + "/" +
                       node['deploy-drupal']['sql_load_file']
-SOURCE_SCRIPT_FILE  = SOURCE_PROJECT_DIR + "/" +
+
+SOURCE_SCRIPT_FILE  = node['deploy-drupal']['source_project_path'] + "/" +
                       node['deploy-drupal']['post_script_file']
 
-
-DRUPAL_SITE_NAME    = node['deploy-drupal']['site_name']
 DEPLOY_PROJECT_DIR  = node['deploy-drupal']['deploy_base_path']+
-                      "/#{DRUPAL_SITE_NAME}"
+                      "/#{node['deploy-drupal']['site_name']}"
 
 # assemble the deploy_site_dir attribute
 node.normal['deploy-drupal']['deploy_site_dir'] = 
                       DEPLOY_PROJECT_DIR + "/" +
                       node['deploy-drupal']['site_path']
 
-DEPLOY_SITE_DIR     = node['deploy-drupal']['deploy_site_dir']
-
-DEPLOY_FILES_DIR    = DEPLOY_SITE_DIR + "/" +
+DEPLOY_FILES_DIR    = node['deploy-drupal']['deploy_site_dir'] + "/" +
                       node['deploy-drupal']['site_files_path']
+
 DEPLOY_SQL_LOAD_FILE= DEPLOY_PROJECT_DIR + "/" +
                       node['deploy-drupal']['sql_load_file']
+
 DEPLOY_SCRIPT_FILE  = DEPLOY_PROJECT_DIR + "/" +
                       node['deploy-drupal']['post_script_file']
 
-Chef::Log.info("source project path is #{SOURCE_PROJECT_DIR}")
+Chef::Log.info("source project path is #{node['deploy-drupal']['source_project_path']}")
 Chef::Log.info("source site path is #{SOURCE_SITE_DIR}")
 Chef::Log.info("source db file path is #{SOURCE_DB_FILE}")
 Chef::Log.info("source post-install script path is #{SOURCE_SCRIPT_FILE}")
 Chef::Log.info("deploy project path is #{DEPLOY_PROJECT_DIR}")
-Chef::Log.info("deploy site path is #{DEPLOY_SITE_DIR}")
+Chef::Log.info("deploy site path is #{node['deploy-drupal']['deploy_site_dir']}")
 Chef::Log.info("deploy db dump path is #{DEPLOY_SQL_LOAD_FILE}")
 Chef::Log.info("deploy post-install script path is #{DEPLOY_SCRIPT_FILE}")
 Chef::Log.info("Drupal files path is #{DEPLOY_FILES_DIR}")
-Chef::Log.info("copy would be  cp -Rf  #{SOURCE_PROJECT_DIR}/. '#{DEPLOY_PROJECT_DIR}'")
+Chef::Log.info("copy would be  cp -Rf  #{node['deploy-drupal']['source_project_path']}/. '#{DEPLOY_PROJECT_DIR}'")
 node['deploy-drupal']['dev_group_members'].each do |member|
   Chef::Log.info("*******#{member}*******")
 end
@@ -84,7 +82,7 @@ directory DEPLOY_PROJECT_DIR do
   recursive true 
 end
 
-directory DEPLOY_SITE_DIR do
+directory node['deploy-drupal']['deploy_site_dir'] do
   owner node['deploy-drupal']['apache_user']
   group node['deploy-drupal']['dev_group_name']
   recursive true
@@ -92,7 +90,7 @@ end
 
 execute "validate-drush-works" do
   command "drush status"
-  cwd DEPLOY_SITE_DIR
+  cwd node['deploy-drupal']['deploy_site_dir']
 end
 
 # destroy the project root directory and removes the Drupal database user 
@@ -100,12 +98,12 @@ end
 # keeps a drush archive-dump in vagrant shared folder (/vagrant/ hardcoded)
 bash "reset-project" do
   code <<-EOH
-    cd #{DEPLOY_SITE_DIR}
+    cd #{node['deploy-drupal']['deploy_site_dir']}
     drush archive-dump --tar-options="--exclude=.git" --destination=/vagrant/drupal_archive_dump.tar
-    drush sql-query "DROP DATABASE #{DRUPAL_DB_NAME};"
-    #{DB_ROOT_CONNECTION} -e "DROP DATABASE #{DRUPAL_DB_NAME};"
-    #{DB_ROOT_CONNECTION} -e "REVOKE ALL FROM #{DRUPAL_DB_USER};"
-    #{DB_ROOT_CONNECTION} -e "DROP USER '#{DRUPAL_DB_USER}'@'localhost';"
+    drush sql-query "DROP DATABASE #{node['deploy-drupal']['db_name']};"
+    #{DB_ROOT_CONNECTION} -e "DROP DATABASE #{node['deploy-drupal']['db_name']};"
+    #{DB_ROOT_CONNECTION} -e "REVOKE ALL FROM #{node['deploy-drupal']['mysql_user']};"
+    #{DB_ROOT_CONNECTION} -e "DROP USER '#{node['deploy-drupal']['mysql_user']}'@'localhost';"
     rm -rf #{DEPLOY_PROJECT_DIR}/*
   EOH
   only_if { node['deploy-drupal']['reset'] == "true" }
@@ -116,11 +114,11 @@ bash "copy-drupal-site" do
   # see http://superuser.com/a/367303 for cp syntax discussion
   # assumes target directory already exists
   code <<-EOH
-    cp -Rf #{SOURCE_PROJECT_DIR}/. '#{DEPLOY_PROJECT_DIR}'
+    cp -Rf #{node['deploy-drupal']['source_project_path']}/. '#{DEPLOY_PROJECT_DIR}'
   EOH
   # If identical, `creates "index.php"` will prevent resource execution.
   # This is great if you want to deploy directly to Vagrant shared folder
-  creates "#{DEPLOY_SITE_DIR}/index.php"
+  creates "#{node['deploy-drupal']['deploy_site_dir']}/index.php"
   notifies :restart, "service[apache2]", :delayed
   only_if(
     "test -d '#{SOURCE_SITE_DIR}' && \
@@ -135,21 +133,21 @@ bash "download-drupal" do
   code <<-EOH
     drush dl drupal-7 --destination=. --drupal-project-rename=#{node['deploy-drupal']['site_path']} -y
   EOH
-  creates "#{DEPLOY_SITE_DIR}/index.php"
+  creates "#{node['deploy-drupal']['deploy_site_dir']}/index.php"
   notifies :restart, "service[apache2]", :delayed
   # not if there is already stuff copied over to deployment directory
   not_if( 
-    "test -d '#{DEPLOY_SITE_DIR}' && \
-     test -f '#{DEPLOY_SITE_DIR}/index.php'"
+    "test -d '#{node['deploy-drupal']['deploy_site_dir']}' && \
+     test -f '#{node['deploy-drupal']['deploy_site_dir']}/index.php'"
   )
 end
 
-web_app DRUPAL_SITE_NAME do
+web_app node['deploy-drupal']['site_name'] do
   template "web_app.conf.erb"
   port node['deploy-drupal']['apache_port']
-  server_name DRUPAL_SITE_NAME
-  server_aliases [DRUPAL_SITE_NAME]
-  docroot DEPLOY_SITE_DIR
+  server_name node['deploy-drupal']['site_name']
+  server_aliases [node['deploy-drupal']['site_name']]
+  docroot node['deploy-drupal']['deploy_site_dir']
   notifies :restart, "service[apache2]", :delayed
 end
 
@@ -165,16 +163,16 @@ end
 # remove anonymous and @ % users)
 bash "add-mysql-user" do
   code <<-EOH
-    #{DB_ROOT_CONNECTION} -e "CREATE DATABASE IF NOT EXISTS #{DRUPAL_DB_NAME};"
-    #{DB_ROOT_CONNECTION} -e "GRANT ALL ON #{DRUPAL_DB_NAME}.* TO
-    '#{DRUPAL_DB_USER}'@'localhost' IDENTIFIED BY '#{DRUPAL_DB_PASS}'; FLUSH PRIVILEGES;"
+    #{DB_ROOT_CONNECTION} -e "CREATE DATABASE IF NOT EXISTS #{node['deploy-drupal']['db_name']};"
+    #{DB_ROOT_CONNECTION} -e "GRANT ALL ON #{node['deploy-drupal']['db_name']}.* TO
+    '#{node['deploy-drupal']['mysql_user']}'@'localhost' IDENTIFIED BY '#{node['deploy-drupal']['mysql_pass']}'; FLUSH PRIVILEGES;"
     #{DB_DRUPAL_CONNECTION} -e "SHOW TABLES;"
   EOH
 end
 
 # load the drupal database from specified local SQL file
 execute "load-drupal-db-from-sql" do
-  cwd DEPLOY_SITE_DIR
+  cwd node['deploy-drupal']['deploy_site_dir']
   
   #TODO: not robust to errors connecting to DB
   mysql_empty_check_cmd = "drush sql-query 'show tables;' | wc -l | xargs test 0 -eq"
@@ -189,35 +187,37 @@ execute "load-drupal-db-from-sql" do
 end
 
 execute "drush-site-install" do
-  cwd DEPLOY_SITE_DIR 
+  cwd node['deploy-drupal']['deploy_site_dir'] 
   # fixes sendmail error https://drupal.org/node/1826652#comment-6706102
   command "php -d sendmail_path=/bin/true /usr/share/php/drush/drush.php \
                 site-install standard -y \
-                --account-name=admin --account-pass=#{DRUPAL_ADMIN_PASS} \
-                --db-url=mysql://#{DRUPAL_DB_USER}:'#{DRUPAL_DB_PASS}'@localhost/#{DRUPAL_DB_NAME} \
-                --site-name='#{DRUPAL_SITE_NAME}'"
-  
+                --account-name=#{node['deploy-drupal']['admin_user']} \
+                --account-pass=#{node['deploy-drupal']['admin_pass']} \
+                --db-url=#{DRUSH_DB_URL}
+                
+                --site-name='#{node['deploy-drupal']['site_name']}'"
+ 
   # requires drush 6
-  only_if "drush status --fields=db-status | grep Connected | wc -l | xargs test 0 -eq", :cwd => DEPLOY_SITE_DIR
+  only_if DRUSH_STATUS_CMD, :cwd => node['deploy-drupal']['deploy_site_dir']
   notifies :run, "execute[drush-suppress-http-status-error]"
 end
 
 execute "drush-suppress-http-status-error" do
-  cwd DEPLOY_SITE_DIR
+  cwd node['deploy-drupal']['deploy_site_dir']
   command "drush vset -y drupal_http_request_fails FALSE"
   action :nothing
 end
 
 # drush cache clear
 execute "drush cache-clear" do
-  cwd DEPLOY_SITE_DIR 
+  cwd node['deploy-drupal']['deploy_site_dir'] 
   action :nothing
 end
 
 # run customized sql-post-load-script, if requested
 execute "customized-sql-post-load-script" do
   command "bash '#{DEPLOY_SCRIPT_FILE}'"
-  cwd DEPLOY_SITE_DIR
+  cwd node['deploy-drupal']['deploy_site_dir']
   only_if "test -f '#{DEPLOY_SCRIPT_FILE}'"
   action :nothing
   subscribes :run, "execute[load-drupal-db-from-sql]"
