@@ -125,10 +125,10 @@ initially set through MySQL installation to have no password.
 `<mysql_password>`. The user is granted **all** privileges on the database
 `db_name`.
 1. Apache has a virtual host bound to port `<apache_port>` with the name
-`site_name`. The virtual host has its root directory at
+`<site_name>`. The virtual host has its root directory at
 `<deploy_base_path>/<site_name>/source`.
 1. The `<deploy_base_path>/<site_name>` directory is the root of the installed Drupal 
-project (the actual site is in the `site` subdirectory).
+project (the actual site is in the `<site_path>` subdirectory).
 1. The provisioned operating system recognizes a user group named
 `<dev_group_name>` containing users with usernames in the array
 `<dev_group_members>` (if some of the provided usernames do not exist by

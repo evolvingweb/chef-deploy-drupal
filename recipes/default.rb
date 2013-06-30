@@ -181,8 +181,7 @@ execute "drush-site-install" do
                 site-install standard -y \
                 --account-name=#{node['deploy-drupal']['admin_user']} \
                 --account-pass=#{node['deploy-drupal']['admin_pass']} \
-                --db-url=#{DRUSH_DB_URL}
-                
+                --db-url=#{DRUSH_DB_URL}\
                 --site-name='#{node['deploy-drupal']['site_name']}'"
  
   # requires drush 6
