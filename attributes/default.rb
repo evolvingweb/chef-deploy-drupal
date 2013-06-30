@@ -11,8 +11,6 @@ default['deploy-drupal']['apache_port']           = "80"
 # user owning drupal codebase files
 default['deploy-drupal']['apache_user']           = 'www-data' 
 
-default['deploy-drupal']['apache_group']          = 'www-data' 
-
 # group owning drupal codebase files
 default['deploy-drupal']['dev_group_name']        = 'sudo'
 default['deploy-drupal']['dev_grou_members']      = []

@@ -68,7 +68,6 @@ below can be accessed in the cookbook via
 |`site_name`          |`cooked.drupal`| Virtual Host name and directory in deploy base path
 |`apache_port`        |80      | must be consistent with`node['apache']['listen_ports']`
 |`apache_user`        |`www-data` |
-|`apache_group`       |`www-data` |
 |`dev_group_name`     |`sudo`     | System group owning site root (excludes `apache_user`)
 |`dev_group_members`  |`[]`       | Array of system users that are members of the `dev_group_name` user group
 |`admin_pass`         |`admin`    | Drupal site administrator password
