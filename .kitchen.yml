@@ -14,9 +14,6 @@ suites:
   - recipe[deploy-drupal]
   - recipe[minitest-handler]
   attributes: {
-    "deploy-drupal": {
-      "dev_group" : "sudo"
-    },
     "mysql": {
       "server_root_password": "root",
       "server_debian_password": "root",
