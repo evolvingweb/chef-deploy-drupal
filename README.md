@@ -9,7 +9,7 @@ site running on MySQL and Apache. The cookbook supports two main use cases:
 - You have an **existing** Drupal site (code base, database SQL dump, and maybe
   a bash script to run after everything is loaded) and want to
   configure a server to serve your site.
-- You want the server to download, bootstrap, and serve a **fresh** installation of
+- You want the server to download, install, and serve a **fresh** installation of
   Drupal 7.
 
 Look at [Attributes](#Attributes) to see how to use each of these use cases.
@@ -60,8 +60,8 @@ below can be accessed in the cookbook via
 |`site_path`          | `site`| Drupal site root (in source & in deployment), relative to project path
 |`sql_load_file`      |`''`    | path to SQL dump, relative to project path
 |`post_script_file`   |`''`|path to post-install script, relative to project path
-|`admin_user`         |`admin`| username for "user one" in the bootstrapped site
-|`admin_user`         |`admin`| password for "user one" in the bootstrapped site
+|`admin_user`         |`admin`| username for "user one" in the installed site
+|`admin_user`         |`admin`| password for "user one" in the installed site
 |`site_files_path`    |`sites/default/files`| Drupal "files", relative to site root
 |`deploy_base_path`   |`/var/shared/sites`| Directory containing differentDrupal projects
 |`site_name`          |`cooked.drupal`| Virtual Host name and deployed project directory (relative to `deploy_base_path`)
@@ -82,12 +82,12 @@ Currently, the cookbook tries to load an existing site and if it fails due to
 the absence of codebase or discrepancies in credentials, it will
 download a fresh stable release of Drupal 7 from [drupal.org](http://drupal.org)
 and will configure MySQL and Apache, according to cookbook attributes, to serve
-a bootstrapped site (no manual installation required).
+a installed site (no manual installation required).
 
 The expected state after provisioning is as follows:
 
 1. An existing Drupal site is sought at the absolute path
-`<source_project_path>/<source_site_path>`. If such project is found, the entire
+`<source_project_path>/<site_path>`. If such project is found, the entire
 `<source_project_path>` directory will be copied to the directory
 `<deploy_base_path>/<site_name>`, which will contain the Apache virtual host
 site root. If an existing site is not found, Drupal 7 will be downloaded,
@@ -96,12 +96,12 @@ installed, and served from the same directory as above.
 `<deploy_base_path>/<site_name>`) will be entirely removed before provisioning
 starts, and so will the `<db_name>` database and the `<mysql_user>` user from
 MySQL. After this, provisioning proceeds as usual.
-1. The bootstrapped Drupal site recognizes `<admin_user>` (with password
+1. The installed Drupal site recognizes `<admin_user>` (with password
 `<admin_pass>`) as "user one".
 1. The following directory structure holds in the provisioned machine:
   - `<deploy_base_path>`
       - `<site_name>`
-          - `<source_site_path>`
+          - `<site_path>`
               - `index.php`
               - `includes`
               - `modules`
@@ -115,7 +115,7 @@ MySQL. After this, provisioning proceeds as usual.
 
 1. Note that `db` and `scripts` are just example subdirectories and are not
 controlled by the cookbook. Such subdirectories under the
-`<source_project_path>/<source_site_path>` directory and will be copied over along with
+`<source_project_path>/<site_path>` directory and will be copied over along with
 everything else that might exist in the `<source_project_path>` directory (for
 instance, your `.git` directory would be copied over to deployment).
 1. Password is set to `<mysql_unsafe_user_pass>` for all MySQL user accounts

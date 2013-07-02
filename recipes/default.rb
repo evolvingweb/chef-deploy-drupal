@@ -38,7 +38,7 @@ DEPLOY_PROJECT_DIR  = node['deploy-drupal']['deploy_base_path']+
                       "/#{node['deploy-drupal']['site_name']}"
 
 # assemble the deploy_site_dir attribute
-node.normal['deploy-drupal']['deploy_site_dir'] = 
+node['deploy-drupal']['deploy_site_dir'] = 
                       DEPLOY_PROJECT_DIR + "/" +
                       node['deploy-drupal']['site_path']
 
