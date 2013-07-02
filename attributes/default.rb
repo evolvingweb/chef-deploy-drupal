@@ -13,7 +13,7 @@ default['deploy-drupal']['apache_user']           = 'www-data'
 
 # group owning drupal codebase files
 default['deploy-drupal']['dev_group_name']        = 'sudo'
-default['deploy-drupal']['dev_grou_members']      = []
+default['deploy-drupal']['dev_group_members']      = []
 # vhost server name
 default['deploy-drupal']['site_name']             = 'cooked.drupal' 
 
