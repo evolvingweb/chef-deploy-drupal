@@ -144,14 +144,15 @@ the fact that all other members of `smith` have write access to it.
 #### Minitest
 Tests are written using the
 [minitest-handler](https://github.com/btm/minitest-handler-cookbook) cookbook.
-Look at this
-[example](https://github.com/calavera/minitest-chef-handler/blob/v0.4.0/examples/spec_examples/files/default/tests/minitest/example_test.rb)
+Look at
+[this](https://github.com/calavera/minitest-chef-handler/blob/v0.4.0/examples/spec_examples/files/default/tests/minitest/example_test.rb)
 for an example of how it works. Once test recipes are written, all that needs to
 be done is first, add `minitest-handler` to Berkshelf's dependencies (in the
 `Berksfile`), and second, add `recipe[minitest-handler]` to Chef's run list.
 
 Also, keep in mind that the path where test
-recipes are looked up has changed in recent versions (refer to repo).
+recipes are looked up has changed in recent versions (refer to their
+[README](https://github.com/btm/minitest-handler-cookbook)).
 Currently, they are expected to be found at `files/default/test/*_test.rb`
 
 #### Test-Kitchen
@@ -180,8 +181,8 @@ tried to setup a simple convergence test using minitest.
 The first thing to remember is that Travis workers have (an old version of) Chef
 [running](http://about.travis-ci.org/docs/user/ci-environment/#How-VM-images-are-upgraded-and-deployed),
 which is used by Travis itself to provision them. So, the `Gemfile` should
-specifically ask for a modern version of Chef to be installed alongside (say
-`11.2.0`) the original one. 
+specifically ask for a modern version of Chef to be installed (say `11.2.0`)
+alongside the original one. 
 
 Fixing that, Chef would get stuck while trying to perform `action :restart` on
 `mysql`. Since Travis workers have MySQL running [on
@@ -197,7 +198,7 @@ This resulted in Chef throwing an error at the same spot.
 recorded log of the failed attempt to configure a Travis worker using only the
 [mysql cookbook](https://github.com/opscode-cookbooks/mysql).
 
-Ideally, at least the "fresh Drupal install" use case (see [Scope][] below)
+Ideally, at least the "fresh Drupal install" use case (see Scope below)
 should be tested on Travis.
 
 #### Alternatives
