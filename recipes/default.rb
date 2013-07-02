@@ -31,12 +31,9 @@ SOURCE_SITE_DIR     = node['deploy-drupal']['source_project_path'] + "/" +
 DEPLOY_PROJECT_DIR  = node['deploy-drupal']['deploy_base_path']+
                       "/#{node['deploy-drupal']['site_name']}"
 
-# assemble the deploy_site_dir attribute
-node.default['deploy-drupal']['deploy_site_dir'] = 
-                      DEPLOY_PROJECT_DIR + "/" +
-                      node['deploy-drupal']['site_path']
+DEPLOY_SITE_DIR     = DEPLOY_PROJECT_DIR + "/" + node['deploy-drupal']['site_path']
 
-DEPLOY_FILES_DIR    = node['deploy-drupal']['deploy_site_dir'] + "/" +
+DEPLOY_FILES_DIR    = DEPLOY_SITE_DIR + "/" +
                       node['deploy-drupal']['site_files_path']
 
 DEPLOY_SQL_LOAD_FILE= DEPLOY_PROJECT_DIR + "/" +
@@ -57,7 +54,7 @@ group node['deploy-drupal']['dev_group_name'] do
   append true
 end
 
-directory node['deploy-drupal']['deploy_site_dir'] do
+directory DEPLOY_SITE_DIR do
   owner node['deploy-drupal']['apache_user']
   group node['deploy-drupal']['dev_group_name']
   recursive true
@@ -73,7 +70,7 @@ end
 # keeps a drush archive-dump in vagrant shared folder (/vagrant/ hardcoded)
 bash "reset-project" do
   code <<-EOH
-    cd #{node['deploy-drupal']['deploy_site_dir']}
+    cd #{DEPLOY_SITE_DIR}
     drush archive-dump --tar-options="--exclude=.git" --destination=/vagrant/drupal_archive_dump.tar
     drush sql-query "DROP DATABASE #{node['deploy-drupal']['db_name']};"
     #{DB_ROOT_CONNECTION} -e "DROP DATABASE #{node['deploy-drupal']['db_name']};"
@@ -93,7 +90,7 @@ bash "copy-drupal-site" do
   EOH
   # If identical, `creates "index.php"` will prevent resource execution.
   # This is great if you want to deploy directly to Vagrant shared folder
-  creates "#{node['deploy-drupal']['deploy_site_dir']}/index.php"
+  creates "#{DEPLOY_SITE_DIR}/index.php"
   notifies :restart, "service[apache2]", :delayed
   only_if(
     "test -d '#{SOURCE_SITE_DIR}' && \
@@ -108,12 +105,12 @@ bash "download-drupal" do
   code <<-EOH
     drush dl drupal-7 --destination=. --drupal-project-rename=#{node['deploy-drupal']['site_path']} -y
   EOH
-  creates "#{node['deploy-drupal']['deploy_site_dir']}/index.php"
+  creates "#{DEPLOY_SITE_DIR}/index.php"
   notifies :restart, "service[apache2]", :delayed
   # not if there is already stuff copied over to deployment directory
   not_if( 
-    "test -d '#{node['deploy-drupal']['deploy_site_dir']}' && \
-     test -f '#{node['deploy-drupal']['deploy_site_dir']}/index.php'"
+    "test -d '#{DEPLOY_SITE_DIR}' && \
+     test -f '#{DEPLOY_SITE_DIR}/index.php'"
   )
 end
 
@@ -122,7 +119,7 @@ web_app node['deploy-drupal']['site_name'] do
   port node['deploy-drupal']['apache_port']
   server_name node['deploy-drupal']['site_name']
   server_aliases [node['deploy-drupal']['site_name']]
-  docroot node['deploy-drupal']['deploy_site_dir']
+  docroot DEPLOY_SITE_DIR
   notifies :restart, "service[apache2]", :delayed
 end
 
@@ -149,7 +146,7 @@ end
 
 # load the drupal database from specified local SQL file
 execute "load-drupal-db-from-sql" do
-  cwd node['deploy-drupal']['deploy_site_dir']
+  cwd DEPLOY_SITE_DIR
   
   #TODO: not robust to errors connecting to DB
   mysql_empty_check_cmd = "drush sql-query 'show tables;' | wc -l | xargs test 0 -eq"
@@ -174,19 +171,19 @@ execute "drush-site-install" do
                 --site-name='#{node['deploy-drupal']['site_name']}'"
  
   # requires drush 6
-  only_if DRUSH_STATUS_CMD, :cwd => node['deploy-drupal']['deploy_site_dir']
+  only_if DRUSH_STATUS_CMD, :cwd => DEPLOY_SITE_DIR
   notifies :run, "execute[drush-suppress-http-status-error]"
 end
 
 execute "drush-suppress-http-status-error" do
-  cwd node['deploy-drupal']['deploy_site_dir']
+  cwd DEPLOY_SITE_DIR
   command "drush vset -y drupal_http_request_fails FALSE"
   action :nothing
 end
 
 # drush cache clear
 execute "drush cache-clear" do
-  cwd node['deploy-drupal']['deploy_site_dir'] 
+  cwd DEPLOY_SITE_DIR
   action :nothing
 end
 

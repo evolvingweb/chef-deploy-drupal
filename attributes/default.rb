@@ -31,12 +31,6 @@ default['deploy-drupal']['site_path']             = 'site'
 # the Drupal site root would be deploy_path/site_name/site
 default['deploy-drupal']['deploy_base_path']      = '/var/shared/sites'
 
-# absolute path to site deployment directory
-default['deploy-drupal']['deploy_site_dir']       = 
-                        node['deploy-drupal']['deploy_base_path'] + "/" +
-                        node['deploy-drupal']['site_name']        + "/" +
-                        node['deploy-drupal']['site_path']
-
 # whether to start from scratch (obliterate any
 # potential projects in deploy_base_path/site_name
 default['deploy-drupal']['reset']                 = ''
