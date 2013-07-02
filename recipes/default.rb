@@ -63,12 +63,6 @@ group node['deploy-drupal']['dev_group_name'] do
   append true
 end
 
-directory DEPLOY_PROJECT_DIR do
-  owner node['deploy-drupal']['apache_user']
-  group node['deploy-drupal']['dev_group_name']
-  recursive true 
-end
-
 directory node['deploy-drupal']['deploy_site_dir'] do
   owner node['deploy-drupal']['apache_user']
   group node['deploy-drupal']['dev_group_name']
