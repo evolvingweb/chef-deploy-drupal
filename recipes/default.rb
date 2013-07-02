@@ -28,12 +28,6 @@ DRUSH_STATUS_CMD    = "drush status --fields=db-status \
 SOURCE_SITE_DIR     = node['deploy-drupal']['source_project_path'] + "/" +
                       node['deploy-drupal']['site_path']
 
-SOURCE_DB_FILE      = node['deploy-drupal']['source_project_path'] + "/" +
-                      node['deploy-drupal']['sql_load_file']
-
-SOURCE_SCRIPT_FILE  = node['deploy-drupal']['source_project_path'] + "/" +
-                      node['deploy-drupal']['post_script_file']
-
 DEPLOY_PROJECT_DIR  = node['deploy-drupal']['deploy_base_path']+
                       "/#{node['deploy-drupal']['site_name']}"
 
@@ -90,7 +84,7 @@ bash "reset-project" do
   only_if { node['deploy-drupal']['reset'] == "true" }
 end
 
-# Copies drupal codebase from DRUPAL_SOURCE_PATH to DRUPAL_DEPLOY_DIR
+# copies the entire source_project_path directory to deployment root
 bash "copy-drupal-site" do 
   # see http://superuser.com/a/367303 for cp syntax discussion
   # assumes target directory already exists
