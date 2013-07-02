@@ -63,19 +63,18 @@ below can be accessed in the cookbook via
 |`admin_user`         |`admin`| username for "user one" in the bootstrapped site
 |`admin_user`         |`admin`| password for "user one" in the bootstrapped site
 |`site_files_path`    |`sites/default/files`| Drupal "files", relative to site root
-|`site_files_path`    |`sites/default/files`| Drupal "files", relative to site root
 |`deploy_base_path`   |`/var/shared/sites`| Directory containing differentDrupal projects
-|`site_name`          |`cooked.drupal`| Virtual Host name and directory in deploy base path
+|`site_name`          |`cooked.drupal`| Virtual Host name and deployed project directory (relative to `deploy_base_path`)
 |`apache_port`        |80      | must be consistent with`node['apache']['listen_ports']`
 |`apache_user`        |`www-data` |
-|`dev_group_name`     |`sudo`     | System group owning site root (excludes `apache_user`)
+|`dev_group_name`     |`sudo`     | System group owning site root
 |`dev_group_members`  |`[]`       | Array of system users that are members of the `dev_group_name` user group
 |`admin_pass`         |`admin`    | Drupal site administrator password
 |`db_name`            |`drupal`   | MySQL database used by Drupal
 |`mysql_user`         |`drupal_db`| MySQL user used by Drupal
 |`mysql_pass`         |`drupal_db`| MySQL password used by Drupal
 |`mysql_unsafe_user_pass` |`newpwd`| MySQL password assigned to initially unsafe users (all users with empty passwords)
-|`reset`              | `''`| if set to `'true'`, starts provisioning with reseting the system to its state before installation of the Drupal site 
+|`reset`              | `''`| if set to `'true'`, starts provisioning with reseting the system to its state before installation of the Drupal site, then proceed as usual.
 
 #### Behavior
 

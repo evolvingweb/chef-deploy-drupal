@@ -9,12 +9,12 @@ Vagrant.configure("2") do |config|
 
   # precise64.box doesn't have chef 11, which we require
   config.vm.provision :shell, :inline => <<-HEREDOC
-    apt-get install -y curl vim
+    apt-get install -y curl vim git
     gem install chef --version 11.0.0 --no-rdoc --no-ri --conservative
   HEREDOC
   
   config.vm.provision :chef_solo do |chef|
-    reset = !ENV["reset"].nil? ? ENV["reset"] : ""
+    reset = ENV["reset"].nil? ? "" : ENV["reset"]
     chef.json.merge!({
       "deploy-drupal" => { 
         "sql_load_file" => "db/dump.sql.gz",
