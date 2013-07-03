@@ -310,12 +310,12 @@ following issue in `drush status`. If **all** the following conditions hold:
 then drush throws an exception (not if any of the conditions above does not hold).
 
 #### Security
-For now, security will be considered outside the scope of this cookbook. The
+For now, user management is considered outside the scope of this cookbook. The
 only user/group management that happens in the cookbook is the ownership of the
 deployed project root by a group defined in the attribute `dev_group_name` which
 defaults to `root` (and in the Vagrant use case can easily be replaced with
 `vagrant`). If the provided group name does not exist, it will not be created,
-nor will any users be added to this group
+nor will the cookbook add any users to this group.
 
 If such measures are to be implemented in the cookbook, a good place to start
 would be the [sudo
@@ -324,7 +324,19 @@ managing sudoers.
 
 Also, none of the passwordless MySQL user accounts will be
 [secured](http://dev.mysql.com/doc/refman/5.0/en/default-privileges.html) by the
-cookbook.
+cookbook. If this were to be included at some point in the cookbook, the easiest
+way would be to run the following:
+
+``` sql
+UPDATE mysql.user
+  SET password = PASSWORD ('newpwd')
+  WHERE password='';
+```
+
+Note that this would disallow an empty root password which might be desirable.
+An alternative would be to remove all MySQL users that are defined using
+wildcards (`''` usernames and/or `%` hosts).
+
 
 #### Reset functionality
 Currently, reset functionality is provided through setting an environment

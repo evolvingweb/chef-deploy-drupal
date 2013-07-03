@@ -47,5 +47,4 @@ default['deploy-drupal']['post_script_file']      = ''
 # MySQL credentials
 default['deploy-drupal']['mysql_user']            = 'drupal_db'
 default['deploy-drupal']['mysql_pass']            = 'drupal_db'
-default['deploy-drupal']['mysql_unsafe_user_pass']= 'newpwd'
 default['deploy-drupal']['db_name']               = 'drupal'

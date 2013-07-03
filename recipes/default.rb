@@ -118,12 +118,6 @@ apache_site "000-default" do
   notifies :restart, "service[apache2]", :delayed
 end
 
-execute "secure-initial-mysql-accounts" do
-  command "#{DB_ROOT_CONNECTION} -e \"UPDATE mysql.user SET password= \
-            PASSWORD('#{node['deploy-drupal']['mysql_unsafe_user_pass']}') \
-            WHERE password='';\""
-end
-
 bash "add-mysql-user" do
   code <<-EOH
     #{DB_ROOT_CONNECTION} -e "CREATE DATABASE IF NOT EXISTS #{node['deploy-drupal']['db_name']};"

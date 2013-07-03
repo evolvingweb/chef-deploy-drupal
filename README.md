@@ -61,7 +61,6 @@ below can be accessed in the cookbook via
 |`db_name`            |`drupal`   | MySQL database used by Drupal
 |`mysql_user`         |`drupal_db`| MySQL user used by Drupal
 |`mysql_pass`         |`drupal_db`| MySQL password used by Drupal
-|`mysql_unsafe_user_pass` |`newpwd`| MySQL password assigned to initially unsafe users (all users with empty passwords)
 |`reset`              | `''`| if set to `'true'`, starts provisioning with reseting the system to its state before installation of the Drupal site, then proceed as usual.
 
 #### Behavior
@@ -106,8 +105,6 @@ controlled by the cookbook. Such subdirectories under the
 `<source_project_path>/<site_path>` directory and will be copied over along with
 everything else that might exist in the `<source_project_path>` directory (for
 instance, your `.git` directory would be copied over to deployment).
-1. Password is set to `<mysql_unsafe_user_pass>` for all MySQL user accounts
-initially set through MySQL installation to have no password.
 1. MySQL recognizes a user with username `<mysql_user>`, identified by
 `<mysql_password>`. The user is granted **all** privileges on the database
 `db_name`.
