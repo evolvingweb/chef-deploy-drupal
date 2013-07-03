@@ -174,7 +174,7 @@ blog post.
 To test/debug the cookbook with Test-Kitchen, which simply runs the
 minitest test cases defined at `files/default/test/*_test.rb`, you first need to
 install [Vagrant](http://downloads.vagrantup.com/) (look at note on Vagrant
-versions below). The rest is straightforward:
+versions above). The rest is straightforward:
 
 ``` bash
 git clone https://github.com/amirkdv/chef-deploy-drupal.git
@@ -222,6 +222,12 @@ testing on Travis.
 Also, look at [these](http://www.iflowfor8hours.info/2012/11/chef-testing-stratagies-compared/)
 [two](http://technology.customink.com/blog/2012/08/03/testing-chef-cookbooks/)
 about different strategies for testing Chef cookbooks.
+
+It seems that Jenkins is a popular platform for continuous integration testing
+of Chef cookbooks, look at jtimberman's blogpost
+[here](http://jtimberman.housepub.org/blog/2013/05/08/test-kitchen-and-jenkins/),
+and his [cookbook](https://github.com/jtimberman/kitchen-jenkins-cookbook) for
+setting up a Jenkins build environment.
 
 # Workflow and Main Use Cases
 
@@ -303,17 +309,32 @@ following issue in `drush status`. If **all** the following conditions hold:
 
 then drush throws an exception (not if any of the conditions above does not hold).
 
+#### Security
+For now, security will be considered outside the scope of this cookbook. The
+only user/group management that happens in the cookbook is the ownership of the
+deployed project root by a group defined in the attribute `dev_group_name` which
+defaults to `root` (and in the Vagrant use case can easily be replaced with
+`vagrant`). If the provided group name does not exist, it will not be created,
+nor will any users be added to this group.
+
+Also, none of the passwordless MySQL user accounts will be
+[secured](http://dev.mysql.com/doc/refman/5.0/en/default-privileges.html) by the
+cookbook.
+
 #### Reset functionality
 Currently, reset functionality is provided through setting an environment
-varible in the Vagrant run like this `destroy=true vagrant [up,provision]`
+varible in the Vagrant run like this `reset=true vagrant [up,provision]`
 If the solo-provisioner script is to be used, Right now the `Vagrantfile` does two things regarding chef attributes:
 
 ``` ruby
-chef.json = JSON.parse( IO.read("dna.json") )
+reset = ENV["reset"].nil? ? "" : ENV["reset"]
 chef.json.merge!({
+    . . .
     "deploy-drupal" => { 
-      "destroy_existing" => ENV["destroy"]
-    }   
+      "reset" => reset
+      . . .
+    }
+    . . .
 }) 
 ```
 
