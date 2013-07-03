@@ -315,7 +315,12 @@ only user/group management that happens in the cookbook is the ownership of the
 deployed project root by a group defined in the attribute `dev_group_name` which
 defaults to `root` (and in the Vagrant use case can easily be replaced with
 `vagrant`). If the provided group name does not exist, it will not be created,
-nor will any users be added to this group.
+nor will any users be added to this group
+
+If such measures are to be implemented in the cookbook, a good place to start
+would be the [sudo
+cookbook](https://github.com/opscode-cookbooks/sudo) for configuring and
+managing sudoers.
 
 Also, none of the passwordless MySQL user accounts will be
 [secured](http://dev.mysql.com/doc/refman/5.0/en/default-privileges.html) by the
