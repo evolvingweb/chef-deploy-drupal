@@ -6,7 +6,7 @@ Vagrant.configure("2") do |config|
   config.vm.box_url = "http://dl.dropbox.com/u/1537815/precise64.box"
   
   config.vm.network :forwarded_port, guest: 80, host: 8080
-
+  config.vm.synced_folder "./db", "/home/vagrant/drush-backups/"
   # precise64.box doesn't have chef 11, which we require
   config.vm.provision :shell, :inline => <<-HEREDOC
     apt-get install -y curl vim git

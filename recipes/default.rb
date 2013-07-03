@@ -55,11 +55,11 @@ end
 
 # destroy the project root directory and removes the Drupal database user 
 # if reset attribue is set to "true".
-# keeps a drush archive-dump in vagrant shared folder (/vagrant/ hardcoded)
+# keeps a drush archive-dump in drush's default directory (~/drush-backups/)
 bash "reset-project" do
   code <<-EOH
     cd #{DEPLOY_SITE_DIR}
-    drush archive-dump --tar-options="--exclude=.git" --destination=/vagrant/drupal_archive_dump.tar
+    drush archive-dump --tar-options="--exclude=.git"
     drush sql-query "DROP DATABASE #{node['deploy-drupal']['db_name']};"
     #{DB_ROOT_CONNECTION} -e "DROP DATABASE #{node['deploy-drupal']['db_name']};"
     #{DB_ROOT_CONNECTION} -e "REVOKE ALL FROM #{node['deploy-drupal']['mysql_user']};"
