@@ -24,17 +24,6 @@ installed. For the latter, use `vagrant plugin install vagrant-berkshelf`.
 Refer to [Vagrant-Drupal](http://github.com/dergachev/vagrant-drupal) for a more
 detailed description of how to use this cookbook with Vagrant.
 
-To test/debug the cookbook you can use [Test-Kitchen](https://github.com/opscode/test-kitchen)
-which simply runs the
-minitest test cases defined at `files/default/test/*_test.rb`. To get
-Test-Kitchen running:
-
-``` bash
-# inside repo root
-bundle install
-kitchen test
-```
-
 #### Recipes
 
 - `deploy-drupal::lamp_stack`: installs infrastructure packages to support

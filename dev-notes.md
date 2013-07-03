@@ -171,6 +171,19 @@ For a good introduction to Test-Kitchen, look at jtimberman's
 [part](http://jtimberman.housepub.org/blog/2013/03/19/anatomy-of-a-test-kitchen-1-dot-0-cookbook-part-2/)
 blog post. 
 
+To test/debug the cookbook with Test-Kitchen, which simply runs the
+minitest test cases defined at `files/default/test/*_test.rb`, you first need to
+install [Vagrant](http://downloads.vagrantup.com/) (look at note on Vagrant
+versions below). The rest is straightforward:
+
+``` bash
+git clone https://github.com/amirkdv/chef-deploy-drupal.git
+cd chef-deploy-drupal
+# install vagrant-berkshelf, kitchen-vagrant:
+bundle install
+kitchen test
+```
+
 #### Travis CI
 Right now, [Travis-CI](https://travis-ci.org/) is being used only minimally;
 only `foodcritic` and `knife cookbook test` are run against the cookbook. I
