@@ -28,9 +28,10 @@ Vagrant.configure("2") do |config|
         "server_repl_password" => "root"
       },  
       "minitest" =>{ 
-        "recipes" => [ "deploy-drupal" ]
+        "recipes" => [ "deploy-drupal" ],
+        "drupal_site_dir" => "/var/shared/sites/cooked.drupal/site"
       },  
-      "run_list" =>[ "minitest-handler" ]
+      "run_list" =>[ "deploy-drupal", "minitest-handler" ]
     })   
   end
 end
