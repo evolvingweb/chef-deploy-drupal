@@ -141,6 +141,16 @@ the fact that all other members of `smith` have write access to it.
 
 ## Testing 
 
+Since Vagrant is the primary testing and debugging tool, there exists a
+`Vagrantfile` in the repository that provisions a virtual machine serving Drupal
+and runs minitests after provisioning. You should be careful with running
+multiple Vagrant machines while testing different things. Vagrant is generally
+[not
+good](https://groups.google.com/forum/#!msg/vagrant-up/YNcGex2Ffjs/AzTDkxN3078J)
+with concurrency; at the very least, you should change your port forwarding
+configuration. The better way to run multiple tests is to use Test-Kitchen in
+parallel mode (`kitchen test --parallel`).
+
 #### Minitest
 Tests are written using the
 [minitest-handler](https://github.com/btm/minitest-handler-cookbook) cookbook.
