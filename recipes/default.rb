@@ -25,7 +25,7 @@ DRUSH_DB_URL        = "mysql://" +
 DRUSH_STATUS_CMD    = "drush status --fields=db-status \
                       | grep Connected | wc -l | xargs test 0 -eq"
 # Convert all paths to absolute equivalents
-SOURCE_SITE_DIR     = node['deploy-drupal']['source_project_path'] + "/" +
+SOURCE_SITE_DIR     = node['deploy-drupal']['copy_project_from'] + "/" +
                       node['deploy-drupal']['site_path']
 
 DEPLOY_PROJECT_DIR  = node['deploy-drupal']['deploy_base_path']+
@@ -69,12 +69,12 @@ bash "reset-project" do
   only_if { node['deploy-drupal']['reset'] == "true" }
 end
 
-# copies the entire source_project_path directory to deployment root
+# copies the entire copy_project_from directory to deployment root
 bash "copy-drupal-site" do 
   # see http://superuser.com/a/367303 for cp syntax discussion
   # assumes target directory already exists
   code <<-EOH
-    cp -Rf #{node['deploy-drupal']['source_project_path']}/. '#{DEPLOY_PROJECT_DIR}'
+    cp -Rf #{node['deploy-drupal']['copy_project_from']}/. '#{DEPLOY_PROJECT_DIR}'
   EOH
   # If identical, `creates "index.php"` will prevent resource execution.
   # This is great if you want to deploy directly to Vagrant shared folder

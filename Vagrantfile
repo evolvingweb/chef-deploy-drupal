@@ -18,7 +18,7 @@ Vagrant.configure("2") do |config|
     chef.json.merge!({
       "deploy-drupal" => { 
         "sql_load_file" => "db/dump.sql.gz",
-        "source_project_path" => "/vagrant",
+        "copy_project_from" => "/vagrant",
         "dev_group_name" => "vagrant",
         "reset" => reset
       },  

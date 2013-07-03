@@ -45,7 +45,7 @@ below can be accessed in the cookbook via
 
 |   Attribute Name    |Default |           Description           |
 | --------------------|:------:|:------------------------------: |
-|`source_project_path`| `''`   | absolute path to existing project
+|`copy_project_from`| `''`   | absolute path to existing project
 |`site_path`          | `site`| Drupal site root (in source & in deployment), relative to project path
 |`sql_load_file`      |`''`    | path to SQL dump, relative to project path
 |`post_script_file`   |`''`|path to post-install script, relative to project path
@@ -74,8 +74,8 @@ a installed site (no manual installation required).
 The expected state after provisioning is as follows:
 
 1. An existing Drupal site is sought at the absolute path
-`<source_project_path>/<site_path>`. If such project is found, the entire
-`<source_project_path>` directory will be copied to the directory
+`<copy_project_from>/<site_path>`. If such project is found, the entire
+`<copy_project_from>` directory will be copied to the directory
 `<deploy_base_path>/<site_name>`, which will contain the Apache virtual host
 site root. If an existing site is not found, Drupal 7 will be downloaded,
 installed, and served from the same directory as above.
@@ -102,8 +102,8 @@ MySQL. After this, provisioning proceeds as usual.
 
 1. Note that `db` and `scripts` are just example subdirectories and are not
 controlled by the cookbook. Such subdirectories under the
-`<source_project_path>/<site_path>` directory and will be copied over along with
-everything else that might exist in the `<source_project_path>` directory (for
+`<copy_project_from>/<site_path>` directory and will be copied over along with
+everything else that might exist in the `<copy_project_from>` directory (for
 instance, your `.git` directory would be copied over to deployment).
 1. MySQL recognizes a user with username `<mysql_user>`, identified by
 `<mysql_password>`. The user is granted **all** privileges on the database

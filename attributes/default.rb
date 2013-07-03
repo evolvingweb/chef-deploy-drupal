@@ -21,7 +21,7 @@ default['deploy-drupal']['site_name']             = 'cooked.drupal'
 # path to the root of an existing project to be 
 # loaded, the contents of this path will be 
 # copied to deploy_project_base/site_name/
-default['deploy-drupal']['source_project_path']   = ''
+default['deploy-drupal']['copy_project_from']   = ''
 
 # root of the Drupal site, relative to project_path
 # this must be such that project_path/drupal_site_path/ contains index.php
@@ -38,7 +38,7 @@ default['deploy-drupal']['reset']                 = ''
 # path to Drupal "files" directory, relative to site root
 default['deploy-drupal']['site_files_path']       = 'sites/default/files'
 
-# path to drupal SQL dump (can be .gz), relative to source_project_path
+# path to drupal SQL dump (can be .gz), relative to copy_project_from 
 default['deploy-drupal']['sql_load_file']         = '' 
 
 # absolute path to bash script to run after loading SQL dump
