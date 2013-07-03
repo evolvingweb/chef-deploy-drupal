@@ -67,8 +67,7 @@ below can be accessed in the cookbook via
 |`site_name`          |`cooked.drupal`| Virtual Host name and deployed project directory (relative to `deploy_base_path`)
 |`apache_port`        |80      | must be consistent with`node['apache']['listen_ports']`
 |`apache_user`        |`www-data` |
-|`dev_group_name`     |`sudo`     | System group owning site root
-|`dev_group_members`  |`[]`       | Array of system users that are members of the `dev_group_name` user group
+|`dev_group_name`     |`root`     | System group owning site root (user owner is `<apache_user>`)
 |`admin_pass`         |`admin`    | Drupal site administrator password
 |`db_name`            |`drupal`   | MySQL database used by Drupal
 |`mysql_user`         |`drupal_db`| MySQL user used by Drupal
@@ -128,10 +127,8 @@ initially set through MySQL installation to have no password.
 `<deploy_base_path>/<site_name>/source`.
 1. The `<deploy_base_path>/<site_name>` directory is the root of the installed Drupal 
 project (the actual site is in the `<site_path>` subdirectory).
-1. The provisioned operating system recognizes a user group named
-`<dev_group_name>` containing users with usernames in the array
-`<dev_group_members>` (if some of the provided usernames do not exist by
-default, they will be created with an empty password).
+1. The provided `dev_group_name` must be already recognized by the operating
+system to be provisioned. This user group will own the project root directory. 
 1. Ownership and permission settings of the deployed project root directory
 (loated at `<deploy_base_path>/<site_name>`) are set as follows:
   1. The user and group owners of all current files and subdirectories are

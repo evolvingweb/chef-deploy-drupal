@@ -60,12 +60,6 @@ describe_recipe 'deploy-drupal::default' do
     it "creates apache user" do
       user(node['deploy-drupal']['apache_user']).must_exist
     end
-    
-    # Check for group membership, you can pass a single user or an array of
-    # users:
-    it "appends expected users to the dev_group" do
-      group(node['deploy-drupal']['dev_group_name']).must_include(node['deploy-drupal']['dev_group_members'])
-    end
   end
 end
 

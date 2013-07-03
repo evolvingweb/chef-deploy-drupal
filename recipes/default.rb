@@ -42,18 +42,6 @@ DEPLOY_SQL_LOAD_FILE= DEPLOY_PROJECT_DIR + "/" +
 DEPLOY_SCRIPT_FILE  = DEPLOY_PROJECT_DIR + "/" +
                       node['deploy-drupal']['post_script_file']
 
-# users defined to be members of the dev_group user group
-node['deploy-drupal']['dev_group_members'].each do |dev_member|
-  user dev_member do
-  end
-end
-
-# the group has full access over drupal root folder, should not include www-data
-group node['deploy-drupal']['dev_group_name'] do
-  members node['deploy-drupal']['dev_group_members']
-  append true
-end
-
 directory DEPLOY_SITE_DIR do
   owner node['deploy-drupal']['apache_user']
   group node['deploy-drupal']['dev_group_name']
