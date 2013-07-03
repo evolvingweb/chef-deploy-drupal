@@ -17,7 +17,7 @@ Vagrant.configure("2") do |config|
     reset = ENV["reset"].nil? ? "" : ENV["reset"]
     chef.json.merge!({
       "deploy-drupal" => { 
-        "sql_load_file" => "db/dump.sql.gz",
+        "sql_load_file" => "/vagrant/db/dump.sql.gz",
         "copy_project_from" => "/vagrant",
         "dev_group_name" => "vagrant",
         "reset" => reset

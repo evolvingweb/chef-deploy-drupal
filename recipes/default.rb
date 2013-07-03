@@ -36,7 +36,6 @@ DEPLOY_SITE_DIR     = DEPLOY_PROJECT_DIR + "/" + node['deploy-drupal']['site_pat
 DEPLOY_FILES_DIR    = DEPLOY_SITE_DIR + "/" +
                       node['deploy-drupal']['site_files_path']
 
-DEPLOY_SQL_LOAD_FILE= DEPLOY_PROJECT_DIR + "/" +
                       node['deploy-drupal']['sql_load_file']
 
 DEPLOY_SCRIPT_FILE  = DEPLOY_PROJECT_DIR + "/" +
@@ -132,13 +131,11 @@ execute "load-drupal-db-from-sql" do
   
   #TODO: not robust to errors connecting to DB
   mysql_empty_check_cmd = "drush sql-query 'show tables;' | wc -l | xargs test 0 -eq"
-
-  # SQL_LOAD_FILE might be nil, must be quoted
-  only_if  "test -f '#{DEPLOY_SQL_LOAD_FILE}' && #{mysql_empty_check_cmd}"
+  only_if  "test -f '#{node['deploy-drupal']['sql_load_file']}' && #{mysql_empty_check_cmd}", :cwd => DEPLOY_PROJECT_DIR
   
   # Using zless instead of cat/zcat to optionally support gzipped files 
   # "`drush sql-connect`" because "drush sqlc" returns 0 even on connection failure
-  command "zless '#{DEPLOY_SQL_LOAD_FILE}' | `drush sql-connect`"
+  command "zless '#{node['deploy-drupal']['sql_load_file']}' | `drush sql-connect`"
   notifies :run, "execute[drush cache-clear]"
 end
 
@@ -173,7 +170,7 @@ end
 execute "customized-sql-post-load-script" do
   command "bash '#{DEPLOY_SCRIPT_FILE}'"
   cwd node['deploy-drupal']['deploy_site_dir']
-  only_if "test -f '#{DEPLOY_SCRIPT_FILE}'"
+  only_if "test -f '#{DEPLOY_SCRIPT_FILE}'", :cwd => DEPLOY_PROJECT_DIR
   action :nothing
   subscribes :run, "execute[load-drupal-db-from-sql]"
 end

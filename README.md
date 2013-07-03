@@ -46,9 +46,9 @@ below can be accessed in the cookbook via
 |   Attribute Name    |Default |           Description           |
 | --------------------|:------:|:------------------------------: |
 |`copy_project_from`| `''`   | absolute path to existing project
-|`site_path`          | `site`| Drupal site root (in source & in deployment), relative to project path
-|`sql_load_file`      |`''`    | path to SQL dump, relative to project path
-|`post_script_file`   |`''`|path to post-install script, relative to project path
+|`site_path`          | `site`| Drupal site root (in source & in deployment), relative to project root
+|`sql_load_file`      |`''`    | path to SQL dump, absolute or relative to project root
+|`post_script_file`   |`''`|path to post-install script, absolute or relative to project root
 |`admin_user`         |`admin`| username for "user one" in the installed site
 |`admin_user`         |`admin`| password for "user one" in the installed site
 |`site_files_path`    |`sites/default/files`| Drupal "files", relative to site root
