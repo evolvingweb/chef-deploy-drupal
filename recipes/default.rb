@@ -49,7 +49,7 @@ end
 
 execute "validate-drush-works" do
   command "drush status"
-  cwd node['deploy-drupal']['deploy_site_dir']
+  cwd DEPLOY_SITE_DIR 
 end
 
 # destroy the project root directory and removes the Drupal database user 
@@ -140,7 +140,7 @@ execute "load-drupal-db-from-sql" do
 end
 
 execute "drush-site-install" do
-  cwd node['deploy-drupal']['deploy_site_dir'] 
+  cwd DEPLOY_SITE_DIR 
   # fixes sendmail error https://drupal.org/node/1826652#comment-6706102
   command "php -d sendmail_path=/bin/true /usr/share/php/drush/drush.php \
                 site-install standard -y \
@@ -169,7 +169,7 @@ end
 # run customized sql-post-load-script, if requested
 execute "customized-sql-post-load-script" do
   command "bash '#{DEPLOY_SCRIPT_FILE}'"
-  cwd node['deploy-drupal']['deploy_site_dir']
+  cwd DEPLOY_SITE_DIR 
   only_if "test -f '#{DEPLOY_SCRIPT_FILE}'", :cwd => DEPLOY_PROJECT_DIR
   action :nothing
   subscribes :run, "execute[load-drupal-db-from-sql]"
