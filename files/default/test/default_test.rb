@@ -31,13 +31,19 @@ describe_recipe 'deploy-drupal::default' do
     # And you can chain attributes together if you are asserting several.
     # You don't want to get too carried away doing this but it can be useful.
     it "files folder must be appropriately set" do
-      file(node['minitest']['drupal_site_dir']+"/index.php").must_have(:mode, "460").with(:owner, "www-data").and(:group,"sudo")
+      file(node['minitest']['drupal_site_dir']+"/index.php")
+        .must_have(:mode, "460")
+        .with(:owner, node['deploy-drupal']['apache_user'])
+        .and(:group,node['deploy-drupal']['dev_group_name'])
     end
     # = Directories =
     # The file existence and permissions matchers are also valid for
     # directories:
     it "has appropriate folder permissions in drupal site" do
-      directory(node['minitest']['drupal_site_dir']+"/includes").must_have(:mode, "2570").must_exist.with(:owner, "www-data").and(:group,"sudo")
+      directory(node['minitest']['drupal_site_dir']+"/includes")
+        .must_have(:mode, "2570")
+        .must_exist.with(:owner, node['deploy-drupal']['apache_user'])
+        .and(:group,node['deploy-drupal']['dev_group_name'])
     end
 
   end
