@@ -5,11 +5,16 @@
 
 base  = %w{ apt build-essential git curl vim }
 apache= %w{ apache2 apache2::mod_rewrite apache2::mod_php5
-                            apache2::mod_expires }
+            apache2::mod_expires }
 php   = %w{ php php::module_mysql php::module_memcache
-                            php::module_gd php::module_curl}
+            php::module_gd php::module_curl}
 mysql = %w{ mysql::server}
 drupal= %w{ drush xhprof memcached }
+
+# include all recipes
+[base, apache, php, mysql, drupal].each do |group|
+  group.each {|recipe| include_recipe recipe}
+end
 
 pkgs = value_for_platform(
   [ "centos", "redhat", "fedora" ] => { #TODO needs testing
@@ -20,11 +25,6 @@ pkgs = value_for_platform(
   },
   "default" => %w{ libpcre3-dev php5-mcrypt php-apc }
 )
-
-# include all recipes
-[base, apache, php, mysql, drupal].each do |group|
-  group.each {|recipe| include_recipe recipe}
-end
 
 # install all packages
 pkgs.each {|pkg| package ( pkg ) { action :install } }
