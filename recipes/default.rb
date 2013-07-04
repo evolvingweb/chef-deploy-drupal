@@ -3,9 +3,6 @@
 ##
 #
 
-include_recipe 'deploy-drupal::lamp_stack'
-include_recipe 'deploy-drupal::pear_dependencies'
-
 # the shorthand format mysql -u <user> -p<password> ... causes errors when
 # password is empty. 
 DB_DRUPAL_CONNECTION= "mysql  --user='#{node['deploy-drupal']['mysql_user']}'\
