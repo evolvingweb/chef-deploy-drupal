@@ -35,6 +35,10 @@ default['deploy-drupal']['deploy_base_path']      = '/var/shared/sites'
 # potential projects in deploy_base_path/site_name
 default['deploy-drupal']['reset']                 = ''
 
+# whether to download Drupal 7 from drupal.org
+# or copy from an existing code base 
+default['deploy-drupal']['copy']                 = ''
+
 # path to Drupal "files" directory, relative to site root
 default['deploy-drupal']['site_files_path']       = 'sites/default/files'
 

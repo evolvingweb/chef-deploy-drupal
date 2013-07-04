@@ -9,18 +9,19 @@ Vagrant.configure("2") do |config|
   config.vm.synced_folder "./db", "/home/vagrant/drush-backups/"
   # precise64.box doesn't have chef 11, which we require
   config.vm.provision :shell, :inline => <<-HEREDOC
-    apt-get install -y curl vim git
     gem install chef --version 11.0.0 --no-rdoc --no-ri --conservative
   HEREDOC
   
   config.vm.provision :chef_solo do |chef|
     reset = ENV["reset"].nil? ? "" : ENV["reset"]
+    copy  = ENV["copy"] .nil? ? "" : ENV["copy"]
     chef.json.merge!({
       "deploy-drupal" => { 
-        "sql_load_file" => "/vagrant/db/dump.sql.gz",
+        "sql_load_file" => "db/dump.sql.gz",
         "copy_project_from" => "/vagrant",
         "dev_group_name" => "vagrant",
-        "reset" => reset
+        "reset" => reset,
+        "copy"  => copy
       },  
       "mysql" => {
         "server_root_password" => "root",
@@ -31,7 +32,7 @@ Vagrant.configure("2") do |config|
         "recipes" => [ "deploy-drupal" ],
         "drupal_site_dir" => "/var/shared/sites/cooked.drupal/site"
       },  
-      "run_list" =>[ "deploy-drupal::base", "deploy-drupal::default", "minitest-handler" ]
+      "run_list" =>[ "deploy-drupal", "minitest-handler" ]
     })   
   end
 end
