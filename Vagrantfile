@@ -31,7 +31,7 @@ Vagrant.configure("2") do |config|
         "recipes" => [ "deploy-drupal" ],
         "drupal_site_dir" => "/var/shared/sites/cooked.drupal/site"
       },  
-      "run_list" =>[ "deploy-drupal", "minitest-handler" ]
+      "run_list" =>[ "deploy-drupal::base", "deploy-drupal::default", "minitest-handler" ]
     })   
   end
 end
