@@ -5,6 +5,18 @@
 ## if reset attribue is set to "true".
 ## keeps a drush archive-dump in drush's default directory (~/drush-backups/)
 
+# assemble all necessary query strings and paths
+DB_ROOT_CONNECTION  = "mysql  --user='root'\
+                              --host='localhost'\
+                              --password='#{node['mysql']['server_root_password']}'"
+
+DEPLOY_PROJECT_DIR  = node['deploy-drupal']['deploy_base_path']+
+                      "/#{node['deploy-drupal']['site_name']}"
+
+DEPLOY_SITE_DIR     = DEPLOY_PROJECT_DIR + "/" + node['deploy-drupal']['site_path']
+
+
+
 bash "reset-project" do
   code <<-EOH
     cd #{DEPLOY_SITE_DIR}
