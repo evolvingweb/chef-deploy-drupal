@@ -1,13 +1,11 @@
 ## Cookbook Name:: deploy-drupal
-## Recipe:: base
+## Recipe:: dependencies
 ##
-#
+## include dependencies and install packages
 
 base  = %w{ apt build-essential git curl vim }
-apache= %w{ apache2 apache2::mod_rewrite apache2::mod_php5
-            apache2::mod_expires }
-php   = %w{ php php::module_mysql php::module_memcache
-            php::module_gd php::module_curl}
+apache= %w{ apache2 apache2::mod_rewrite apache2::mod_php5 apache2::mod_expires }
+php   = %w{ php php::module_mysql php::module_memcache php::module_gd php::module_curl}
 mysql = %w{ mysql::server}
 drupal= %w{ drush xhprof memcached }
 
@@ -32,3 +30,8 @@ pkgs.each {|pkg| package ( pkg ) { action :install } }
 # Install uploadprogress for better feedback during Drupal file uploads.
 # php_pear LWRP is installed as part of the PHP cookbook
 php_pear ("uploadprogress") { action :install }
+
+execute "validate-drush-works" do
+  command "drush status"
+  cwd DEPLOY_SITE_DIR 
+end
