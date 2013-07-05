@@ -23,7 +23,7 @@ execute "get-project-from-path" do
   command "cp -Rf '#{node['deploy-drupal']['get_project_from']['path']}/.'\
            '#{DEPLOY_PROJECT_DIR}'"
   creates DEPLOY_PROJECT_DIR
-  not_if {node['deploy-drupal']['get_project_from']['empty'].empty? }
+  not_if {node['deploy-drupal']['get_project_from']['path'].empty? }
   notifies :restart, "service[apache2]", :delayed
 end
 
