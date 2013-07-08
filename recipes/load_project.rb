@@ -28,10 +28,8 @@ end
 
 # only runs if project root directory (deploy_dir/project_name) does not exist
 # TODO must raise exception if path is not a directory
-cp -R get_project_from/. deploy_dir/project_name
 execute "get-project-from-path" do
-  command "cp -Rf '#{node['deploy-drupal']['get_project_from']['path']}/.' " + 
-          DEPLOY_PROJECT_DIR
+  command "cp -Rf '#{node['deploy-drupal']['get_project_from']['path']}/.' '#{DEPLOY_PROJECT_DIR}'"
   creates DEPLOY_PROJECT_DIR
   not_if {node['deploy-drupal']['get_project_from']['path'].empty? }
   notifies :restart, "service[apache2]", :delayed
