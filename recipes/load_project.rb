@@ -10,7 +10,7 @@ DEPLOY_PROJECT_DIR  = node['deploy-drupal']['deploy_dir']+ "/" +
 
 DEPLOY_SITE_DIR     = DEPLOY_PROJECT_DIR + "/" +
                       node['deploy-drupal']['drupal_root_dir']
-
+                        
 directory node['deploy-drupal']['deploy_dir'] do
   recursive true
 end
@@ -18,7 +18,9 @@ end
 # only runs if project root directory does not exist
 execute "get-project-from-git" do
   cwd node['deploy-drupal']['deploy_dir']
-  command "git clone " + node['deploy-drupal']['get_project_from']['git']
+  command "git clone " +
+          node['deploy-drupal']['get_project_from']['git'] + " " +
+          node['deploy-drupal']['project_name']
   creates DEPLOY_PROJECT_DIR
   not_if { node['deploy-drupal']['get_project_from']['git'].empty? }
   notifies :restart, "service[apache2]", :delayed

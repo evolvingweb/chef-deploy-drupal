@@ -18,7 +18,7 @@ Vagrant.configure("2") do |config|
         "dev_group_name" => "vagrant",
         "drupal_root_dir" => "amir site-jul8",
         "sql_load_file" => "db/dump-jul8.sql.gz",
-        "get_project_from" => { "path" => "/vagrant" }
+        "get_project_from" => { "git" => "/vagrant/gitrepo" }
       },  
       "mysql" => {
         "server_root_password" => "root",
