@@ -28,7 +28,7 @@ default['deploy-drupal']['project_name']          = 'cooked.drupal'
 default['deploy-drupal']['drupal_root_dir']       = 'site'
 
 # path to Drupal "files" directory, relative to site root
-default['deploy-drupal']['durpal_files_dir']      = 'sites/default/files'
+default['deploy-drupal']['drupal_files_dir']      = 'sites/default/files'
 
 # absolute path to deployment directory 
 # project root will be deploy_dir/project_name
