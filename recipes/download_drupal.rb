@@ -14,7 +14,7 @@ DEPLOY_SITE_DIR     = DEPLOY_PROJECT_DIR + "/" +
 DRUSH_DL            = [ "drush dl -y",
                         node['deploy-drupal']['drupal_dl_version'],
                         "--destination='#{DEPLOY_PROJECT_DIR}'",
-                        "--drupal-project-rename=#{node['deploy-drupal']['drupal_root_dir']}"
+                        "--drupal-project-rename='#{node['deploy-drupal']['drupal_root_dir']}'"
                       ].join(' ')
 
 execute "download-drupal" do
