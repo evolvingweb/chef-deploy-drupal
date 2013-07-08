@@ -16,8 +16,9 @@ MYSQL_GRANT_QUERY   = "GRANT ALL ON " +
                       "IDENTIFIED BY " +
                       "'#{node['deploy-drupal']['mysql_pass']}';" +
                       "FLUSH PRIVILEGES;" 
-DEPLOY_SITE_DIR     = node['deploy-drupal']['deploy_dir']   + "/" +
-                      node['deploy-drupal']['project_name'] + "/" +
+DEPLOY_PROJECT_DIR  = node['deploy-drupal']['deploy_dir']   + "/" +
+                      node['deploy-drupal']['project_name']
+DEPLOY_SITE_DIR     = DEPLOY_PROJECT_DIR   + "/" +
                       node['deploy-drupal']['drupal_root_dir']
 
 DEPLOY_FILES_DIR    = DEPLOY_SITE_DIR + node['deploy-drupal']['drupal_files_dir']

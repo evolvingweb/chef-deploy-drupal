@@ -63,8 +63,8 @@ end
 
 execute "run-post-install-script" do
   cwd DEPLOY_SITE_DIR 
-  command "bash '#{node['deploy-drupal']['post_install_script']}'"
-  only_if "test -f '#{DEPLOY_SCRIPT_FILE}'", :cwd => DEPLOY_PROJECT_DIR
+  command "bash " + node['deploy-drupal']['post_install_script']
+  only_if "test -f " + node['deploy-drupal']['post_install_script'], :cwd => DEPLOY_PROJECT_DIR
   action :nothing
 end
 
