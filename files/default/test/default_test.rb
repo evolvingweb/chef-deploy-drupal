@@ -17,21 +17,21 @@ describe_recipe 'deploy-drupal::default' do
   
   describe "files" do
     it "creates the index.php file" do
-      file(node['minitest']['drupal_site_dir'] + "/index.php").must_exist
+      file(node['minitest']['drupal_root_dir'] + "/index.php").must_exist
     end
 
     it "creates the settings.php file" do
-      file(node['minitest']['drupal_site_dir'] + "/sites/default/settings.php").must_exist
+      file(node['minitest']['drupal_root_dir'] + "/sites/default/settings.php").must_exist
     end
     
     it "has the expected ownership and permissions" do
-      file(node['minitest']['drupal_site_dir']).must_exist.with(:owner, "www-data")
+      file(node['minitest']['drupal_root_dir']).must_exist.with(:owner, "www-data")
     end
 
     # And you can chain attributes together if you are asserting several.
     # You don't want to get too carried away doing this but it can be useful.
     it "files folder must be appropriately set" do
-      file(node['minitest']['drupal_site_dir']+"/index.php").
+      file(node['minitest']['drupal_root_dir']+"/index.php").
         must_have(:mode, "460").
         with(:owner, node['deploy-drupal']['apache_user']).
         and(:group,node['deploy-drupal']['dev_group_name'])
@@ -40,7 +40,7 @@ describe_recipe 'deploy-drupal::default' do
     # The file existence and permissions matchers are also valid for
     # directories:
     it "has appropriate folder permissions in drupal site" do
-      directory(node['minitest']['drupal_site_dir']+"/includes").
+      directory(node['minitest']['drupal_root_dir']+"/includes").
         must_have(:mode, "2570").
         must_exist.with(:owner, node['deploy-drupal']['apache_user']).
         and(:group,node['deploy-drupal']['dev_group_name'])
