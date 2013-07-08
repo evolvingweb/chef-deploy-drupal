@@ -10,8 +10,6 @@
 DB_ROOT_CONNECTION  = "mysql  --user='root'\
                               --host='localhost'\
                               --password='#{node['mysql']['server_root_password']}'"
-# TODO use the following as an example to modify
-# all concatenated strings to have only one space
 MYSQL_GRANT_QUERY   = [ "GRANT ALL ON",
                         "#{node['deploy-drupal']['db_name']}.* TO",
                         "'#{node['deploy-drupal']['mysql_user']}'@'localhost'",
@@ -73,7 +71,7 @@ template "/usr/local/bin/drupal-reset.sh" do
     :site_path => DEPLOY_SITE_DIR,
     :deploy_path => node['deploy-drupal']['deploy_dir'],
     :db_connection => DB_ROOT_CONNECTION,
-    :user => node['deploy-drupal']['mysql_user'],
+    :user => "'#{node['deploy-drupal']['mysql_user']}'@'localhost'",
     :db => node['deploy-drupal']['db_name']
   })
 end
