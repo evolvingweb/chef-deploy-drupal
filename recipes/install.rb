@@ -17,7 +17,6 @@ DRUPAL_DISCONNECTED = "drush status --fields=db-status \
 DB_FULL             = "drush sql-query 'show tables;' \
                       | wc -l | xargs test 0 -eq"
 
-
 DRUSH_DB_URL        = "mysql://" +
                           node['deploy-drupal']['mysql_user'] + ":'" +
                           node['deploy-drupal']['mysql_pass'] + "'@localhost/" +
@@ -44,10 +43,9 @@ execute "drush-site-install" do
   command DRUSH_SI
   only_if DRUPAL_DISCONNECTED, :cwd => DEPLOY_SITE_DIR
   not_if DB_FULL, :cwd => DEPLOY_SITE_DIR 
-  notifies :run, "execute[load-drupal-db-from-sql]"
-  notifies :run, "execute[drush cache-clear]"
-  notifies :run, "execute[drush-suppress-http-status-error]"
-  notifies :run, "execute[fix-drupal-permissions]"
+  notifies :run, "execute[drush-cache-clear]", :delayed
+  notifies :run, "execute[drush-suppress-http-status-error]", :delayed
+  notifies :run, "execute[fix-drupal-permissions]", :delayed
 end
 
 # load the drupal database from specified local SQL file
@@ -58,13 +56,16 @@ execute "load-drupal-db-from-sql" do
   command "zless '#{node['deploy-drupal']['sql_load_file']}' | `drush sql-connect`"
   only_if  "test -f '#{node['deploy-drupal']['sql_load_file']}'", :cwd => DEPLOY_PROJECT_DIR
   not_if DB_FULL , :cwd => DEPLOY_SITE_DIR
-  notifies :run, "execute[run-post-install-script]"
+  notifies :run, "execute[run-post-install-script]",
+  notifies :run, "execute[drush-cache-clear]", :delayed
+  notifies :run, "execute[drush-suppress-http-status-error]", :delayed
+  notifies :run, "execute[fix-drupal-permissions]", :delayed
 end
 
 execute "run-post-install-script" do
   cwd DEPLOY_SITE_DIR 
   command "bash " + node['deploy-drupal']['post_install_script']
-  only_if "test -f " + node['deploy-drupal']['post_install_script'], :cwd => DEPLOY_PROJECT_DIR
+  only_if "test -f '#{node['deploy-drupal']['post_install_script']}'", :cwd => DEPLOY_PROJECT_DIR
   action :nothing
 end
 
@@ -83,7 +84,7 @@ execute "drush-suppress-http-status-error" do
 end
 
 # drush cache clear
-execute "drush cache-clear" do
+execute "drush-cache-clear" do
   cwd DEPLOY_SITE_DIR
   action :nothing
 end
