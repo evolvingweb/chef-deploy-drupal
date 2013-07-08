@@ -13,9 +13,13 @@
 DRUPAL_DISCONNECTED = "drush status --fields=db-status \
                       | grep Connected | wc -l | xargs test 0 -eq"
 
-# database full, FIXME not robust to errors connecting to DB
-DB_FULL             = "drush sql-query 'show tables;' \
-                      | wc -l | xargs test 0 -eq"
+DB_ROOT_CONNECTION  = "mysql  --user='root'\
+                              --host='localhost'\
+                              --password='#{node['mysql']['server_root_password']}'"
+
+DB_FULL             = DB_ROOT_CONNECTION +
+                      " --database=#{node['deploy-drupal']['db_name']}\
+                      -e \"SHOW TABLES;\" | wc -l | xargs test 0 -ne"
 
 DRUSH_DB_URL        = "mysql://" +
                           node['deploy-drupal']['mysql_user'] + ":'" +
@@ -87,5 +91,6 @@ end
 # drush cache clear
 execute "drush-cache-clear" do
   cwd DEPLOY_SITE_DIR
+  command "drush cache-clear all"
   action :nothing
 end
