@@ -44,7 +44,7 @@ execute "drush-site-install" do
   command DRUSH_SI
   only_if DRUPAL_DISCONNECTED, :cwd => DEPLOY_SITE_DIR
   not_if DB_FULL, :cwd => DEPLOY_SITE_DIR 
-  notifies :run, "execute[load-db-from-sql]"
+  notifies :run, "execute[load-drupal-db-from-sql]"
   notifies :run, "execute[drush cache-clear]"
   notifies :run, "execute[drush-suppress-http-status-error]"
   notifies :run, "execute[fix-drupal-permissions]"
