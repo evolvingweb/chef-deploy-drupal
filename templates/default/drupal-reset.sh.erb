@@ -3,7 +3,7 @@
 #! /bin/sh
 
 drush --root=<%= @site_path %> archive-dump --tar-options="--exclude=.git"
-<%= @db_connection %> -e "DROP DATABASE <%= @db %>;"
+<%= @db_connection %> -e "DROP DATABASE IF EXISTS <%= @db %>;"
 <%= @db_connection %> -e "REVOKE ALL FROM <%= @user %>; FLUSH PRIVILEGES;"
 <%= @db_connection %> -e "DROP USER '<%= @user %>'@'localhost';"
-rm -rf <%= @root_dir %>
+rm -rf <%= @deploy_path %>

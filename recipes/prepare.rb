@@ -69,6 +69,7 @@ template "/usr/local/bin/drupal-reset.sh" do
   group "root"
   variables({
     :site_path => DEPLOY_SITE_DIR,
+    :deploy_path => node['deploy-drupal']['deploy_dir']
     :db_connection => DB_ROOT_CONNECTION,
     :user => node['deploy-drupal']['mysql_user'],
     :db => node['deploy-drupal']['db_name']
