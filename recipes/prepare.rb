@@ -7,17 +7,22 @@
 ## if necessary, create Drupal database
 
 # assemble all necessary query strings and paths
-DB_ROOT_CONNECTION  = "mysql  --user='root'\
-                              --host='localhost'\
-                              --password='#{node['mysql']['server_root_password']}'"
+DB_ROOT_CONNECTION  = [ "mysql",
+                        "--user='root'",
+                        "--host='localhost'",
+                        "--password='#{node['mysql']['server_root_password']}'"
+                      ].join(' ')
+
 MYSQL_GRANT_QUERY   = [ "GRANT ALL ON",
                         "#{node['deploy-drupal']['db_name']}.* TO",
                         "'#{node['deploy-drupal']['mysql_user']}'@'localhost'",
                         "IDENTIFIED BY '#{node['deploy-drupal']['mysql_pass']}';",
                         "FLUSH PRIVILEGES;"
                       ].join(' ') 
+
 DEPLOY_PROJECT_DIR  = node['deploy-drupal']['deploy_dir']   + "/" +
                       node['deploy-drupal']['project_name']
+
 DEPLOY_SITE_DIR     = DEPLOY_PROJECT_DIR   + "/" +
                       node['deploy-drupal']['drupal_root_dir']
 
@@ -28,7 +33,7 @@ web_app node['deploy-drupal']['project_name'] do
   port node['deploy-drupal']['apache_port']
   server_name node['deploy-drupal']['project_name']
   server_aliases [node['deploy-drupal']['project_name']]
-  docroot DEPLOY_SITE_DIR
+  docroot "'#{DEPLOY_SITE_DIR}'"
   notifies :restart, "service[apache2]", :delayed
 end
 
@@ -39,7 +44,6 @@ apache_site "000-default" do
 end
 
 bash "prepare-mysql" do
-  Chef::Log.info "#{DB_ROOT_CONNECTION} -e \"#{MYSQL_GRANT_QUERY}\""
   code <<-EOH
     #{DB_ROOT_CONNECTION} -e "#{MYSQL_GRANT_QUERY}"
     #{DB_ROOT_CONNECTION} -e "CREATE DATABASE IF NOT EXISTS #{node['deploy-drupal']['db_name']};"
@@ -53,11 +57,12 @@ template "/usr/local/bin/drupal-perm.sh" do
   owner "root"
   group "root"
   variables({
-    :project_path => DEPLOY_PROJECT_DIR,
-    :site_path    => DEPLOY_SITE_DIR,
-    :files_path   => DEPLOY_SITE_DIR + "/" + node['deploy-drupal']['drupal_files_dir'],
-    :user         => node['deploy-drupal']['apache_user'],
-    :group        => node['deploy-drupal']['dev_group_name'] 
+    :project_path =>  "'#{DEPLOY_PROJECT_DIR}'",
+    :site_path    =>  "'#{DEPLOY_SITE_DIR}'",
+    :files_path   =>  "'#{DEPLOY_SITE_DIR}/" + 
+                      "#{node['deploy-drupal']['drupal_files_dir']}'",
+    :user         =>  node['deploy-drupal']['apache_user'],
+    :group        =>  node['deploy-drupal']['dev_group_name'] 
   })
 end
 
@@ -68,8 +73,8 @@ template "/usr/local/bin/drupal-reset.sh" do
   owner "root"
   group "root"
   variables({
-    :site_path => DEPLOY_SITE_DIR,
-    :deploy_path => node['deploy-drupal']['deploy_dir'],
+    :site_path => "'#{DEPLOY_SITE_DIR}'",
+    :deploy_path => "'#{node['deploy-drupal']['deploy_dir']}'",
     :db_connection => DB_ROOT_CONNECTION,
     :user => "'#{node['deploy-drupal']['mysql_user']}'@'localhost'",
     :db => node['deploy-drupal']['db_name']

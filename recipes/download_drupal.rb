@@ -11,12 +11,13 @@ DEPLOY_PROJECT_DIR  = node['deploy-drupal']['deploy_dir']   + "/" +
 DEPLOY_SITE_DIR     = DEPLOY_PROJECT_DIR + "/" +
                       node['deploy-drupal']['drupal_root_dir']
 
-DRUSH_DL            = "drush dl -y #{node['deploy-drupal']['drupal_dl_version']} " +
-                      "--destination=#{DEPLOY_PROJECT_DIR} " +
-                      "--drupal-project-rename=#{node['deploy-drupal']['drupal_root_dir']}" 
+DRUSH_DL            = [ "drush dl -y",
+                        node['deploy-drupal']['drupal_dl_version'],
+                        "--destination='#{DEPLOY_PROJECT_DIR}'",
+                        "--drupal-project-rename=#{node['deploy-drupal']['drupal_root_dir']}"
+                      ].join(' ')
 
 execute "download-drupal" do
-  Chef::Log.info DRUSH_DL
   command DRUSH_DL
   creates DEPLOY_SITE_DIR + "/index.php"
   not_if { node['deploy-drupal']['drupal_dl_version'] == 'false' }
