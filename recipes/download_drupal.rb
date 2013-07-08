@@ -11,7 +11,7 @@ DEPLOY_PROJECT_DIR  = node['deploy-drupal']['deploy_dir']   + "/" +
 DEPLOY_SITE_DIR     = DEPLOY_PROJECT_DIR + "/" +
                       node['deploy-drupal']['drupal_root_dir']
 
-DRUSH_DL            = "drush dl #{node['deploy-drupal']['drupal_dl_version']} " +
+DRUSH_DL            = "drush dl -y #{node['deploy-drupal']['drupal_dl_version']} " +
                       "--destination=#{DEPLOY_PROJECT_DIR} " +
                       "--drupal-project-rename=#{node['deploy-drupal']['drupal_root_dir']}" 
 

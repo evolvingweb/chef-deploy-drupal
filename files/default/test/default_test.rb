@@ -25,7 +25,7 @@ describe_recipe 'deploy-drupal::default' do
     end
     
     it "has the expected ownership and permissions" do
-      file(node['minitest']['drupal_root_dir']).must_exist.with(:owner, "www-data")
+      file(node['minitest']['drupal_site_dir']).must_exist.with(:owner, "www-data")
     end
 
     # And you can chain attributes together if you are asserting several.
