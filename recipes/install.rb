@@ -73,7 +73,8 @@ end
 execute "fix-drupal-permissions" do
   cwd DEPLOY_PROJECT_DIR
   command "bash drupal-perm.sh"
-  action :nothing
+  # TODO this should be action :nothing and only notified by
+  # site-install, but that requires fixing ownership of deploy_dir
 end
 
 # TODO should only be used when Drupal is served through a forwarded port

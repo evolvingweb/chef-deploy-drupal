@@ -12,8 +12,6 @@ DEPLOY_SITE_DIR     = DEPLOY_PROJECT_DIR + "/" +
                       node['deploy-drupal']['drupal_root_dir']
 
 directory node['deploy-drupal']['deploy_dir'] do
-  owner 'root'
-  group node['deploy-drupal']['dev_group_name']
   recursive true
 end
 

@@ -14,7 +14,7 @@ MYSQL_GRANT_QUERY   = "GRANT ALL ON " +
                       "#{node['deploy-drupal']['db_name']}.* TO " +
                       "'#{node['deploy-drupal']['mysql_user']}'@'localhost'" +
                       "IDENTIFIED BY " +
-                      "'#{node['deploy-drupal']['mysql_pass']}';" +
+                      "'#{node['deploy-drupal']['mysql_pass']}'; " +
                       "FLUSH PRIVILEGES;" 
 DEPLOY_PROJECT_DIR  = node['deploy-drupal']['deploy_dir']   + "/" +
                       node['deploy-drupal']['project_name']
@@ -42,7 +42,7 @@ end
 
 bash "prepare-mysql" do
   code <<-EOH
-    #{DB_ROOT_CONNECTION} -e #{MYSQL_GRANT_QUERY}
+    #{DB_ROOT_CONNECTION} -e "#{MYSQL_GRANT_QUERY}"
     #{DB_ROOT_CONNECTION} -e "CREATE DATABASE IF NOT EXISTS #{node['deploy-drupal']['db_name']};"
   EOH
 end
