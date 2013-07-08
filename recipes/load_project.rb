@@ -20,15 +20,16 @@ end
 # only runs if project root directory does not exist
 execute "get-project-from-git" do
   cwd node['deploy-drupal']['deploy_dir']
-  command "git clone #{node['deploy-drupal']['get_project_from']['git']}"
+  command "git clone " + node['deploy-drupal']['get_project_from']['git']
   creates DEPLOY_PROJECT_DIR
-  not_if {node['deploy-drupal']['get_project_from']['git'].empty? }
+  not_if { node['deploy-drupal']['get_project_from']['git'].empty? }
   notifies :restart, "service[apache2]", :delayed
 end
 
 # only runs if project root directory (deploy_dir/project_name) does not exist
+# TODO must raise exception if path is not a directory
 execute "get-project-from-path" do
-  command "cp -Rf " + node['deploy-drupal']['get_project_from']['path'] +
+  command "cp -Rf " + node['deploy-drupal']['get_project_from']['path'] + " " +
                       node['deploy-drupal']['deploy_dir']
   creates DEPLOY_PROJECT_DIR
   not_if {node['deploy-drupal']['get_project_from']['path'].empty? }
