@@ -17,10 +17,8 @@ Vagrant.configure("2") do |config|
     copy  = ENV["copy"] .nil? ? "" : ENV["copy"]
     chef.json.merge!({
       "deploy-drupal" => { 
-        "get_project_from" => { "path" => "/vagrant" },
         "sql_load_file" => "db/dump.sql.gz",
-        "dev_group_name" => "vagrant",
-        "drupal_root_dir" => "amir_site"
+        "dev_group_name" => "vagrant"
       },  
       "mysql" => {
         "server_root_password" => "root",

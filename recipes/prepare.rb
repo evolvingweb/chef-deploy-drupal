@@ -12,7 +12,7 @@ DB_ROOT_CONNECTION  = "mysql  --user='root'\
                               --password='#{node['mysql']['server_root_password']}'"
 MYSQL_GRANT_QUERY   = "GRANT ALL ON " +
                       "#{node['deploy-drupal']['db_name']}.* TO " +
-                      "'#{node['deploy-drupal']['mysql_user']}'@'localhost'" +
+                      "'#{node['deploy-drupal']['mysql_user']}'@'localhost' " +
                       "IDENTIFIED BY " +
                       "'#{node['deploy-drupal']['mysql_pass']}'; " +
                       "FLUSH PRIVILEGES;" 
@@ -41,6 +41,7 @@ apache_site "000-default" do
 end
 
 bash "prepare-mysql" do
+  Chef::Log.info "#{DB_ROOT_CONNECTION} -e \"#{MYSQL_GRANT_QUERY}\""
   code <<-EOH
     #{DB_ROOT_CONNECTION} -e "#{MYSQL_GRANT_QUERY}"
     #{DB_ROOT_CONNECTION} -e "CREATE DATABASE IF NOT EXISTS #{node['deploy-drupal']['db_name']};"
