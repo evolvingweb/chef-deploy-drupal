@@ -5,10 +5,8 @@
 
 # assemble all necessary query strings and paths
 
-DEPLOY_PROJECT_DIR  = node['deploy-drupal']['deploy_dir']+ "/" +
-                      node['deploy-drupal']['project_name']
-
-DEPLOY_SITE_DIR     = DEPLOY_PROJECT_DIR + "/" +
+DEPLOY_SITE_DIR     = node['deploy-drupal']['deploy_dir']   + "/" +
+                      node['deploy-drupal']['project_name'] + "/" +
                       node['deploy-drupal']['drupal_root_dir']
 DRUSH_DL            = "drush dl #{node['deploy-drupal']['drupal_dl_version']} " +
                       "--destination= #{DEPLOY_PROJECT_DIR} " +
@@ -16,7 +14,7 @@ DRUSH_DL            = "drush dl #{node['deploy-drupal']['drupal_dl_version']} " 
 
 execute "download-drupal" do
   command DRUSH_DL
-  creates "#{DEPLOY_SITE_DIR}/index.php"
+  creates DEPLOY_SITE_DIR + "/index.php"
   not_if { node['deploy-drupal']['drupal_dl_version'] == 'false' }
   notifies :restart, "service[apache2]", :delayed
 end
