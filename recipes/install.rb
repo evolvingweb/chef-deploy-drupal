@@ -56,7 +56,7 @@ execute "load-drupal-db-from-sql" do
   command "zless '#{node['deploy-drupal']['sql_load_file']}' | `drush sql-connect`"
   only_if  "test -f '#{node['deploy-drupal']['sql_load_file']}'", :cwd => DEPLOY_PROJECT_DIR
   not_if DB_FULL , :cwd => DEPLOY_SITE_DIR
-  notifies :run, "execute[run-post-install-script]",
+  notifies :run, "execute[run-post-install-script]"
   notifies :run, "execute[drush-cache-clear]", :delayed
   notifies :run, "execute[drush-suppress-http-status-error]", :delayed
   notifies :run, "execute[fix-drupal-permissions]", :delayed
