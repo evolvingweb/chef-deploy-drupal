@@ -13,12 +13,12 @@ Vagrant.configure("2") do |config|
   HEREDOC
   
   config.vm.provision :chef_solo do |chef|
-    reset = ENV["reset"].nil? ? "" : ENV["reset"]
-    copy  = ENV["copy"] .nil? ? "" : ENV["copy"]
     chef.json.merge!({
       "deploy-drupal" => { 
-        "sql_load_file" => "db/dump.sql.gz",
-        "dev_group_name" => "vagrant"
+        "dev_group_name" => "vagrant",
+        "drupal_root_dir" => "amir site-jul8",
+        "sql_load_file" => "db/dump-jul8.sql.gz",
+        "get_project_from" => { "path" => "/vagrant" }
       },  
       "mysql" => {
         "server_root_password" => "root",
@@ -27,7 +27,7 @@ Vagrant.configure("2") do |config|
       },  
       "minitest" =>{ 
         "recipes" => [ "deploy-drupal" ],
-        "drupal_site_dir" => "/var/shared/sites/cooked.drupal/site"
+        "drupal_site_dir" => "/var/shared/sites/cooked.drupal/amir site-jul8"
       },  
       "run_list" =>[ "deploy-drupal", "minitest-handler" ]
     })   

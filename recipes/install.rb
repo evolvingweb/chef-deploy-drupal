@@ -10,7 +10,15 @@
 
    # assemble all necessary query strings and paths
 # requires drush 6
-DRUPAL_DISCONNECTED = [ "drush status",
+DEPLOY_PROJECT_DIR  = node['deploy-drupal']['deploy_dir']   + "/" +
+                      node['deploy-drupal']['project_name']
+
+DEPLOY_SITE_DIR     = DEPLOY_PROJECT_DIR   + "/" +
+                      node['deploy-drupal']['drupal_root_dir']
+
+DRUSH               = "drush --root='#{DEPLOY_SITE_DIR}'"
+
+DRUPAL_DISCONNECTED = [ DRUSH, "status",
                         "--fields=db-status",
                         "| grep Connected",
                         "| wc -l | xargs test 0 -eq"
@@ -29,13 +37,17 @@ DB_FULL             = [ DB_ROOT_CONNECTION,
                       ].join(' ')
 
 DRUSH_DB_URL        = "mysql://" +
-                          node['deploy-drupal']['mysql_user'] + ":'" +
-                          node['deploy-drupal']['mysql_pass'] + "'@localhost/" +
-                          node['deploy-drupal']['db_name']
+                        node['deploy-drupal']['mysql_user'] + ":'" +
+                        node['deploy-drupal']['mysql_pass'] + "'@localhost/" +
+                        node['deploy-drupal']['db_name']
+
+DRUSH_SQL_LOAD      =   "zless '#{node['deploy-drupal']['sql_load_file']}' " +
+                        "| `#{DRUSH} sql-connect`"
 
 # fixes sendmail error https://drupal.org/node/1826652#comment-6706102
 DRUSH_SI            = [ "php -d sendmail_path=/bin/true",
                         "/usr/share/php/drush/drush.php",
+                        "--root='#{DEPLOY_SITE_DIR}'",
                         "site-install standard -y",
                         "--account-name=#{node['deploy-drupal']['admin_user']}",
                         "--account-pass=#{node['deploy-drupal']['admin_pass']}",
@@ -43,19 +55,12 @@ DRUSH_SI            = [ "php -d sendmail_path=/bin/true",
                         "--site-name='#{node['deploy-drupal']['project_name']}'"
                       ].join(' ')
 
-DEPLOY_PROJECT_DIR  = node['deploy-drupal']['deploy_dir']   + "/" +
-                      node['deploy-drupal']['project_name']
-
-DEPLOY_SITE_DIR     = DEPLOY_PROJECT_DIR   + "/" +
-                      node['deploy-drupal']['drupal_root_dir']
-
 # TODO must raise exception if db is full but Drupal is not connected
 # install Drupal Site
 execute "drush-site-install" do
-  cwd DEPLOY_SITE_DIR
   command DRUSH_SI
-  only_if DRUPAL_DISCONNECTED, :cwd => DEPLOY_SITE_DIR
-  not_if DB_FULL, :cwd => "'#{DEPLOY_SITE_DIR}'"
+  only_if DRUPAL_DISCONNECTED
+  not_if DB_FULL
   notifies :run, "execute[drush-cache-clear]", :delayed
   notifies :run, "execute[drush-suppress-http-status-error]", :delayed
   notifies :run, "execute[fix-drupal-permissions]", :delayed
@@ -65,9 +70,10 @@ end
 # Using zless instead of cat/zcat to optionally support gzipped files 
 # "`drush sql-connect`" because "drush sqlc" returns 0 even on connection failure
 execute "load-drupal-db-from-sql" do
-  cwd DEPLOY_SITE_DIR
-  command "zless '#{node['deploy-drupal']['sql_load_file']}' | `drush sql-connect`"
-  only_if  "test -f '#{node['deploy-drupal']['sql_load_file']}'", :cwd => DEPLOY_PROJECT_DIR
+  # move to project root, db script path might be relative
+  cwd DEPLOY_PROJECT_DIR
+  command DRUSH_SQL_LOAD 
+  only_if  "test -f '#{node['deploy-drupal']['sql_load_file']}'" 
   not_if DB_FULL
   notifies :run, "execute[run-post-install-script]"
   notifies :run, "execute[drush-cache-clear]", :delayed
@@ -76,9 +82,9 @@ execute "load-drupal-db-from-sql" do
 end
 
 execute "run-post-install-script" do
-  cwd DEPLOY_SITE_DIR
+  cwd DEPLOY_PROJECT_DIR
   command "bash '#{node['deploy-drupal']['post_install_script']}'"
-  only_if "test -f '#{node['deploy-drupal']['post_install_script']}'", :cwd => DEPLOY_PROJECT_DIR
+  only_if "test -f '#{node['deploy-drupal']['post_install_script']}'"
   action :nothing
 end
 
@@ -91,14 +97,12 @@ end
 
 # TODO should only be used when Drupal is served through a forwarded port
 execute "drush-suppress-http-status-error" do
-  cwd DEPLOY_SITE_DIR
-  command "drush vset -y drupal_http_request_fails FALSE"
+  command "#{DRUSH} vset -y drupal_http_request_fails FALSE"
   action :nothing
 end
 
 # drush cache clear
 execute "drush-cache-clear" do
-  cwd DEPLOY_SITE_DIR
-  command "drush cache-clear all"
+  command "#{DRUSH} cache-clear all"
   action :nothing
 end
