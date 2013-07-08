@@ -19,7 +19,8 @@ Vagrant.configure("2") do |config|
       "deploy-drupal" => { 
         "get_project_from" => { "path" => "/vagrant" },
         "sql_load_file" => "db/dump.sql.gz",
-        "dev_group_name" => "vagrant"
+        "dev_group_name" => "vagrant",
+        "drupal_root_dir" => "amir_site"
       },  
       "mysql" => {
         "server_root_password" => "root",
