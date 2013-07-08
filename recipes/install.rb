@@ -18,6 +18,9 @@ DEPLOY_SITE_DIR     = DEPLOY_PROJECT_DIR   + "/" +
 
 DRUSH               = "drush --root='#{DEPLOY_SITE_DIR}'"
 
+# FIXME this is not robust: it will break if the credentials in 
+# settings.php work with the database but do not match the
+# credentials in Chef attributes.
 DRUPAL_DISCONNECTED = [ DRUSH, "status",
                         "--fields=db-status",
                         "| grep Connected",
@@ -30,9 +33,12 @@ DB_ROOT_CONNECTION  = [ "mysql",
                         "--password='#{node['mysql']['server_root_password']}'"
                       ].join(' ')
 
-DB_FULL             = [ DB_ROOT_CONNECTION,
-                        "--database=#{node['deploy-drupal']['db_name']}",
-                        "-e \"SHOW TABLES;\"",
+# mysql specific query to determine whether the Drupal database has
+# any tables (exits with 0 if there is any table)
+DB_FULL             = [ DB_ROOT_CONNECTION, "-e \"",
+                        "SELECT * FROM information_schema.tables",
+                        "WHERE table_type = 'BASE TABLE'",
+                        "AND table_schema = '#{node['deploy-drupal']['db_name']}';\"",
                         "| wc -l | xargs test 0 -ne"
                       ].join(' ')
 
@@ -41,6 +47,8 @@ DRUSH_DB_URL        = "mysql://" +
                         node['deploy-drupal']['mysql_pass'] + "'@localhost/" +
                         node['deploy-drupal']['db_name']
 
+# Using zless instead of cat/zcat to optionally support gzipped files
+# "`drush sql-connect`" because "drush sqlc" returns 0 even on connection failure
 DRUSH_SQL_LOAD      =   "zless '#{node['deploy-drupal']['sql_load_file']}' " +
                         "| `#{DRUSH} sql-connect`"
 
@@ -57,23 +65,36 @@ DRUSH_SI            = [ "php -d sendmail_path=/bin/true",
 
 # TODO must raise exception if db is full but Drupal is not connected
 # install Drupal Site
-execute "drush-site-install" do
+execute "install-disconnected-empty-db-site" do
   command DRUSH_SI
   only_if DRUPAL_DISCONNECTED
   not_if DB_FULL
+  notifies :run, "execute[populate-fresh-installation-db]", :immediately
   notifies :run, "execute[drush-cache-clear]", :delayed
   notifies :run, "execute[drush-suppress-http-status-error]", :delayed
   notifies :run, "execute[fix-drupal-permissions]", :delayed
 end
 
-# load the drupal database from specified local SQL file
-# Using zless instead of cat/zcat to optionally support gzipped files 
-# "`drush sql-connect`" because "drush sqlc" returns 0 even on connection failure
-execute "load-drupal-db-from-sql" do
-  # move to project root, db script path might be relative
+# load sql dump, if any, after fresh installation
+# obliterates database regardless of content, 
+# should only be notified by install-disconnected-empty-db-site
+execute "populate-fresh-installation-db" do
+  # DRUSH_SQL_LOAD has to be run in the project root,
+  # since db script path might be relative
   cwd DEPLOY_PROJECT_DIR
-  command DRUSH_SQL_LOAD 
-  only_if  "test -f '#{node['deploy-drupal']['sql_load_file']}'" 
+  command DRUSH_SQL_LOAD
+  only_if  "test -f '#{node['deploy-drupal']['sql_load_file']}'", :cwd => DEPLOY_PROJECT_DIR
+  action :nothing
+  notifies :run, "execute[run-post-install-script]"
+end
+
+# load sql dump, if any, if Database is still empty
+execute "populate-db" do
+  # DRUSH_SQL_LOAD has to be run in the project root,
+  # since db script path might be relative
+  cwd DEPLOY_PROJECT_DIR
+  command DRUSH_SQL_LOAD
+  only_if  "test -f '#{node['deploy-drupal']['sql_load_file']}'", :cwd => DEPLOY_PROJECT_DIR
   not_if DB_FULL
   notifies :run, "execute[run-post-install-script]"
   notifies :run, "execute[drush-cache-clear]", :delayed
@@ -84,7 +105,7 @@ end
 execute "run-post-install-script" do
   cwd DEPLOY_PROJECT_DIR
   command "bash '#{node['deploy-drupal']['post_install_script']}'"
-  only_if "test -f '#{node['deploy-drupal']['post_install_script']}'"
+  only_if "test -f '#{node['deploy-drupal']['post_install_script']}'", :cwd => DEPLOY_PROJECT_DIR
   action :nothing
 end
 
