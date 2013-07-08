@@ -5,17 +5,16 @@
 # run this script in the Drupal root directory
 echo "setting filesystem permissions for Drupal root directory at `pwd` ..."
 
-chown -R <%= @user %>:<%= @group %> .
-chmod -R g+s .
-chmod u=rx,g=rwx,o-rwx . 
-find . -type f -exec chmod u=r,g=rw,o-rwx '{}' \;
-find . -type d -exec chmod u=rx,g=rwx,o-rwx '{}' \;
+chown -R <%= @user %>:<%= @group %> <%= @project_path %>
+chmod -R g+s <%= @project_path %>
+chmod u=rx,g=rwx,o-rwx <%= @project_path %>
+find <%= @site_path %> -type f -exec chmod u=r,g=rw,o-rwx '{}' \;
+find <%= @site_path %> -type d -exec chmod u=rx,g=rwx,o-rwx '{}' \;
 chmod ug=rwx,o-rwx <%= @files_path %>
 
 
-ls -ld | awk '{print $3":"$4, "Project root ownership"}'
-ls -ld | awk '{print $1, "permissions for the Project root"}'
-ls -l index.php | awk '{print $1, "permissions for all files"}'
-ls -ld includes | awk '{print $1, "permissions for all directories"}'
-ls -ld sites/default/files | awk '{print $1,"permissions for the Drupal "files" folder"}'
-
+ls -ld <%= @project_path %> | awk '{print $3":"$4, "Project root ownership"}'
+ls -ld <%= @project_path %> | awk '{print $1, "permissions for the Project root"}'
+ls -l  <%= @site_path %>/index.php | awk '{print $1, "files in Drupal root"}'
+ls -ld <%= @site_path %>/includes  | awk '{print $1, "directories in Drupal root"}'
+ls -ld <%= @files_path %>   | awk '{print $1, "Drupal "files" directory"}'
