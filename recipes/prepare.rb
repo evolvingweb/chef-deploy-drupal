@@ -21,8 +21,6 @@ DEPLOY_PROJECT_DIR  = node['deploy-drupal']['deploy_dir']   + "/" +
 DEPLOY_SITE_DIR     = DEPLOY_PROJECT_DIR   + "/" +
                       node['deploy-drupal']['drupal_root_dir']
 
-DEPLOY_FILES_DIR    = DEPLOY_SITE_DIR + node['deploy-drupal']['drupal_files_dir']
-
 # setup system for site installation:
 # directory, validate drush, web_app, mysql user
 web_app node['deploy-drupal']['project_name'] do
@@ -57,7 +55,7 @@ template "/usr/local/bin/drupal-perm.sh" do
   variables({
     :project_path => DEPLOY_PROJECT_DIR,
     :site_path    => DEPLOY_SITE_DIR,
-    :files_path   => DEPLOY_FILES_DIR, 
+    :files_path   => DEPLOY_SITE_DIR + "/" + node['deploy-drupal']['drupal_files_dir'],
     :user         => node['deploy-drupal']['apache_user'],
     :group        => node['deploy-drupal']['dev_group_name'] 
   })
@@ -70,7 +68,7 @@ template "/usr/local/bin/drupal-reset.sh" do
   owner "root"
   group "root"
   variables({
-    :root_dir => DEPLOY_PROJECT_DIR,
+    :site_path => DEPLOY_SITE_DIR,
     :db_connection => DB_ROOT_CONNECTION,
     :user => node['deploy-drupal']['mysql_user'],
     :db => node['deploy-drupal']['db_name']
