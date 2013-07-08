@@ -10,8 +10,7 @@ chmod -R g+s <%= @project_path %>
 chmod u=rx,g=rwx,o-rwx <%= @project_path %>
 find <%= @site_path %> -type f -exec chmod u=r,g=rw,o-rwx '{}' \;
 find <%= @site_path %> -type d -exec chmod u=rx,g=rwx,o-rwx '{}' \;
-chmod ug=rwx,o-rwx <%= @files_path %>
-
+chmod -R ug=rwx,o-rwx <%= @files_path %>
 
 ls -ld <%= @project_path %> | awk '{print $3":"$4, "Project root ownership"}'
 ls -ld <%= @project_path %> | awk '{print $1, "permissions for the Project root"}'
