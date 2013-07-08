@@ -45,6 +45,7 @@ execute "drush-site-install" do
   only_if DRUPAL_DISCONNECTED, :cwd => DEPLOY_SITE_DIR
   not_if DB_FULL, :cwd => DEPLOY_SITE_DIR 
   notifies :run, "execute[load-db-from-sql]"
+  notifies :run, "execute[drush cache-clear]"
   notifies :run, "execute[drush-suppress-http-status-error]"
   notifies :run, "execute[fix-drupal-permissions]"
 end
@@ -57,7 +58,6 @@ execute "load-drupal-db-from-sql" do
   command "zless '#{node['deploy-drupal']['sql_load_file']}' | `drush sql-connect`"
   only_if  "test -f '#{node['deploy-drupal']['sql_load_file']}'", :cwd => DEPLOY_PROJECT_DIR
   not_if DB_FULL , :cwd => DEPLOY_SITE_DIR
-  notifies :run, "execute[drush cache-clear]"
   notifies :run, "execute[run-post-install-script]"
 end
 

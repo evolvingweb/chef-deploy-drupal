@@ -30,8 +30,3 @@ pkgs.each {|pkg| package ( pkg ) { action :install } }
 # Install uploadprogress for better feedback during Drupal file uploads.
 # php_pear LWRP is installed as part of the PHP cookbook
 php_pear ("uploadprogress") { action :install }
-
-execute "validate-drush-works" do
-  command "drush status"
-  cwd DEPLOY_SITE_DIR 
-end
