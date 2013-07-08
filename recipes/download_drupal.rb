@@ -5,9 +5,12 @@
 
 # assemble all necessary query strings and paths
 
-DEPLOY_SITE_DIR     = node['deploy-drupal']['deploy_dir']   + "/" +
-                      node['deploy-drupal']['project_name'] + "/" +
+DEPLOY_PROJECT_DIR  = node['deploy-drupal']['deploy_dir']   + "/" +
+                      node['deploy-drupal']['project_name']
+
+DEPLOY_SITE_DIR     = DEPLOY_PROJECT_DIR + "/" +
                       node['deploy-drupal']['drupal_root_dir']
+
 DRUSH_DL            = "drush dl #{node['deploy-drupal']['drupal_dl_version']} " +
                       "--destination= #{DEPLOY_PROJECT_DIR} " +
                       "--drupal-project-rename=#{node['deploy-drupal']['drupal_root_dir']}" 
