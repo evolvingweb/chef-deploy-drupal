@@ -40,7 +40,7 @@ default['deploy-drupal']['deploy_dir']            = '/var/shared/sites'
 default['deploy-drupal']['drupal_dl_version']   = 'drupal-7'
 
 # path to drupal SQL dump (can be .gz), relative to copy_project_from 
-default['deploy-drupal']['sql_dump']              = '' 
+default['deploy-drupal']['sql_load_file']              = '' 
 
 # absolute path to bash script to run after site install
 default['deploy-drupal']['post_install_script']   = ''

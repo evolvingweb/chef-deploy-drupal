@@ -12,32 +12,52 @@ site running on MySQL and Apache. The cookbook supports two main use cases:
 - You want the server to download, install, and serve a **fresh** installation of
   Drupal 7.
 
-Look at [Attributes](#Attributes) to see how to use each of these use cases.
+To see how you can load an existing code base (from local filesystem or from a
+git repo) and populate the Drupal database with an existing database dump, refer
+to the **recipes** and **attributes** sections below.
 
-#### Testing
-This repository includes an example `Vagrantfile` to test the cookbook. To use
-this file, make sure you have [Vagrant
-v2](http://docs.vagrantup.com/v2/installation/) and the
-[Vagrant-Berkshelf](https://github.com/riotgames/vagrant-berkshelf) plugin
-installed. For the latter, use `vagrant plugin install vagrant-berkshelf`.
+#### Requirements
+Chef >= 11.0.0
 
-Refer to [Vagrant-Drupal](http://github.com/dergachev/vagrant-drupal) for a more
-detailed description of how to use this cookbook with Vagrant.
-
-#### Recipes
-
-- `deploy-drupal::lamp_stack`: installs infrastructure packages to support
-  Apache, MySQL, PHP, and Drush. 
-- `deploy-drupal::pear_dependencies`: installs PEAR, PECL, and other PHP
-  enhancement packages.
-- `deploy-drupal::default`: is the main recipe that loads and installs Drupal 7
-  and configures MySQL and Apache to serve the site.
-
-#### Platform
-Tested on:
+#### Platforms
+Testing on this cookbook is not yet complete. Currently, the cookbook is
+tested on:
 * Ubuntu 12.04
 
-#### Attributes
+#### Usage with Vagrant
+
+This repository includes an example `Vagrantfile` that spins up a virtual machine
+serving Drupal. To use this file, make sure you have [Vagrant
+v2](http://docs.vagrantup.com/v2/installation/); do not install it as a Ruby gem
+since Vagrant is [not a gem](http://mitchellh.com/abandoning-rubygems) as of version
+1.1+ (i.e v2). You will also need to have the
+[Vagrant-Berkshelf](https://github.com/riotgames/vagrant-berkshelf) plugin
+installed:
+
+``` bash
+# have Vagrant v2 installed
+vagrant plugin install vagrant-berkshelf
+```
+
+Once you have these ready, clone this repository, `cd` to the repo root, and:
+
+``` bash
+bundle install
+vagrant up
+```
+
+For a more
+detailed description of how to use this cookbook for local development with
+Vagrant, you can refer to the
+[Vagrant-Drupal](http://github.com/dergachev/vagrant-drupal) project 
+
+## Attributes
+The cookbook tries to load an existing site and if it fails due to
+the absence of codebase or discrepancies in credentials, it will
+download a fresh stable release of Drupal 7 from [drupal.org](http://drupal.org)
+and will configure MySQL and Apache, according to cookbook attributes, to serve
+a installed site (no manual installation required).
+
 The following are the main attributes that this cookbook uses. All attributes mentioned
 below can be accessed in the cookbook via 
 `node['deploy_drupal']['<attribute_name>']`:
@@ -45,50 +65,118 @@ below can be accessed in the cookbook via
 
 |   Attribute Name    |Default |           Description           |
 | --------------------|:------:|:------------------------------: |
-|`copy_project_from`| `''`   | absolute path to existing project
-|`site_path`          | `site`| Drupal site root (in source & in deployment), relative to project root
-|`sql_load_file`      |`''`    | path to SQL dump, absolute or relative to project root
-|`post_script_file`   |`''`|path to post-install script, absolute or relative to project root
-|`admin_user`         |`admin`| username for "user one" in the installed site
-|`admin_user`         |`admin`| password for "user one" in the installed site
-|`site_files_path`    |`sites/default/files`| Drupal "files", relative to site root
-|`deploy_base_path`   |`/var/shared/sites`| Directory containing differentDrupal projects
-|`site_name`          |`cooked.drupal`| Virtual Host name and deployed project directory (relative to `deploy_base_path`)
-|`apache_port`        |80      | must be consistent with`node['apache']['listen_ports']`
-|`apache_user`        |`www-data` |
-|`dev_group_name`     |`root`     | System group owning site root (user owner is `<apache_user>`)
-|`admin_pass`         |`admin`    | Drupal site administrator password
-|`db_name`            |`drupal`   | MySQL database used by Drupal
-|`mysql_user`         |`drupal_db`| MySQL user used by Drupal
-|`mysql_pass`         |`drupal_db`| MySQL password used by Drupal
-|`reset`              | `''`| if set to `'true'`, starts provisioning with reseting the system to its state before installation of the Drupal site, then proceed as usual.
+|`get_project_from`| `''`| path to existing project or url to existing git repo (refer to Recipes for usage)
+|`drupal_dl_version`| `drupal-7`| Drupal version to download if no existing site is found (refer to Recipes for usage)
+|`sql_load_file`|`''`     | path to SQL dump, absolute **or** relative to project root
+|`post_install_script`|`''` |path to post-install script, absolute **or** relative to project root
+|`drupal_root_dir`|`site`| name (no path) of Drupal site root directory (in source & in deployment), relative to project root
+|`drupal_files_dir`|`sites/default/files`| Drupal "files", relative to site root
+|`deploy_dir`|`/var/shared/sites`| absolute path to deployment directory
+|`project_name`|`cooked.drupal`| Virtual Host name and deployed project directory (relative inside `deploy_dir`)
+|`admin_user`   |`admin`  | username for "user one" in the installed site
+|`admin_user`   |`admin`  | password for "user one" in the installed site
+|`apache_port`|80       | must be consistent with`node['apache']['listen_ports']`
+|`apache_user`|`www-data`|
+|`admin_pass` |`admin`  | Drupal site administrator password
+|`dev_group_name` |`root` | System group owning site root (user owner is
+`<apache_user>`), must be already recognized by the operating system
+|`db_name`      |`drupal` | MySQL database used by Drupal
+|`mysql_user`   |`drupal_db`| MySQL user used by Drupal
+|`mysql_pass`   |`drupal_db`| MySQL password used by Drupal
 
-#### Behavior
+## Recipes
+In what follows, a **project** is a directory containing a directory which is a
+Drupal site root (`drupal_root_dir`), and potentially database dumps, scripts
+and other configuration files.
 
-Currently, the cookbook tries to load an existing site and if it fails due to
-the absence of codebase or discrepancies in credentials, it will
-download a fresh stable release of Drupal 7 from [drupal.org](http://drupal.org)
-and will configure MySQL and Apache, according to cookbook attributes, to serve
-a installed site (no manual installation required).
+#### `deploy-drupal::dependencies`
+Includes dependency cookbooks, installs lamp stack packages to get Apache, MySQL, PHP, and Drush running.
 
-The expected state after provisioning is as follows:
+#### `deploy-drupal::get_project`
+Loads existing project, if any, and make sure the 
+project directry skeleton is created in deployment. To specify existing
+projects, the `get_project_from` attribute should be used:
 
-1. An existing Drupal site is sought at the absolute path
-`<copy_project_from>/<site_path>`. If such project is found, the entire
-`<copy_project_from>` directory will be copied to the directory
-`<deploy_base_path>/<site_name>`, which will contain the Apache virtual host
-site root. If an existing site is not found, Drupal 7 will be downloaded,
-installed, and served from the same directory as above.
-1. If `reset` is set to `'true'`, project root (at
-`<deploy_base_path>/<site_name>`) will be entirely removed before provisioning
-starts, and so will the `<db_name>` database and the `<mysql_user>` user from
-MySQL. After this, provisioning proceeds as usual.
+``` ruby
+# use git repo as project
+:git => "url://to/git/repository.git"
+
+# use project in local file system
+:path => "path/to/existing/project"
+
+```
+
+An existing Drupal site is sought either at the absolute path
+`<get_project_from[:path]>` or at git url `<get_project_from[:git]>`.
+If such project is found, it will be deployed at `<deploy_dir>/<project_name>`
+
+This recipes ensures that the directories `<deploy_dir>/<project_name>` and
+`<deploy_dir>/<project_name>/<drupal_root_dir>` are created.
+
+#### `deploy-drupal::download_drupal`
+Downloads drupal if no existing project is found. This recipe
+**only** downloads Drupal if after `get_project` there exists no `index.php` in the
+`<deploy_dir>/<project_name>/<drupal_root_dir>` directory. This recipe uses the
+`dl_drupal_version` attribute which defaults to `drupal-7`. To use this
+attribute, you should provide the recipe with drupal version that `drush dl`
+would understand:
+
+1. `drupal` will download the latest recommended Drupal release,
+1. `drupal-7` will download the latest stable version of Drupal 7 core,
+1. `drupal-7.x` will download the latest development version of Drupal 7 core,
+1. Furthermore, you can set `dl_drupal_version` to `'false'` to avoid downloading
+Drupal, even if that would mean there will be no site to be served.
+
+#### `deplpoy-drupal::prepare`
+Prepares the machine for Drupal installation: configures apache
+vhost, and if necessary, creates Drupal MySQL user with appropriate privileges,
+and, again, if necessary, creates an empty Drupal database.
+This recipe ensures that:
+
+* MySQL recognizes a user with username `<mysql_user>`, identified by
+`<mysql_password>`. The user is granted **all** privileges on the database
+`db_name`.
+* Apache has a virtual host bound to port `<apache_port>` with the name
+`<project_name>`. The virtual host has its root directory at
+`<deploy_dir>/<project_name>/<drupal_root_dir>`.
+
+Additionally, this
+recipe installs two utility bash scripts under `/usr/local/bin/`:
+
+* `drupal-perm.sh`: fixes the fily system permissions and ownership of the
+project directory (automatically invoked in the `install` recipe). Refer to the
+description of the `deploy-drupal::install` recipe, below, for more information
+about the behavior of this script.
+* `drupal-reset.sh`: takes a `drush archive-dump` of the existing Drupal site,
+and reverts the system back to its state prior to Drupal
+installation: destroys project directory at `<deploy_dir>/<project_name>`,
+drops the Drupal Database `<db_name>` and MySQL user `<db_user>`.
+
+#### `deploy-drupal::install`
+Makes sure that the Drupal site is connected to a Drupal database. Drush
+site-install is used **only** if the loaded (or downloaded) site does not have
+valid credentials **and** if the database `<db_name>` is entirely empty (no
+tables).
+
+It also populates the database if a database dump is found at
+`sql_load_file`. This attribute can be an absolute path in local file system
+(for example, when you do not have an existing project), or
+relative to the project root (and therefore sought at
+`<deploy_dir>/<project_name>/<sql_load_file>`). Again, the database dump is
+**only** used if the `<db_name>` MySQL database is entirely empty.
+
+After installation, this recipe will run an optional bash script that you might
+provide under `post_install_script`, which, similar to `sql_load_file`, can be
+absolute or relative to project root.
+
+After installation, the expected state is as follows:
+
 1. The installed Drupal site recognizes `<admin_user>` (with password
 `<admin_pass>`) as "user one".
 1. The following directory structure holds in the provisioned machine:
-  - `<deploy_base_path>`
-      - `<site_name>`
-          - `<site_path>`
+  - `<deploy_dir>`
+      - `<project_name>`
+          - `<drupal_root_dir>`
               - `index.php`
               - `includes`
               - `modules`
@@ -101,22 +189,13 @@ MySQL. After this, provisioning proceeds as usual.
               - `post-install-script.sh`
 
 1. Note that `db` and `scripts` are just example subdirectories and are not
-controlled by the cookbook. Such subdirectories under the
-`<copy_project_from>/<site_path>` directory and will be copied over along with
-everything else that might exist in the `<copy_project_from>` directory (for
-instance, your `.git` directory would be copied over to deployment).
-1. MySQL recognizes a user with username `<mysql_user>`, identified by
-`<mysql_password>`. The user is granted **all** privileges on the database
-`db_name`.
-1. Apache has a virtual host bound to port `<apache_port>` with the name
-`<site_name>`. The virtual host has its root directory at
-`<deploy_base_path>/<site_name>/source`.
-1. The `<deploy_base_path>/<site_name>` directory is the root of the installed Drupal 
-project (the actual site is in the `<site_path>` subdirectory).
-1. The provided `dev_group_name` must be already recognized by the operating
+controlled by the cookbook. You will be able to find the entire contents of
+the `<get_project_from[:path]>` directory, or the `<get_project_from[:git]>`
+repo at `<deploy_dir>/<project_name>`
+1. The provided `dev_group_name` 
 system to be provisioned. This user group will own the project root directory. 
 1. Ownership and permission settings of the deployed project root directory
-(loated at `<deploy_base_path>/<site_name>`) are set as follows:
+(loated at `<deploy_dir>/<project_name>`) are set as follows:
   1. The user and group owners of all current files and subdirectories are
   `<apache_user>` and `<dev_group_name>`, respectively.
   1. The group owner of all files and subdirectories created in the future will be
@@ -126,9 +205,27 @@ system to be provisioned. This user group will own the project root directory.
   is ignored, and this cookbook, therefore, does not use it).
   1. The permissions for all files and subdirectories are set to `r-- rw- ---`
   and `r-x rwx ---`, respectively. The only exception is the "files"
-  directories (refer to the `site_files_path` attribute) and all its
+  directories (refer to the `drupal_files_dir` attribute) and all its
   contents, which has its permissions set to `rwx rwx ---`.
-1. A bash utility `drupal-perm.sh` is installed at `/usr/local/bin` with
-execute permission for members of the group `<dev_group_name>`.
-When invoked from the project root directory, the script ensures that the ownership and
-permission settings described above are in place.
+
+#### Testing/Development
+1. The cookbook includes test cases written using the
+[minitest-handler-cookbook](https://github.com/btm/minitest-handler-cookbook).
+You can add test cases to `files/default/test/*_test.rb`.
+1. Automated testing of different combinations platforms and existing machine
+state is done using [Test-Kitchen](https://github.com/opscode/test-kitchen).
+You can define more tests in the `.kitchen.yml` file. The existing
+`.kitchen.yml` file uses the [Vagrant driver](https://github.com/portertech/kitchen-vagrant)
+for Test-Kitchen, also included in the Gemfile. To get Test-Kitchen to run 
+your tests against the cookbook:
+
+        git clone [this-repo] && cd [this-repo]
+        # install and kitchen-vagrant
+        bundle install
+        kitchen test 
+
+1. Note that the `vagrant-berkshelf` plugin should
+be installed using `vagrant plugin install` and not as an independent Ruby gem.
+1. Right now, [Travis-CI](https://travis-ci.org/) is being used only minimally;
+only `foodcritic` and `knife cookbook test` are run against the cookbook. More
+continuous integrantion to come ... 

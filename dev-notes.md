@@ -1,68 +1,68 @@
 # How This Works
 
-## Cookbook (Dependency) Management
-[Berkshelf](http://berkshelf.com/) provides the same functionality as
-[Librarian-Chef](https://github.com/applicationsonline/librarian-chef) in that it follows
-the information provided in a `Berksfile` (almost equivalent of Librarian-Chef's
-`Cheffile`) and loads all the required cookbooks. The main difference between
-the two, aside from Berkshelf's [superior
-integration](https://github.com/RiotGames/vagrant-berkshelf) with Vagrant, is
-that Berkshelf has more awareness of its surrounding environment and is
+## cookbook (dependency) management
+[berkshelf](http://berkshelf.com/) provides the same functionality as
+[librarian-chef](https://github.com/applicationsonline/librarian-chef) in that it follows
+the information provided in a `berksfile` (almost equivalent of librarian-chef's
+`cheffile`) and loads all the required cookbooks. the main difference between
+the two, aside from berkshelf's [superior
+integration](https://github.com/riotgames/vagrant-berkshelf) with vagrant, is
+that berkshelf has more awareness of its surrounding environment and is
 integrated more smoothly within a cookbook.
 
-#### The `Berksfile`
-`berks install` follows the directives in your `Berksfile` to load cookbooks
-(from community API, local system, or git repo). You can also group cookbooks
+#### the `berksfile`
+`berks install` follows the directives in your `berksfile` to load cookbooks
+(from community api, local system, or git repo). you can also group cookbooks
 together (using `group` blocks) and use this grouping at installation time (when
 you perform `berks install`), to exclude or include certain cookbooks using
 options like `--without` and `--only`. 
 
-You can use the `site` directive in your `Berksfile` to indicate a community
-site API to be used by Berkshelf. For using the Opscode's newest community API
+you can use the `site` directive in your `berksfile` to indicate a community
+site api to be used by berkshelf. for using the opscode's newest community api
 you can simply use `:opscode` (instead of
-`http://cookbooks.opscode.com/api/v1/cookbooks`). Cookbooks can also be loaded
+`http://cookbooks.opscode.com/api/v1/cookbooks`). cookbooks can also be loaded
 from other sources using `:path` (local) and `:git` (and potentially `:rel`)
 options.
 
-The convention has become to leave a `Berksfile` in the root of the cookbook,
-even when there is no provisioning setup. The immediate use case for this is to
-provide alternative (non-community) sources for specific dependencies. But also
-to use the `metadata` keyword to tell Berkshelf that it should also load the
+the convention has become to leave a `berksfile` in the root of the cookbook,
+even when there is no provisioning setup. the immediate use case for this is to
+provide alternative (non-community) sources for specific dependencies. but also
+to use the `metadata` keyword to tell berkshelf that it should also load the
 dependencies mentioned in the `metadata.rb` file of the cookbook (this only
-works if `Berksfile` is in the cookbook root).
+works if `berksfile` is in the cookbook root).
 
-#### Berkshelf Workflow
-Berks, as opposed to Librarian-Chef, maintains some sort of state of its own by
-installing cookbooks to **its** directory (stored in `BERKSHELF_PATH`, by
-default `~/.berkshelf/`). All cookbooks installed in this way can be 
-catalogued using `berks shelf list`. Although apparently you can get 
+#### berkshelf workflow
+berks, as opposed to librarian-chef, maintains some sort of state of its own by
+installing cookbooks to **its** directory (stored in `berkshelf_path`, by
+default `~/.berkshelf/`). all cookbooks installed in this way can be 
+catalogued using `berks shelf list`. although apparently you can get 
 `berks install` to put the cookbooks in a
 custom folder (relative to the directory where install is invoked `berks install
--p /path/to/cookbooks`). In the
-latter case, Berkshelf will leave a copy of all cookbooks it installs in the
+-p /path/to/cookbooks`). in the
+latter case, berkshelf will leave a copy of all cookbooks it installs in the
 path you specify, **in addition** to installing them, for further reuse, in its
 directory.
 
-Furthermore, the customary way of using Berkshelf is to allow it to install
-dependencies on the node as needed. So you provide the node with all *your*
-cookbooks and use Berkshelf on the node to load all external dependencies
-before provisioning with Chef.
+furthermore, the customary way of using berkshelf is to allow it to install
+dependencies on the node as needed. so you provide the node with all *your*
+cookbooks and use berkshelf on the node to load all external dependencies
+before provisioning with chef.
 
-#### Berkshelf and Vagrant
-Berkshelf works easily with Vagrant through a plugin (`vagrant plugin install
-vagrant-berkshelf`). Note that this does install a gem named
+#### berkshelf and vagrant
+berkshelf works easily with vagrant through a plugin (`vagrant plugin install
+vagrant-berkshelf`). note that this does install a gem named
 `vagrant-berkshelf`, but installing the gem directly (without `vagrant plugin
-install` would not let Vagrant know about the plugin.
-Once the plugin is installed, Vagrant **by default** calls Berkshelf before
-provisioning. If you want Vagrant to not use the plugin you should
-indicate so in the `Vagrantfile` by adding `config.berkshelf.enabled = false` to
-your `Vagrant.configure("2")` block.  Once you have done that, the plugin would
-allow vagrant to access Berkshelf's cookbook directory without the `Vagrantfile`
+install` would not let vagrant know about the plugin.
+once the plugin is installed, vagrant **by default** calls berkshelf before
+provisioning. if you want vagrant to not use the plugin you should
+indicate so in the `vagrantfile` by adding `config.berkshelf.enabled = false` to
+your `vagrant.configure("2")` block.  once you have done that, the plugin would
+allow vagrant to access berkshelf's cookbook directory without the `vagrantfile`
 having to contain a `chef.cookbooks_path` directive (this attribute is, in fact,
-[hijacked](http://berkshelf.com/#chef_solo_provisioner) by Vagrant-Berkshelf in
-solo provisioning). All cookbooks that Berkshelf has installed (in
+[hijacked](http://berkshelf.com/#chef_solo_provisioner) by vagrant-berkshelf in
+solo provisioning). all cookbooks that berkshelf has installed (in
 `~/.berkshelf/`) can be used, and any non-installed cookbooks indicated in the
-`Berksfile` will be downloaded and available to the VM, as usual, at
+`berksfile` will be downloaded and available to the vm, as usual, at
 `/tmp/vagrant-chef-1/chef-solo-1/cookbooks/`.
 
 #### Minimal Setup
