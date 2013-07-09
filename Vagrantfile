@@ -16,9 +16,8 @@ Vagrant.configure("2") do |config|
     chef.json.merge!({
       "deploy-drupal" => { 
         "dev_group_name" => "vagrant",
-        "drupal_root_dir" => "amir site-jul8",
-        "sql_load_file" => "db/dump-jul8.sql.gz",
-        "get_project_from" => { "git" => "/vagrant/gitrepo" }
+        "sql_load_file" => "db/dump.sql.gz",
+        "get_project_from" => { :path => "/vagrant" }
       },  
       "mysql" => {
         "server_root_password" => "root",
@@ -27,7 +26,7 @@ Vagrant.configure("2") do |config|
       },  
       "minitest" =>{ 
         "recipes" => [ "deploy-drupal" ],
-        "drupal_site_dir" => "/var/shared/sites/cooked.drupal/amir site-jul8"
+        "drupal_site_dir" => "/var/shared/sites/cooked.drupal/site"
       },  
       "run_list" =>[ "deploy-drupal", "minitest-handler" ]
     })   
