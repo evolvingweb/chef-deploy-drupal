@@ -77,8 +77,7 @@ below can be accessed in the cookbook via
 |`apache_port`|80       | must be consistent with`node['apache']['listen_ports']`
 |`apache_user`|`www-data`|
 |`admin_pass` |`admin`  | Drupal site administrator password
-|`dev_group_name` |`root` | System group owning site root (user owner is
-`<apache_user>`), must be already recognized by the operating system
+|`dev_group_name` |`root` | System group owning site root (user owner is `<apache_user>`), must be already recognized by the operating system
 |`db_name`      |`drupal` | MySQL database used by Drupal
 |`mysql_user`   |`drupal_db`| MySQL user used by Drupal
 |`mysql_pass`   |`drupal_db`| MySQL password used by Drupal
