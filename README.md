@@ -52,8 +52,7 @@ Vagrant, you can refer to the
 [Vagrant-Drupal](http://github.com/dergachev/vagrant-drupal) project 
 
 ## Attributes
-The cookbook tries to load an existing site and if it fails due to
-the absence of codebase or discrepancies in credentials, it will
+The cookbook tries to load an existing site and if it fails to do so, it will
 download a fresh stable release of Drupal 7 from [drupal.org](http://drupal.org)
 and will configure MySQL and Apache, according to cookbook attributes, to serve
 a installed site (no manual installation required).
@@ -85,16 +84,16 @@ below can be accessed in the cookbook via
 |`mysql_pass`   |`drupal_db`| MySQL password used by Drupal
 
 ## Recipes
-In what follows, a **project** is a directory containing a directory which is a
-Drupal site root (`drupal_root_dir`), and potentially database dumps, scripts
+In what follows, a **project** is a directory containing a Drupal site root
+directory (`drupal_root_dir`), and potentially database dumps, scripts
 and other configuration files.
 
 #### `deploy-drupal::dependencies`
 Includes dependency cookbooks, installs lamp stack packages to get Apache, MySQL, PHP, and Drush running.
 
 #### `deploy-drupal::get_project`
-Loads existing project, if any, and make sure the 
-project directry skeleton is created in deployment. To specify existing
+Loads existing project, if any, and makes sure the 
+project directory skeleton is created in deployment. To specify existing
 projects, the `get_project_from` attribute should be used:
 
 ``` ruby
