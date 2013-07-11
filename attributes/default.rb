@@ -5,7 +5,7 @@ default['deploy-drupal']['admin_pass']            = 'admin'
 default['deploy-drupal']['admin_user']            = 'admin'
 # apache vhost port should be consistent with 
 # node['apache']['listen_ports']
-default['deploy-drupal']['apache_port']           = "80" 
+default['deploy-drupal']['apache_port']           = '80' 
 # user owning drupal codebase files
 default['deploy-drupal']['apache_user']           = 'www-data' 
 # MySQL credentials
@@ -27,7 +27,7 @@ default['deploy-drupal']['project_name']          = 'cooked.drupal'
 # must be directory name (no path)
 default['deploy-drupal']['drupal_root_dir']       = 'site'
 
-# path to Drupal "files" directory, relative to site root
+# path to Drupal 'files' directory, relative to site root
 default['deploy-drupal']['drupal_files_dir']      = 'sites/default/files'
 
 # absolute path to deployment directory 
