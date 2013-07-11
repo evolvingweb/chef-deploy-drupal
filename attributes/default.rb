@@ -5,7 +5,7 @@ default['deploy-drupal']['admin_pass']            = 'admin'
 default['deploy-drupal']['admin_user']            = 'admin'
 # apache vhost port should be consistent with 
 # node['apache']['listen_ports']
-default['deploy-drupal']['apache_port']           = '80' 
+default['deploy-drupal']['apache_port']           = '80'
 # user owning drupal codebase files
 default['deploy-drupal']['apache_user']           = 'www-data' 
 # MySQL credentials
