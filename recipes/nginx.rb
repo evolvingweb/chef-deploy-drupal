@@ -10,9 +10,10 @@ include_recipe 'nginx::default'
 DEPLOY_SITE_DIR     = node['deploy-drupal']['deploy_dir']   + "/" +
                       node['deploy-drupal']['project_name'] + "/" +
                       node['deploy-drupal']['drupal_root_dir']
-
+NGINX_SITE_FILE     = node['nginx']['dir'] + "/sites-available/" + 
+                      node['deploy-drupal']['project_name']
 # load the nginx site template
-template "#{node['nginx']['dir']}/sites-available/#{node['deploy-drupal']['project_name']}" do
+template NGINX_SITE_FILE do
   source "nginx_site.conf.erb"
   mode 0644
   owner "root"
