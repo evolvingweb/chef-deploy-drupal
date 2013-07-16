@@ -19,7 +19,7 @@ Vagrant.configure('2') do |config|
       'deploy-drupal' => { 
         'dev_group_name' => 'vagrant',
         'sql_load_file' => 'db/dump.sql.gz',
-        'get_project_from' => { :path => '/vagrant/prj-jul8' },
+        'get_project_from' => { :path => '/vagrant' },
         'apache_port' => '8000',
         'nginx_port' => '80',
       },
