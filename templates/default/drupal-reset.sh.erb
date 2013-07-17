@@ -7,6 +7,8 @@ drush --root=<%= @site_path %> archive-dump --tar-options="--exclude=.git"
 
 echo "destroying Drupal database and user..."
 <%= @db_connection %> -e "DROP DATABASE IF EXISTS <%= @db %>;"
+# create user if it does not already exist
+<%= @db_connection %> -e "GRANT USAGE ON *.* TO <%= @user %>; FLUSH PRIVILEGES;"
 <%= @db_connection %> -e "REVOKE ALL PRIVILEGES, GRANT OPTION FROM <%= @user %>; FLUSH PRIVILEGES;"
 <%= @db_connection %> -e "DROP USER <%= @user %>;"
 

@@ -51,7 +51,7 @@ bash "prepare-mysql" do
 end
 
 # install the permissions script
-template "/usr/local/bin/drupal-perm.sh" do
+template "/usr/local/bin/drupal-perm" do
   source "drupal-perm.sh.erb"
   mode 0755
   owner "root"
@@ -67,7 +67,7 @@ template "/usr/local/bin/drupal-perm.sh" do
 end
 
 # install the reset script
-template "/usr/local/bin/drupal-reset.sh" do
+template "/usr/local/bin/drupal-reset" do
   source "drupal-reset.sh.erb"
   mode 0755
   owner "root"
