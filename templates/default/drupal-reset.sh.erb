@@ -6,7 +6,8 @@ echo "taking drush archive-dump ..."
 drush --root=<%= @site_path %> archive-dump --tar-options="--exclude=.git"
 
 echo "disabling Apache site and removing Virtual Host file ..."
-rm -f <%= @vhost_files %>
+rm -f <%= node['apache']['dir'] %>/sites-enabled/<%= node['deploy-drupal']['project_name']%>.conf
+rm -f <%= node['apache']['dir'] %>/sites-available/<%= node['deploy-drupal']['project_name']%>.conf
 
 echo "destroying Drupal database and user..."
 <%= @db_connection %> -e "DROP DATABASE IF EXISTS <%= @db %>;"
