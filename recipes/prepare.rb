@@ -37,12 +37,6 @@ web_app node['deploy-drupal']['project_name'] do
   notifies :restart, "service[apache2]", :delayed
 end
 
-# TODO: solve this more nicely
-apache_site "000-default" do
-  enable false
-  notifies :restart, "service[apache2]", :delayed
-end
-
 bash "prepare-mysql" do
   code <<-EOH
     #{DB_ROOT_CONNECTION} -e "#{MYSQL_GRANT_QUERY}"
