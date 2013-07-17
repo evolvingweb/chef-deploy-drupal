@@ -75,9 +75,8 @@ below can be accessed in the cookbook via
 |`admin_user`   |`admin`  | username for "user one" in the installed site
 |`admin_user`   |`admin`  | password for "user one" in the installed site
 |`apache_port`|80       | must be consistent with`node['apache']['listen_ports']`
-|`apache_user`|`www-data`|
 |`admin_pass` |`admin`  | Drupal site administrator password
-|`dev_group_name` |`root` | System group owning site root (user owner is `<apache_user>`), must be already recognized by the operating system
+|`dev_group_name` |`root` | System group owning site root (user owner is `node['apache']['user']`), must be already recognized by the operating system
 |`db_name`      |`drupal` | MySQL database used by Drupal
 |`mysql_user`   |`drupal_db`| MySQL user used by Drupal
 |`mysql_pass`   |`drupal_db`| MySQL password used by Drupal
@@ -195,7 +194,7 @@ system to be provisioned. This user group will own the project root directory.
 1. Ownership and permission settings of the deployed project root directory
 (loated at `<deploy_dir>/<project_name>`) are set as follows:
   1. The user and group owners of all current files and subdirectories are
-  `<apache_user>` and `<dev_group_name>`, respectively.
+  `<node['apache']['user']>` and `<dev_group_name>`, respectively.
   1. The group owner of all files and subdirectories created in the future will be
   `dev_group` (the `setgid` flag is set for all subdirectories). The user owner 
   of future files and directories will depend on the

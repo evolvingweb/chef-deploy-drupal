@@ -55,7 +55,7 @@ template "/usr/local/bin/drupal-perm" do
     :site_path    =>  "'#{DEPLOY_SITE_DIR}'",
     :files_path   =>  "'#{DEPLOY_SITE_DIR}/" + 
                       "#{node['deploy-drupal']['drupal_files_dir']}'",
-    :user         =>  node['deploy-drupal']['apache_user'],
+    :user         =>  node['apache']['user'],
     :group        =>  node['deploy-drupal']['dev_group_name'] 
   })
 end

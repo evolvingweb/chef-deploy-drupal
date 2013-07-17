@@ -25,7 +25,7 @@ describe_recipe 'deploy-drupal::default' do
     end
     
     it "has the expected ownership and permissions" do
-      file(node['minitest']['drupal_site_dir']).must_exist.with(:owner, "www-data")
+      file(node['minitest']['drupal_site_dir']).must_exist.with(:owner, node['apache']['user'])
     end
 
     # And you can chain attributes together if you are asserting several.
@@ -33,8 +33,7 @@ describe_recipe 'deploy-drupal::default' do
     it "files folder must be appropriately set" do
       file("#{node['minitest']['drupal_site_dir']}/index.php").
         must_have(:mode, "460").
-        with(:owner, node['deploy-drupal']['apache_user']).
-        and(:group,node['deploy-drupal']['dev_group_name'])
+        with(:owner, node['apache']['user']).and(:group,node['deploy-drupal']['dev_group_name'])
     end
     # = Directories =
     # The file existence and permissions matchers are also valid for
@@ -42,8 +41,7 @@ describe_recipe 'deploy-drupal::default' do
     it "has appropriate folder permissions in drupal site" do
       directory("#{node['minitest']['drupal_site_dir']}/includes").
         must_have(:mode, "2570").
-        must_exist.with(:owner, node['deploy-drupal']['apache_user']).
-        and(:group,node['deploy-drupal']['dev_group_name'])
+        must_exist.with(:owner, node['apache']['user']).and(:group,node['deploy-drupal']['dev_group_name'])
     end
 
   end
@@ -64,7 +62,7 @@ describe_recipe 'deploy-drupal::default' do
     # = Users =
     # Check if a user has been created:
     it "creates apache user" do
-      user(node['deploy-drupal']['apache_user']).must_exist
+      user(node['apache']['user']).must_exist
     end
   end
 end
