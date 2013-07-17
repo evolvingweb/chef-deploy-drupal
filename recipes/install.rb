@@ -111,7 +111,7 @@ end
 
 # fix permissions of project root
 execute "fix-drupal-permissions" do
-  command "bash drupal-perm.sh"
+  command "bash drupal-perm"
   # TODO this should be action :nothing and only notified by
   # site-install, but that requires fixing ownership of deploy_dir
 end

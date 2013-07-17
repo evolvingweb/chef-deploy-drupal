@@ -37,12 +37,6 @@ web_app node['deploy-drupal']['project_name'] do
   notifies :restart, "service[apache2]", :delayed
 end
 
-# TODO: solve this more nicely
-apache_site "000-default" do
-  enable false
-  notifies :restart, "service[apache2]", :delayed
-end
-
 bash "prepare-mysql" do
   code <<-EOH
     #{DB_ROOT_CONNECTION} -e "#{MYSQL_GRANT_QUERY}"
@@ -51,7 +45,7 @@ bash "prepare-mysql" do
 end
 
 # install the permissions script
-template "/usr/local/bin/drupal-perm.sh" do
+template "/usr/local/bin/drupal-perm" do
   source "drupal-perm.sh.erb"
   mode 0755
   owner "root"
@@ -61,13 +55,13 @@ template "/usr/local/bin/drupal-perm.sh" do
     :site_path    =>  "'#{DEPLOY_SITE_DIR}'",
     :files_path   =>  "'#{DEPLOY_SITE_DIR}/" + 
                       "#{node['deploy-drupal']['drupal_files_dir']}'",
-    :user         =>  node['deploy-drupal']['apache_user'],
+    :user         =>  node['apache']['user'],
     :group        =>  node['deploy-drupal']['dev_group_name'] 
   })
 end
 
 # install the reset script
-template "/usr/local/bin/drupal-reset.sh" do
+template "/usr/local/bin/drupal-reset" do
   source "drupal-reset.sh.erb"
   mode 0755
   owner "root"
