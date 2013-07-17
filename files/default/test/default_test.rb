@@ -3,11 +3,12 @@ require 'minitest/spec'
 # Cookbook Name:: deploy-drupal
 # Spec:: default
 #
+include MiniTest::Chef::Assertions
+include MiniTest::Chef::Context
+include MiniTest::Chef::Resources
+
 describe_recipe 'deploy-drupal::default' do
 
-  include MiniTest::Chef::Assertions
-  include MiniTest::Chef::Context
-  include MiniTest::Chef::Resources
   #TODO this is the path to the deployed site
   # currently this is hardcoded as an attribute
   # to minitest
@@ -21,19 +22,23 @@ describe_recipe 'deploy-drupal::default' do
     end
 
     it "creates the settings.php file" do
-      file("#{node['minitest']['drupal_site_dir']}/sites/default/settings.php").must_exist
+      file("#{node['minitest']['drupal_site_dir']}/sites/default/settings.php").
+      must_exist
     end
-    
     it "has the expected ownership and permissions" do
-      file(node['minitest']['drupal_site_dir']).must_exist.with(:owner, node['apache']['user'])
+      file(node['minitest']['drupal_site_dir']).
+      must_exist.
+      with(:owner, node['apache']['user'])
     end
 
     # And you can chain attributes together if you are asserting several.
     # You don't want to get too carried away doing this but it can be useful.
     it "files folder must be appropriately set" do
       file("#{node['minitest']['drupal_site_dir']}/index.php").
-        must_have(:mode, "460").
-        with(:owner, node['apache']['user']).and(:group,node['deploy-drupal']['dev_group_name'])
+        must_exist.
+        must_have(:mode, "0460").
+        with(:owner, node['apache']['user']).
+        and(:group,node['deploy-drupal']['dev_group_name'])
     end
     # = Directories =
     # The file existence and permissions matchers are also valid for
@@ -41,12 +46,13 @@ describe_recipe 'deploy-drupal::default' do
     it "has appropriate folder permissions in drupal site" do
       directory("#{node['minitest']['drupal_site_dir']}/includes").
         must_have(:mode, "2570").
-        must_exist.with(:owner, node['apache']['user']).and(:group,node['deploy-drupal']['dev_group_name'])
+        must_exist.with(:owner, node['apache']['user']).
+        and(:group,node['deploy-drupal']['dev_group_name'])
     end
 
-  end
+ end
 
-  describe "services" do
+ describe "services" do
     # You can assert that a service must be running following the converge:
     it "runs as a daemon" do
       service("mysql").must_be_running
@@ -66,11 +72,13 @@ describe_recipe 'deploy-drupal::default' do
     end
   end
 end
-
-# TODO This is a traditional Minitest test case, has to be somehow merged with
-# chef-handler style test cases (above)
+# Custom Tests:
 class TestDrupal < MiniTest::Chef::TestCase
   def test_that_drupal_is_served
-    assert system("curl --silent localhost:80 | grep '<title>' | grep 'cooked.drupal'")
+    txt = "tried to access the Drupal site #{node['deploy-drupal']['project_name']}\
+           at localhost:#{node['deploy-drupal']['apache_port']}"
+    command = "curl --silent localhost:#{node['deploy-drupal']['apache_port']}\
+              | grep '<title>' | grep '#{node['deploy-drupal']['project_name']}'"
+    assert_sh command, txt
   end
 end
