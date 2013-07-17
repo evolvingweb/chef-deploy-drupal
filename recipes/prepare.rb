@@ -75,6 +75,7 @@ template "/usr/local/bin/drupal-reset" do
   variables({
     :site_path => "'#{DEPLOY_SITE_DIR}'",
     :deploy_path => "'#{node['deploy-drupal']['deploy_dir']}'",
+    :vhost_files => "#{node['apache']['dir']}/sites-{enabled,available}/#{node['deploy-drupal']['project_name']}.conf",
     :db_connection => DB_ROOT_CONNECTION,
     :user => "'#{node['deploy-drupal']['mysql_user']}'@'localhost'",
     :db => node['deploy-drupal']['db_name']
