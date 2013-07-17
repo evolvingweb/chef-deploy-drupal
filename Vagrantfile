@@ -21,13 +21,13 @@ Vagrant.configure('2') do |config|
         'sql_load_file' => 'db/dump.sql.gz',
         'get_project_from' => { :path => '/vagrant' },
         'apache_port' => '8000',
-        'nginx_port' => '80',
       },
       'apache' => {
-        'listen_ports' => ['8000']
+        'listen_ports' => ['8000'],
       },
       'nginx' => {
         'default_site_enabled' => false,
+        'gzip' => 'on',
       },
       'mysql' => {
         'server_root_password' => 'root',
