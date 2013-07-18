@@ -10,9 +10,11 @@ include MiniTest::Chef::Resources
 class TestNginx < MiniTest::Chef::TestCase
   def test_blocked_extensions
     node['deploy-drupal']['nginx']['extension_block_list'].each do |ext|
-      txt = "expected Nginx to block a request to"
       next unless ext.index(/[\\\(\)\*\+\?]/).nil?
+      
       Chef::Log.info "curling http://localhost:#{node['deploy-drupal']['nginx']['port']}/blah.#{ext}"
+      
+      txt = "expected Nginx to block a request to"
       command = "curl --write-out %{http_code} --silent --remote-name\
                  http://localhost:#{node['deploy-drupal']['nginx']['port']}/blah.#{ext}\
                  | grep 403"
@@ -21,9 +23,11 @@ class TestNginx < MiniTest::Chef::TestCase
   end
   def test_blocked_locations
     node['deploy-drupal']['nginx']['location_block_list'].each do |loc|
-      txt = "expected Nginx to block a request to"
       next unless loc.index(/[\\\(\)\*\+\?]/).nil?
+      
       Chef::Log.info "curling http://localhost:#{node['deploy-drupal']['nginx']['port']}/#{loc}"
+      
+      txt = "expected Nginx to block a request to"
       command = "curl --write-out %{http_code} --silent --remote-name\
                  http://localhost:#{node['deploy-drupal']['nginx']['port']}/#{loc}\
                  | grep 403"
@@ -32,9 +36,11 @@ class TestNginx < MiniTest::Chef::TestCase
   end
   def test_keyword_blocks
     node['deploy-drupal']['nginx']['keyword_block_list'].each do |key|
-      txt = "expected Nginx to block a request to"
       next unless key.index(/[\\\(\)\*\+\?]/).nil?
+      
       Chef::Log.info "http://localhost:#{node['deploy-drupal']['nginx']['port']}/foo#{key}bar"
+      
+      txt = "expected Nginx to block a request to"
       command = "curl --write-out %{http_code} --silent --remote-name\
                  http://localhost:#{node['deploy-drupal']['nginx']['port']}/foo#{key}bar\
                  | grep 403"
@@ -42,21 +48,32 @@ class TestNginx < MiniTest::Chef::TestCase
     end
   end 
   def test_static_content
+    minitest_log_dir = "/tmp/minitest/nginx"
+    apache_access_log = node['apache']['log_dir'] + "/" +
+                        node['deploy-drupal']['project_name'] + "-access.log"
+    system "rm -rf #{minitest_log_dir} ; mkdir -p #{minitest_log_dir}"
+
     node['deploy-drupal']['nginx']['static_content'].each do |ext|
-      txt = "expected Nginx to not proxy pass a request to"
       next unless ext.index(/[\\\(\)\*\+\?]/).nil?
-      test_file = "#{Time.new.usec}.#{ext}"
+ 
+      test_file = Time.new.usec.to_s + "." + ext
+      minitest_log_file = minitest_log_dir + "/" + test_file + ".minitest" 
+      
+      txt = "expected Nginx to not proxy pass a request to\
+             http://localhost:#{node['deploy-drupal']['nginx']['port']}/#{test_file}"
+      
       Chef::Log.info "curling http://localhost:#{node['deploy-drupal']['nginx']['port']}/#{test_file}"
-      system("touch #{node['minitest']['drupal_site_dir']}/#{test_file}")
-      command = "(sleep 0.5;  curl --silent\
-                http://localhost:#{node['deploy-drupal']['nginx']['port']}/#{test_file}) & \
-                ( tail -n0 -F \
-                 #{node['apache']['log_dir']}/#{node['deploy-drupal']['project_name']}-access.log \
-                 pid=$! | grep -m 1 '#{test_file}' && exit 1 ) & \
-                 ( sleep 1; kill $pid; )"
-      Chef::Log.info command
-      assert_sh command, txt
-      system("rm #{node['minitest']['drupal_site_dir']}/#{test_file}")
+      # tail apache access log in the background and curl nginx
+      # test will fail if any access to apache is recorded
+      system "touch #{minitest_log_file} ; \
+              ( tail -n0 -F #{apache_access_log} \
+                | grep #{test_file} \
+                | while read X; do echo $X >> #{minitest_log_file}; done\
+              ) & \
+              curl localhost://#{test_file} > /dev/null 2>&1 ;\
+              sleep 1; kill $( ps | grep tail | awk '{print $1;}' ) > /dev/null 2>&1"
+      assert_sh "cat #{minitest_log_file} | wc -l | xargs test 0 -eq", txt
     end
+    system "rm -rf #{minitest_log_dir}"
   end
 end
