@@ -36,7 +36,7 @@ execute "get-project-from-path" do
 end
 
 directory DEPLOY_SITE_DIR do
-  owner node['deploy-drupal']['apache_user']
+  owner node['apache']['user']
   group node['deploy-drupal']['dev_group_name']
   recursive true
 end
