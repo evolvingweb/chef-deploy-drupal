@@ -56,7 +56,7 @@ DRUSH_SQL_LOAD      =   "zless '#{node['deploy-drupal']['sql_load_file']}' " +
 DRUSH_SI            = [ "php -d sendmail_path=/bin/true",
                         "/usr/share/php/drush/drush.php",
                         "--root='#{DEPLOY_SITE_DIR}'",
-                        "site-install standard -y",
+                        "site-install --debug -y",
                         "--account-name=#{node['deploy-drupal']['admin_user']}",
                         "--account-pass=#{node['deploy-drupal']['admin_pass']}",
                         "--db-url=#{DRUSH_DB_URL}",
@@ -69,6 +69,7 @@ execute "install-disconnected-empty-db-site" do
   command DRUSH_SI
   only_if DRUPAL_DISCONNECTED
   not_if DB_FULL
+  not_if  "test -f '#{node['deploy-drupal']['sql_load_file']}'", :cwd => DEPLOY_PROJECT_DIR
   notifies :run, "execute[populate-fresh-installation-db]", :immediately
   notifies :run, "execute[drush-cache-clear]", :delayed
   notifies :run, "execute[drush-suppress-http-status-error]", :delayed
