@@ -15,15 +15,18 @@ Vagrant.configure('2') do |config|
   HEREDOC
   
   config.vm.provision :chef_solo do |chef|
+    chef.add_recipe 'deploy-drupal::default'
+    chef.add_recipe 'deploy-drupal::nginx'
+    chef.add_recipe 'minitest-handler'
+
     chef.json.merge!({
       'deploy-drupal' => { 
         'dev_group_name' => 'vagrant',
-        'sql_load_file' => 'db/dump.sql.gz',
-        'get_project_from' => { :path => '/vagrant' },
         'apache_port' => '8000',
       },
       'apache' => {
         'listen_ports' => ['8000'],
+        'default_site_enabled' => false,
       },
       'nginx' => {
         'default_site_enabled' => false,
@@ -32,10 +35,12 @@ Vagrant.configure('2') do |config|
       'mysql' => {
         'server_root_password' => 'root',
         'server_debian_password' => 'root',
-        'server_repl_password' => 'root'
+        'server_repl_password' => 'root',
       },  
       'minitest' =>{ 
-        'recipes' => [ 'deploy-drupal' ],
+        'recipes' => [ 'deploy-drupal::default' , 'deploy-drupal::nginx' ],
+        # update following line if you change any of the following attributes:
+        # deploy_dir, project_name, drupal_root_dir
         'drupal_site_dir' => '/var/shared/sites/cooked.drupal/site'
       },  
       'run_list' =>[ 'deploy-drupal::nginx', 'minitest-handler' ]
