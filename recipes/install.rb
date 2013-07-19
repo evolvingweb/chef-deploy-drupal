@@ -69,6 +69,7 @@ execute "install-disconnected-empty-db-site" do
   command DRUSH_SI
   only_if DRUPAL_DISCONNECTED
   not_if DB_FULL
+  not_if  "test -f '#{node['deploy-drupal']['sql_load_file']}'", :cwd => DEPLOY_PROJECT_DIR
   notifies :run, "execute[populate-fresh-installation-db]", :immediately
   notifies :run, "execute[drush-cache-clear]", :delayed
   notifies :run, "execute[drush-suppress-http-status-error]", :delayed
