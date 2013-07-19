@@ -56,7 +56,7 @@ DRUSH_SQL_LOAD      =   "zless '#{node['deploy-drupal']['sql_load_file']}' " +
 DRUSH_SI            = [ "php -d sendmail_path=/bin/true",
                         "/usr/share/php/drush/drush.php",
                         "--root='#{DEPLOY_SITE_DIR}'",
-                        "site-install standard -y",
+                        "site-install --debug -y",
                         "--account-name=#{node['deploy-drupal']['admin_user']}",
                         "--account-pass=#{node['deploy-drupal']['admin_pass']}",
                         "--db-url=#{DRUSH_DB_URL}",
