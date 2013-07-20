@@ -9,9 +9,6 @@ include_recipe 'nginx::default'
 NGINX_SITE_FILE     = node['nginx']['dir'] + "/sites-available/" + 
                       node['deploy-drupal']['project_name']
 
-NGINX_CUSTOM_FILE   = node['nginx']['dir'] + "/" +
-                      node['deploy-drupal']['project_name'] + "-custom"
-
 # the following strings must be assembled using single quotes
 # as they will be used as pcre regular expressions for nginx
 EXTENSION_BLOCK_LIST= '\.(' +
@@ -27,12 +24,6 @@ STATIC_CONTENT      = '\.(' +
                       node['deploy-drupal']['nginx']['static_content'].join('|')+
                       ')(\.gz)?$'
 
-# create symbolic link to the custom blocks file
-link NGINX_CUSTOM_FILE do
-  to node['deploy-drupal']['nginx']['custom_blocks_file']
-  owner "root"
-end
-
 # load the nginx site template
 template NGINX_SITE_FILE do
   source "nginx_site.conf.erb"
@@ -44,7 +35,7 @@ template NGINX_SITE_FILE do
     :pcre_location_block_list => LOCATION_BLOCK_LIST,
     :pcre_keyword_block_list => KEYWORD_BLOCK_LIST,
     :pcre_static_content => STATIC_CONTENT,
-    :custom_file  => NGINX_CUSTOM_FILE
+    :custom_file => node['deploy-drupal']['nginx']['custom_blocks_file']
   })
   notifies :reload, "service[nginx]", :delayed
 end
