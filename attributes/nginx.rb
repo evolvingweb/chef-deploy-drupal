@@ -36,3 +36,5 @@ default['deploy-drupal']['nginx']['root'] =
   node['deploy-drupal']['deploy_dir'] + "/" +
   node['deploy-drupal']['project_name'] + "/" +
   node['deploy-drupal']['drupal_root_dir']
+
+default['deploy-drupal']['nginx']['custom_blocks_file'] = ''
