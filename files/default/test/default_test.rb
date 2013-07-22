@@ -8,46 +8,37 @@ include MiniTest::Chef::Context
 include MiniTest::Chef::Resources
 
 describe_recipe 'deploy-drupal::default' do
-
-  #TODO this is the path to the deployed site
-  # currently this is hardcoded as an attribute
-  # to minitest
-  #node['deploy-drupal']['deploy_base_path']+ "/"
-  #node['deploy-drupal']['site_name'] + "/" +
-  #node['deploy-drupal']['site_path']
-  
   describe "files" do
     it "creates the index.php file" do
-      file("#{node['minitest']['drupal_site_dir']}/index.php").must_exist
+      file("#{node['deploy-drupal']['drupal_root']}/index.php").must_exist
     end
 
     it "creates the settings.php file" do
-      file("#{node['minitest']['drupal_site_dir']}/sites/default/settings.php").
+      file("#{node['deploy-drupal']['drupal_root']}/sites/default/settings.php").
       must_exist
     end
     it "has the expected ownership and permissions" do
-      file(node['minitest']['drupal_site_dir']).
-      must_exist.
-      with(:owner, node['apache']['user'])
+      file(node['deploy-drupal']['drupal_root']).
+      must_exist.with(:owner, node['apache']['user'])
     end
 
     # And you can chain attributes together if you are asserting several.
     # You don't want to get too carried away doing this but it can be useful.
     it "files folder must be appropriately set" do
-      file("#{node['minitest']['drupal_site_dir']}/index.php").
+      file("#{node['deploy-drupal']['drupal_root']}/index.php").
         must_exist.
         must_have(:mode, "0460").
         with(:owner, node['apache']['user']).
-        and(:group,node['deploy-drupal']['dev_group_name'])
+        and(:group,node['deploy-drupal']['dev_group'])
     end
     # = Directories =
     # The file existence and permissions matchers are also valid for
     # directories:
     it "has appropriate folder permissions in drupal site" do
-      directory("#{node['minitest']['drupal_site_dir']}/includes").
+      directory("#{node['deploy-drupal']['drupal_root']}/includes").
         must_have(:mode, "2570").
         must_exist.with(:owner, node['apache']['user']).
-        and(:group,node['deploy-drupal']['dev_group_name'])
+        and(:group,node['deploy-drupal']['dev_group'])
     end
 
  end

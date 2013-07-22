@@ -32,9 +32,4 @@ default['deploy-drupal']['nginx']['static_content'] =
     'mpg','mpeg','mpg4','mp4','avi',
     'zip','bz2','tar','tgz','rar']
 
-default['deploy-drupal']['nginx']['root'] = 
-  node['deploy-drupal']['deploy_dir'] + "/" +
-  node['deploy-drupal']['project_name'] + "/" +
-  node['deploy-drupal']['drupal_root_dir']
-
 default['deploy-drupal']['nginx']['custom_blocks_file'] = ''

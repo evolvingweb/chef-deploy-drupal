@@ -3,17 +3,17 @@
 #! /bin/sh
 
 # run this script in the Drupal root directory
-echo "setting filesystem permissions for Drupal root directory at `pwd` ..."
+echo "setting filesystem permissions for Drupal root directory at <% node['deploy-drupal']['project_root'] %> ..."
 
-chown -R <%= @user %>:<%= @group %> <%= @project_path %>
-chmod -R g+s <%= @project_path %>
-chmod u=rx,g=rwx,o-rwx <%= @project_path %>
-find <%= @site_path %> -type f -exec chmod u=r,g=rw,o-rwx '{}' \;
-find <%= @site_path %> -type d -exec chmod u=rx,g=rwx,o-rwx '{}' \;
-chmod -R ug=rwx,o-rwx <%= @files_path %>
+chown -R <%= node['apache']['user'] %>:<%= node['deploy-drupal']['dev_group'] %> <%= node['deploy-drupal']['project_root'] %>
+chmod -R g+s <%= node['deploy-drupal']['project_root'] %>
+chmod u=rx,g=rwx,o-rwx <%= node['deploy-drupal']['project_root'] %>
+find <%= node['deploy-drupal']['drupal_root'] %> -type f -exec chmod u=r,g=rw,o-rwx '{}' \;
+find <%= node['deploy-drupal']['drupal_root'] %> -type d -exec chmod u=rx,g=rwx,o-rwx '{}' \;
+chmod -R ug=rwx,o-rwx <%= node['deploy-drupal']['files_dir'] %>
 
-ls -ld <%= @project_path %> | awk '{print $3":"$4, "Project root ownership"}'
-ls -ld <%= @project_path %> | awk '{print $1, "permissions for the Project root"}'
-ls -l  <%= @site_path %>/index.php | awk '{print $1, "files in Drupal root"}'
-ls -ld <%= @site_path %>/includes  | awk '{print $1, "directories in Drupal root"}'
-ls -ld <%= @files_path %>   | awk '{print $1, "Drupal "files" directory"}'
+ls -ld <%= node['deploy-drupal']['project_root'] %> | awk '{print $3":"$4, "Project root ownership"}'
+ls -ld <%= node['deploy-drupal']['project_root'] %> | awk '{print $1, "permissions for the Project root"}'
+ls -l  <%= node['deploy-drupal']['drupal_root'] %>/index.php | awk '{print $1, "files in Drupal root"}'
+ls -ld <%= node['deploy-drupal']['drupal_root'] %>/includes  | awk '{print $1, "directories in Drupal root"}'
+ls -ld <%= node['deploy-drupal']['files_dir'] %>   | awk '{print $1, "Drupal "files" directory"}'

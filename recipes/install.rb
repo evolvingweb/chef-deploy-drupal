@@ -1,130 +1,106 @@
 ## Cookbook Name:: deploy-drupal
 ## Recipe:: install
 ##
-## make sure drupal is connected to database
-##  1. drush si (if not connected and empty db)
-##  2. load db from dump (if db empty)
-##  3. run post-install script
-##  4. fix file permissions
-##  5. clear drush cache
+web_app node['deploy-drupal']['project_name'] do
+  template "web_app.conf.erb"
+  port node['deploy-drupal']['apache_port']
+  server_name node['deploy-drupal']['project_name']
+  server_aliases [node['deploy-drupal']['project_name']]
+  docroot node['deploy-drupal']['site_root']
+  notifies :restart, "service[apache2]"
+end
 
-   # assemble all necessary query strings and paths
-# requires drush 6
-DEPLOY_PROJECT_DIR  = node['deploy-drupal']['deploy_dir']   + "/" +
-                      node['deploy-drupal']['project_name']
+# install the permissions script
+template "/usr/local/bin/drupal-perm" do
+  source "drupal-perm.sh.erb"
+  mode 0755
+  owner "root"
+  group "root"
+end
 
-DEPLOY_SITE_DIR     = DEPLOY_PROJECT_DIR   + "/" +
-                      node['deploy-drupal']['drupal_root_dir']
+mysql_connection = "mysql --user='root' --host='localhost' --password='#{node['mysql']['server_root_password']}'"
+mysql_user = "'#{node['deploy-drupal']['install']['db_user']}'@'localhost'"
 
-DRUSH               = "drush --root='#{DEPLOY_SITE_DIR}'"
+template "/usr/local/bin/drupal-reset" do
+  source "drupal-reset.sh.erb"
+  mode 0755
+  owner "root"
+  group "root"
+  variables({
+    :db_connection => mysql_connection,
+    :db_user => mysql_user
+  })
+end
 
-# FIXME this is not robust: it will break if the credentials in 
-# settings.php work with the database but do not match the
-# credentials in Chef attributes.
-DRUPAL_DISCONNECTED = [ DRUSH, "status",
-                        "--fields=db-status",
-                        "| grep Connected",
-                        "| wc -l | xargs test 0 -eq"
-                      ].join(' ')
+bash "prepare-mysql" do
+  code <<-EOH
+    #{mysql_connection} -e "GRANT ALL ON #{node['deploy-drupal']['install']['db_name']}.* \
+    TO #{mysql_user} IDENTIFIED BY '#{node['deploy-drupal']['install']['db_pass']}'; FLUSH PRIVILEGES;"
+    #{mysql_connection} -e "CREATE DATABASE IF NOT EXISTS #{node['deploy-drupal']['install']['db_name']};"
+  EOH
+end
 
-DB_ROOT_CONNECTION  = [ "mysql",
-                        "--user='root'",
-                        "--host='localhost'",
-                        "--password='#{node['mysql']['server_root_password']}'"
-                      ].join(' ')
+conf_dir = "#{node['deploy-drupal']['drupal_root']}/sites/default"
 
-# mysql specific query to determine whether the Drupal database has
-# any tables (exits with 0 if there is any table)
-DB_FULL             = [ DB_ROOT_CONNECTION, "-e \"",
-                        "SELECT * FROM information_schema.tables",
-                        "WHERE table_type = 'BASE TABLE'",
-                        "AND table_schema = '#{node['deploy-drupal']['db_name']}';\"",
-                        "| wc -l | xargs test 0 -ne"
-                      ].join(' ')
+template "local.settings.php" do
+  source "local.setting.php.erb"
+  path "#{conf_dir}/local.settings.php"
+  mode 0460
+  owner node['apache']['user']
+  group node['deploy-drupal']['dev_group']
+  notifies :reload, "service[apache2]"
+  variables ({
+    :custom_file => node['deploy-drupal']['install']['settings']
+  })
+end
 
-DRUSH_DB_URL        = "mysql://" +
-                        node['deploy-drupal']['mysql_user'] + ":'" +
-                        node['deploy-drupal']['mysql_pass'] + "'@localhost/" +
-                        node['deploy-drupal']['db_name']
+# copies contents of default.settings.php
+# removes db crendential lines, and includes local.settings.php
+file "settings.php" do
+  path "#{conf_dir}/settings.php" 
+  content ( 
+    IO.read("#{conf_dir}/default.settings.php").
+    gsub(/\n\$(databases|db_url|db_prefix)\s*=.*\n/,'') +
+    "\ninclude_once('local.settings.php');"
+  )
+  action :create_if_missing
+  notifies :reload, "service[apache2]"
+end
 
-# Using zless instead of cat/zcat to optionally support gzipped files
-# "`drush sql-connect`" because "drush sqlc" returns 0 even on connection failure
-DRUSH_SQL_LOAD      =   "zless '#{node['deploy-drupal']['sql_load_file']}' " +
-                        "| `#{DRUSH} sql-connect`"
+
+# exits with 0 if there are no tables in database
+db_empty = "#{mysql_connection} -e \"SELECT * FROM information_schema.tables WHERE \
+  table_type = 'BASE TABLE' AND table_schema = '#{node['deploy-drupal']['install']['db_name']}';\"\
+  | wc -l | xargs test 0 -eq"
+
+dump = node['deploy-drupal']['install']['sql_dump']
+execute "populate-db" do
+  # dump file path might be relative to project_root
+  cwd node['deploy-drupal']['project_root']
+  command "test -f '#{dump}' && zless '#{dump}' | #{mysql_connection}"
+  only_if db_empty
+end
 
 # fixes sendmail error https://drupal.org/node/1826652#comment-6706102
-DRUSH_SI            = [ "php -d sendmail_path=/bin/true",
-                        "/usr/share/php/drush/drush.php",
-                        "--root='#{DEPLOY_SITE_DIR}'",
-                        "site-install --debug -y",
-                        "--account-name=#{node['deploy-drupal']['admin_user']}",
-                        "--account-pass=#{node['deploy-drupal']['admin_pass']}",
-                        "--db-url=#{DRUSH_DB_URL}",
-                        "--site-name='#{node['deploy-drupal']['project_name']}'"
-                      ].join(' ')
+#drush = "php -d sendmail_path=/bin/true  /usr/share/php/drush/drush.php"
+drush_install = "drush site-install --debug -y\
+  --account-name=#{node['deploy-drupal']['install']['admin_user']}\
+  --account-pass=#{node['deploy-drupal']['install']['admin_pass']}\
+  --site-name='#{node['deploy-drupal']['project_name']}'"
 
-# TODO must raise exception if db is full but Drupal is not connected
-# install Drupal Site
-execute "install-disconnected-empty-db-site" do
-  command DRUSH_SI
-  only_if DRUPAL_DISCONNECTED
-  not_if DB_FULL
-  not_if  "test -f '#{node['deploy-drupal']['sql_load_file']}'", :cwd => DEPLOY_PROJECT_DIR
-  notifies :run, "execute[populate-fresh-installation-db]", :immediately
-  notifies :run, "execute[drush-cache-clear]", :delayed
-  notifies :run, "execute[drush-suppress-http-status-error]", :delayed
-  notifies :run, "execute[fix-drupal-permissions]", :delayed
+execute "drush-site-install" do
+  cwd node['deploy-drupal']['drupal_root']
+  command drush_install
+  only_if db_empty
 end
 
-# load sql dump, if any, after fresh installation
-# obliterates database regardless of content, 
-# should only be notified by install-disconnected-empty-db-site
-execute "populate-fresh-installation-db" do
-  # DRUSH_SQL_LOAD has to be run in the project root,
-  # since db script path might be relative
-  cwd DEPLOY_PROJECT_DIR
-  command DRUSH_SQL_LOAD
-  only_if  "test -f '#{node['deploy-drupal']['sql_load_file']}'", :cwd => DEPLOY_PROJECT_DIR
-  action :nothing
-  notifies :run, "execute[run-post-install-script]"
-end
-
-# load sql dump, if any, if Database is still empty
-execute "populate-db" do
-  # DRUSH_SQL_LOAD has to be run in the project root,
-  # since db script path might be relative
-  cwd DEPLOY_PROJECT_DIR
-  command DRUSH_SQL_LOAD
-  only_if  "test -f '#{node['deploy-drupal']['sql_load_file']}'", :cwd => DEPLOY_PROJECT_DIR
-  not_if DB_FULL
-  notifies :run, "execute[run-post-install-script]"
-  notifies :run, "execute[drush-cache-clear]", :delayed
-  notifies :run, "execute[drush-suppress-http-status-error]", :delayed
-  notifies :run, "execute[fix-drupal-permissions]", :delayed
-end
-
-execute "run-post-install-script" do
-  cwd DEPLOY_PROJECT_DIR
-  command "bash '#{node['deploy-drupal']['post_install_script']}'"
-  only_if "test -f '#{node['deploy-drupal']['post_install_script']}'", :cwd => DEPLOY_PROJECT_DIR
-  action :nothing
-end
-
-# fix permissions of project root
-execute "fix-drupal-permissions" do
-  command "bash drupal-perm"
-  # TODO this should be action :nothing and only notified by
-  # site-install, but that requires fixing ownership of deploy_dir
-end
-
-# TODO should only be used when Drupal is served through a forwarded port
-execute "drush-suppress-http-status-error" do
-  command "#{DRUSH} vset -y drupal_http_request_fails FALSE"
-  action :nothing
-end
-
-# drush cache clear
-execute "drush-cache-clear" do
-  command "#{DRUSH} cache-clear all"
-  action :nothing
+script = node['deploy-drupal']['install']['script']
+bash "post-install" do
+  # post_install_script might be relative to project_root
+  cwd node['deploy-drupal']['project_root']
+  code <<-EOH
+    test -f #{script} && bash #{script}
+    bash drupal-perm
+    drush --root=#{node['deploy-drupal']['drupal_root']} cache-clear all
+  EOH
 end

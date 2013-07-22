@@ -1,42 +1,33 @@
 ## Cookbook Name:: deploy-drupal
 ## Recipe:: get_project
 ##
-## load specified project (if any), and make sure
-## project skeleton exists in deployment 
+## load specified project (if any), and
+## make sure  project skeleton exists in deployment 
 
-# assemble all necessary absolute paths
-DEPLOY_PROJECT_DIR  = node['deploy-drupal']['deploy_dir']+ "/" +
-                      node['deploy-drupal']['project_name']
-
-DEPLOY_SITE_DIR     = DEPLOY_PROJECT_DIR + "/" +
-                      node['deploy-drupal']['drupal_root_dir']
-                        
-directory node['deploy-drupal']['deploy_dir'] do
+directory node['deploy-drupal']['project_root'] do
   recursive true
 end
 
-# only runs if project root directory does not exist
 execute "get-project-from-git" do
-  cwd node['deploy-drupal']['deploy_dir']
-  command "git clone " +
-          node['deploy-drupal']['get_project_from']['git'] + " " +
-          node['deploy-drupal']['project_name']
-  creates DEPLOY_PROJECT_DIR
-  not_if { node['deploy-drupal']['get_project_from']['git'].empty? }
+  command "git clone #{node['deploy-drupal']['get_project']['git']} #{node['deploy-drupal']['project_root']}"
+  group node['deploy-drupal']['dev_goup']
+  creates node['deploy-drupal']['project_root']
+  not_if { node['deploy-drupal']['get_project']['git'].nil? }
   notifies :restart, "service[apache2]", :delayed
 end
 
-# only runs if project root directory (deploy_dir/project_name) does not exist
-# TODO must raise exception if path is not a directory
 execute "get-project-from-path" do
-  command "cp -Rf '#{node['deploy-drupal']['get_project_from']['path']}/.' '#{DEPLOY_PROJECT_DIR}'"
-  creates DEPLOY_PROJECT_DIR
-  not_if {node['deploy-drupal']['get_project_from']['path'].empty? }
+  command "cp -Rf '#{node['deploy-drupal']['get_project']['path']}/.' '#{node['deploy-drupal']['project_root']}'"
+  group node['deploy-drupal']['dev_goup']
+  creates node['deploy-drupal']['project_root']
+  not_if { node['deploy-drupal']['get_project_from']['path'].nil? }
   notifies :restart, "service[apache2]", :delayed
 end
 
-directory DEPLOY_SITE_DIR do
-  owner node['apache']['user']
-  group node['deploy-drupal']['dev_group_name']
-  recursive true
+index_exists = File.exists? "#{node['deploy-drupal']['drupal_root']}/index.php"
+log_message = "there is " + ( index_exists ? "an" : "no" ) + 
+  "index.php file in the site directory #{node['deploy-drupal']['drupal_root']}" +
+  ( index_exists ? "sounds good!" : "this might not be what you want." )
+log log_message  do
+  level :info
 end

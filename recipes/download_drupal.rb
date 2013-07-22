@@ -3,23 +3,34 @@
 ##
 ## download drupal if necessary
 
-# assemble all necessary query strings and paths
+=begin
+repourl = "http://ftp.drupal.org/files/projects"
+case node['deploy-drupal']['version']
+when '7' 
+  version = '7.22'
+when '6'
+  version = '6.28'
+else 
+  version = node['deploy-drupal']['version']
+end
 
-DEPLOY_PROJECT_DIR  = node['deploy-drupal']['deploy_dir']   + "/" +
-                      node['deploy-drupal']['project_name']
+project_missing = node['deploy-drupal']['get_project']['path'].empty? &&
+                  node['deploy-drupal']['get_project']['git'].empty?
+=end
+# temporary project directory where drupal will be downloaded
+tmp_dir = "#{Chef::Config[:file_cache_path]}/#{node['deploy-drupal']['project_name']}"
 
-DEPLOY_SITE_DIR     = DEPLOY_PROJECT_DIR + "/" +
-                      node['deploy-drupal']['drupal_root_dir']
-
-DRUSH_DL            = [ "drush dl -y",
-                        node['deploy-drupal']['drupal_dl_version'],
-                        "--destination='#{DEPLOY_PROJECT_DIR}'",
-                        "--drupal-project-rename='#{node['deploy-drupal']['drupal_root_dir']}'"
-                      ].join(' ')
+#directory "/tmp/vagrant-chef-1/cooked.drupal/site" do
+directory "#{tmp_dir}/site" do
+  recursive true
+end
 
 execute "download-drupal" do
-  command DRUSH_DL
-  creates DEPLOY_SITE_DIR + "/index.php"
-  not_if { node['deploy-drupal']['drupal_dl_version'] == 'false' }
-  notifies :restart, "service[apache2]", :delayed
+  command "cd #{tmp_dir}/tmp/vagrant-chef-1/cooked.drupal; curl http://ftp.drupal.org/files/projects/drupal-7.22.tar.gz | tar xz -C site --strip-components=1"
+  only_if { node['deploy-drupal']['get_project']['path'].empty? && node['deploy-drupal']['get_project']['git'].empty? }
+#only_if { project_missing }
 end
+
+#if project_missing
+ # node.set['deploy-drupal']['get_project']['path'] = tmp_dir
+#end
