@@ -7,19 +7,73 @@ platforms:
 - name: ubuntu-12.04
   driver_config:
     box: precise64
-
-suites:
-- name: default
-  run_list: 
-  - recipe[deploy-drupal]
-  - recipe[minitest-handler]
+    box_url: 'http://dl.dropbox.com/u/1537815/precise64.box'
+  run_list:
+    - recipe[deploy-drupal::dependencies]
   attributes: {
     "mysql": {
       "server_root_password": "root",
       "server_debian_password": "root",
       "server_repl_password": "root"
+    }
+  }
+
+suites:
+- name: download and install
+  run_list: 
+  - recipe[deploy-drupal::default]
+  - recipe[minitest-handler]
+- name: download, populate, and install
+  run_list:
+  - recipe[deploy-drupal::default]
+  - recipe[minitest-handler]
+  attributes: {
+    "deploy-drupal": {
+      "get_project" : { "git" : "" , "path" : "" },
+      "install" : { "sql_dump" : "/vagrant/prj/db/dump.sql.gz" }
     },
     "minitest": {
-      "recipes": ["deploy-drupal"]
+      "recipes": ["deploy-drupal::default"]
+    }
+  }
+- name: get project from filesystem
+  run_list:
+  - recipe[deploy-drupal::default]
+  - recipe[minitest-handler]
+  attributes: {
+    "deploy-drupal": {
+      "get_project" : { "git" : "" , "path" : "/vagrant/prj" }
+    },
+    "minitest": {
+      "recipes": ["deploy-drupal::default"]
+    }
+  }
+- name: get project from git repo with db dump in repo
+  run_list:
+  - recipe[deploy-drupal::default]
+  - recipe[minitest-handler]
+  attributes: {
+    "deploy-drupal": {
+      "get_project" : { "git" : "file:///vagrant/repo" , "path" : "" }
+      "install" : { "install" : "db/sql_dump" }
+    },
+    "minitest": {
+      "recipes": ["deploy-drupal::default"]
+    }
+  }
+- name: nginx
+  run_list:
+  - recipe[deploy-drupal::default]
+  - recipe[deploy-drupal::nginx]
+  - recipe[minitest-handler]
+  attributes: {
+    "deploy-drupal": {
+      "get_project" : { "git" : "" , "path" : "" },
+      "apache_port" : "8000",
+      "nginx" : { "port": "80" } 
+    },
+    "apache" : { "listen_ports" : ["8000"] }
+    "minitest": {
+      "recipes": ["deploy-drupal::default", "deploy-drupal::nginx"]
     }
   }
