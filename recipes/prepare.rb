@@ -51,10 +51,10 @@ template "/usr/local/bin/drupal-perm" do
   owner "root"
   group "root"
   variables({
-    :project_path =>  "'#{DEPLOY_PROJECT_DIR}'",
-    :site_path    =>  "'#{DEPLOY_SITE_DIR}'",
-    :files_path   =>  "'#{DEPLOY_SITE_DIR}/" + 
-                      "#{node['deploy-drupal']['drupal_files_dir']}'",
+    :project_path =>  DEPLOY_PROJECT_DIR,
+    :site_path    =>  DEPLOY_SITE_DIR,
+    :files_path   =>  DEPLOY_SITE_DIR + "/"
+                      node['deploy-drupal']['drupal_files_dir']},
     :user         =>  node['apache']['user'],
     :group        =>  node['deploy-drupal']['dev_group_name'] 
   })

@@ -4,18 +4,18 @@
 # run this script in the Drupal root directory
 echo "setting filesystem permissions for Drupal root directory at <%= @project_path %> ..."
 
-find '<%= @project_path %>' -maxdepth 1 -type d | xargs chown root:<%= @group %>
-find '<%= @project_path %>' -maxdepth 1 -type d | xargs chmod g=rwx,o=rx
-chmod -R g+s <%= @project_path %>
+find '<%= @project_path %>' ! -regex '<%= @site_path%>/?.*' | xargs chown root:<%= @group %>
+chmod -R u=rx,g=rwx,o=rx <%= @project_path %>
+chmod -R g+s '<%= @site_path %>'
 
-chown -R <%= @user %>:<%= @group %> <%= @site_path %>
-find <%= @site_path %> -type f -exec chmod u=r,g=rw,o-rwx '{}' \;
-find <%= @site_path %> -type d -exec chmod u=rx,g=rwx,o-rwx '{}' \;
+chown -R <%= @user %>:<%= @group %> '<%= @site_path %>'
+find '<%= @site_path %>' -type f -exec chmod u=r,g=rw,o-rwx '{}' \;
+find '<%= @site_path %>' -type d -exec chmod u=rx,g=rwx,o-rwx '{}' \;
 chmod -R ug=rwx,o-rwx <%= @files_path %>
 
-ls -ld <%= @project_path %> | awk '{print $3":"$4, "owns project root directory"}'
-ls -ld <%= @project_path %> | awk '{print $1, "is permissions for the project root"}'
-ls -ld <%= @site_path %> | awk '{print $3":"$4, "owns drupal site directory"}'
-ls -l  <%= @site_path %>/index.php | awk '{print $1, "is permissions for files in Drupal root"}'
-ls -ld <%= @site_path %>/includes  | awk '{print $1, "is permissions for directories in Drupal root"}'
-ls -ld <%= @files_path %>   | awk '{print $1, "is permissions for the Drupal files directory"}'
+ls -ld '<%= @project_path %>' | awk '{print $3":"$4, "owns project root directory"}'
+ls -ld '<%= @project_path %>' | awk '{print $1, "is permissions for the project root"}'
+ls -ld '<%= @site_path %>' | awk '{print $3":"$4, "owns drupal site directory"}'
+ls -l  '<%= @site_path %>/index.php' | awk '{print $1, "is permissions for files in Drupal root"}'
+ls -ld '<%= @site_path %>/includes'  | awk '{print $1, "is permissions for directories in Drupal root"}'
+ls -ld '<%= @files_path %>'   | awk '{print $1, "is permissions for the Drupal files directory"}'

@@ -18,6 +18,7 @@ DRUSH_DL            = [ "drush dl -y",
                       ].join(' ')
 
 execute "download-drupal" do
+  group node['deploy-drupal']['dev_group_name']
   command DRUSH_DL
   creates DEPLOY_SITE_DIR + "/index.php"
   not_if { node['deploy-drupal']['drupal_dl_version'] == 'false' }

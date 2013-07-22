@@ -17,6 +17,7 @@ end
 
 # only runs if project root directory does not exist
 execute "get-project-from-git" do
+  group node['deploy-drupal']['dev_group_name']
   cwd node['deploy-drupal']['deploy_dir']
   command "git clone " +
           node['deploy-drupal']['get_project_from']['git'] + " " +
@@ -29,6 +30,7 @@ end
 # only runs if project root directory (deploy_dir/project_name) does not exist
 # TODO must raise exception if path is not a directory
 execute "get-project-from-path" do
+  group node['deploy-drupal']['dev_group_name']
   command "cp -Rf '#{node['deploy-drupal']['get_project_from']['path']}/.' '#{DEPLOY_PROJECT_DIR}'"
   creates DEPLOY_PROJECT_DIR
   not_if {node['deploy-drupal']['get_project_from']['path'].empty? }
