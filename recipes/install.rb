@@ -59,7 +59,7 @@ template "settings.local.php" do
   group node['deploy-drupal']['dev_group']
   notifies :reload, "service[apache2]"
   variables({
-    :db_user => db_user,
+    :db_user => node['deploy-drupal']['install']['db_user'],
     :db_pass => db_pass,
     :db_name => db_name,
     :custom_file => node['deploy-drupal']['install']['settings']
@@ -67,14 +67,14 @@ template "settings.local.php" do
 end
 
 append_code = "unset($db_url, $db_prefix, $databases);" + "\n" +
-              "include_once('settings.local.php');"
+              'include_once("settings.local.php");'
 # copy contents of default.settings.php
 # unset db crendential variables, and includes local.settings.php
 bash "configure-settings.php" do
   cwd conf_dir
   code <<-EOH
     cat default.settings.php > settings.php; 
-    echo "#{append_code}" >> settings.php;
+    echo '#{append_code}' >> settings.php;
   EOH
   not_if "test -f settings.php", :cwd => conf_dir
   notifies :reload, "service[apache2]"
