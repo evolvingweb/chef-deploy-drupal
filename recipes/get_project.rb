@@ -25,10 +25,10 @@ execute "get-project-from-path" do
 end
 
 index_exists = File.exists? "#{node['deploy-drupal']['drupal_root']}/index.php"
-log_message = "there is " + ( index_exists ? "an" : "no" ) + 
+drupal_root_msg = "there is " + ( index_exists ? "an" : "no" ) + 
   "index.php file in the site directory #{node['deploy-drupal']['drupal_root']}" +
   ( index_exists ? "sounds good!" : "this might not be what you want." )
 
-log log_message  do
+log drupal_root_msg do
   level :info
 end

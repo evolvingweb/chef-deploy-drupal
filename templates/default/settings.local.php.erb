@@ -7,9 +7,9 @@ $databases = array (
   array (
     'default' =>                                                              
     array (
-      'database' => '<%= node['deploy-drupal']['install']['db_name'] %>',
-      'username' => '<%= node['deploy-drupal']['install']['db_user'] %>',                                              
-      'password' => '<%= node['deploy-drupal']['install']['db_pass'] %>',
+      'database' => '<%= @db_name %>',
+      'username' => '<%= @db_user %>',                                              
+      'password' => '<%= @db_pass %>',
       'host' => 'localhost',
       'port' => '',                                                    
       'driver' => 'mysql',                                                    
@@ -17,4 +17,4 @@ $databases = array (
     ),
   ),
 );
-<%= IO.read(@custom_file) if File.exists?(@custom_file) %>
+<%= IO.read(@custom_file) if !@custom_file.nil? and File.exists?(@custom_file) %>

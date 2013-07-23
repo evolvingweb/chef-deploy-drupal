@@ -3,14 +3,14 @@
 #! /bin/sh
 
 echo "taking drush archive-dump ..."
-drush --root=<%= node['deploy-drupal']['drupal_root'] %> archive-dump --tar-options="--exclude=.git"
+drush --root=<%= @drupal_root %> archive-dump --tar-options="--exclude=.git"
 
 echo "disabling Apache site and removing Virtual Host file ..."
 rm -f <%= node['apache']['dir'] %>/sites-enabled/<%= node['deploy-drupal']['project_name']%>.conf
 rm -f <%= node['apache']['dir'] %>/sites-available/<%= node['deploy-drupal']['project_name']%>.conf
 
 echo "destroying Drupal database and user..."
-<%= @db_connection %> -e "DROP DATABASE IF EXISTS <%= node['deploy-drupal']['install']['db_name'] %>;"
+<%= @db_connection %> -e "DROP DATABASE IF EXISTS <%= @db_name %>;"
 # create user if it does not already exist
 <%= @db_connection %> -e "GRANT USAGE ON *.* TO <%= @db_user %>; FLUSH PRIVILEGES;"
 <%= @db_connection %> -e "REVOKE ALL PRIVILEGES, GRANT OPTION FROM <%= @db_user %>; FLUSH PRIVILEGES;"
