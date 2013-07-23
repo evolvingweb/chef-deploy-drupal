@@ -91,8 +91,9 @@ dump_file = node['deploy-drupal']['install']['sql_dump']
 execute "populate-db" do
   # dump file path might be relative to project_root
   cwd node['deploy-drupal']['project_root']
-  command "test -f '#{dump_file}' && zless '#{dump_file}' | #{mysql_connection}"
+  command "zless '#{dump_file}' | #{mysql_connection} ;"
   only_if db_empty
+  only_if "test -f '#{dump_file}'", :cwd => node['deploy-drupal']['project_root']
   notifies :run, "execute[post-install-script]"
 end
 
@@ -126,6 +127,8 @@ script_file = node['deploy-drupal']['install']['script']
 # the post install script is only executed if the Drupal database 
 # is populated from scratch, either by drush site-install or from sql dump file
 execute "post-install-script" do
-  command "test -f '#{script_file}' && bash '#{script_file}'"
+  cwd node['deploy-drupal']['project_root']
+  command "bash '#{script_file}'"
+  only_if "test -f '#{script_file}'", :cwd => node['deploy-drupal']['project_root']
   action :nothing
 end
