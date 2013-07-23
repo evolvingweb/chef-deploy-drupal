@@ -1,6 +1,12 @@
 ## Cookbook Name:: deploy-drupal
 ## Recipe:: install
 ##
+
+# make sure the files directory exists
+directory node['deploy-drupal']['files_dir'] do
+  recursive true
+end
+
 mysql_connection = "mysql --user='root' --host='localhost' --password='#{node['mysql']['server_root_password']}'"
 db_user = "'#{node['deploy-drupal']['install']['db_user']}'@'localhost'"
 db_pass = node['deploy-drupal']['install']['db_pass']

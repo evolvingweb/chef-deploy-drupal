@@ -3,9 +3,8 @@
 ##
 ## download drupal if necessary
 
-# temporary project directory where drupal will be downloaded
 tmp_dir = "#{Chef::Config[:file_cache_path]}/#{node['deploy-drupal']['project_name']}"
-
+# temporary project directory where drupal will be downloaded
 directory "#{tmp_dir}/site" do
   recursive true
 end

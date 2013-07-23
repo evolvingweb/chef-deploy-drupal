@@ -12,8 +12,6 @@ default['deploy-drupal']['dev_group'] = 'root'
 
 # vhost server name and project directory name
 default['deploy-drupal']['project_name'] = 'cooked.drupal' 
-# path to Drupal 'files' directory, relative to site root
-default['deploy-drupal']['files_dir'] = 'sites/default/files'
 
 # absolute path to project directory
 default['deploy-drupal']['project_root'] = "/var/shared/sites/#{node['deploy-drupal']['project_name']}"
@@ -26,3 +24,5 @@ else
   default['deploy-drupal']['drupal_root'] = node['deploy-drupal']['project_root'] + "/"
                                             node['deploy-drupal']['get_project']['site_dir']
 end
+# absolute path to Drupal 'files' directory
+default['deploy-drupal']['files_dir'] = node['deploy-drupal']['drupal_root'] + "/sites/default/files"
