@@ -37,7 +37,7 @@ template NGINX_SITE_FILE do
     :pcre_static_content => STATIC_CONTENT,
     :custom_file => node['deploy-drupal']['nginx']['custom_blocks_file']
   })
-  notifies :reload, "service[nginx]", :delayed
+  notifies :reload, "service[nginx]"
 end
 
 # by default is set to enabled = true and timing = delayed

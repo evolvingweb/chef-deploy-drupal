@@ -13,7 +13,7 @@ execute "get-project-from-git" do
   group node['deploy-drupal']['dev_goup']
   creates node['deploy-drupal']['project_root']
   not_if { node['deploy-drupal']['get_project']['git'].nil? }
-  notifies :restart, "service[apache2]", :delayed
+  notifies :restart, "service[apache2]"
 end
 
 execute "get-project-from-path" do
@@ -21,7 +21,7 @@ execute "get-project-from-path" do
   group node['deploy-drupal']['dev_goup']
   creates node['deploy-drupal']['project_root']
   not_if { node['deploy-drupal']['get_project_from']['path'].nil? }
-  notifies :restart, "service[apache2]", :delayed
+  notifies :restart, "service[apache2]"
 end
 
 index_exists = File.exists? "#{node['deploy-drupal']['drupal_root']}/index.php"
