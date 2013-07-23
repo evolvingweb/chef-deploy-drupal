@@ -11,7 +11,7 @@ web_app node['deploy-drupal']['project_name'] do
   port node['deploy-drupal']['apache_port']
   server_name node['deploy-drupal']['project_name']
   server_aliases [node['deploy-drupal']['project_name']]
-  docroot node['deploy-drupal']['site_root']
+  docroot node['deploy-drupal']['drupal_root']
   notifies :restart, "service[apache2]"
 end
 
@@ -46,7 +46,11 @@ bash "prepare-mysql" do
 end
 
 conf_dir = "#{node['deploy-drupal']['drupal_root']}/sites/default"
-
+# the settings.local.php template requires that its directory be
+# declared as a resource
+directory conf_dir do
+  recursive true
+end
 template "settings.local.php" do
   source "settings.local.php.erb"
   path "#{conf_dir}/settings.local.php"
