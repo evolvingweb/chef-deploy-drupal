@@ -15,14 +15,14 @@ web_app node['deploy-drupal']['project_name'] do
   notifies :restart, "service[apache2]"
 end
 
-# install the permissions script
+# install permission script
 template "/usr/local/bin/drupal-perm" do
   source "drupal-perm.sh.erb"
   mode 0755
   owner "root"
   group "root"
 end
-
+# install reset script
 template "/usr/local/bin/drupal-reset" do
   source "drupal-reset.sh.erb"
   mode 0755
@@ -67,9 +67,9 @@ end
 file "settings.php" do
   path "#{conf_dir}/settings.php" 
   content ( 
-    IO.read("#{conf_dir}/default.settings.php").
-    gsub(/\n\$(databases|db_url|db_prefix)\s*=.*\n/,'') +
-    "\ninclude_once('settings.local.php');"
+    IO.read("#{conf_dir}/default.settings.php") + "\n" +
+    "unset($db_url, $db_prefix, $databases);" + "\n" + 
+    "include_once('settings.local.php');"
   )
   action :create_if_missing
   notifies :reload, "service[apache2]"
