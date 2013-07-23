@@ -20,7 +20,7 @@ execute "get-project-from-path" do
   command "cp -Rf '#{node['deploy-drupal']['get_project']['path']}/.' '#{node['deploy-drupal']['project_root']}'"
   group node['deploy-drupal']['dev_goup']
   creates node['deploy-drupal']['project_root']
-  not_if { node['deploy-drupal']['get_project_from']['path'].nil? }
+  not_if { node['deploy-drupal']['get_project']['path'].nil? }
   notifies :restart, "service[apache2]"
 end
 

@@ -62,16 +62,17 @@ template "settings.local.php" do
   })
 end
 
-# copies contents of default.settings.php
-# removes db crendential lines, and includes local.settings.php
-file "settings.php" do
-  path "#{conf_dir}/settings.php" 
-  content ( 
-    IO.read("#{conf_dir}/default.settings.php") + "\n" +
-    "unset($db_url, $db_prefix, $databases);" + "\n" + 
-    "include_once('settings.local.php');"
-  )
-  action :create_if_missing
+append_code = "unset($db_url, $db_prefix, $databases);" + "\n" +
+              "include_once('settings.local.php');"
+# copy contents of default.settings.php
+# unset db crendential variables, and includes local.settings.php
+bash "configure-settings.php" do
+  cwd conf_dir
+  code <<-EOH
+    cat default.settings.php > settings.php; 
+    echo "#{append_code}" >> settings.php;
+  EOH
+  not_if "test -f settings.php", :cwd => conf_dir
   notifies :reload, "service[apache2]"
 end
 
@@ -79,7 +80,7 @@ end
 table_count_sql = "SELECT * FROM information_schema.tables WHERE \
                    table_type = 'BASE TABLE' AND table_schema = '#{db_name}';"
 
-db_empty = "#{mysql_connection} -e \"#{table_count_query}\" | wc -l | xargs test 0 -eq"
+db_empty = "#{mysql_connection} -e \"#{table_count_sql}\" | wc -l | xargs test 0 -eq"
 
 dump_file = node['deploy-drupal']['install']['sql_dump']
 
