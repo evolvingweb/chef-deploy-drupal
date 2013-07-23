@@ -24,7 +24,8 @@ directory "#{tmp_dir}/site" do
 end
 
 execute "download-drupal" do
-  command "cd #{tmp_dir}; curl http://ftp.drupal.org/files/projects/drupal-7.22.tar.gz | tar xz -C site --strip-components=1"
+  cwd tmp_dir;
+  command "curl http://ftp.drupal.org/files/projects/drupal-7.22.tar.gz | tar xz -C site --strip-components=1"
   only_if { project_missing }
 end
 

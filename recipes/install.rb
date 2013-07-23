@@ -42,9 +42,9 @@ end
 
 conf_dir = "#{node['deploy-drupal']['drupal_root']}/sites/default"
 
-template "local.settings.php" do
-  source "local.setting.php.erb"
-  path "#{conf_dir}/local.settings.php"
+template "settings.local.php" do
+  source "settings.local.php.erb"
+  path "#{conf_dir}/settings.local.php"
   mode 0460
   owner node['apache']['user']
   group node['deploy-drupal']['dev_group']
@@ -61,7 +61,7 @@ file "settings.php" do
   content ( 
     IO.read("#{conf_dir}/default.settings.php").
     gsub(/\n\$(databases|db_url|db_prefix)\s*=.*\n/,'') +
-    "\ninclude_once('local.settings.php');"
+    "\ninclude_once('settings.local.php');"
   )
   action :create_if_missing
   notifies :reload, "service[apache2]"
