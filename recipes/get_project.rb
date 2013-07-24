@@ -15,10 +15,6 @@ directory node['deploy-drupal']['deploy_dir'] do
   recursive true
 end
 
-directory DEPLOY_SITE_DIR + "/" + node['deploy-drupal']['drupal_files_dir'] do
-  recursive true
-end
-
 # only runs if project root directory does not exist
 execute "get-project-from-git" do
   group node['deploy-drupal']['dev_group_name']

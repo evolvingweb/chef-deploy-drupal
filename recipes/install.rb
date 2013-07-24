@@ -63,6 +63,12 @@ DRUSH_SI            = [ "php -d sendmail_path=/bin/true",
                         "--site-name='#{node['deploy-drupal']['project_name']}'"
                       ].join(' ')
 
+# make sure the site directory exists
+directory DEPLOY_SITE_DIR + "/" + node['deploy-drupal']['drupal_files_dir'] do
+  recursive true
+end
+
+
 # TODO must raise exception if db is full but Drupal is not connected
 # install Drupal Site
 execute "install-disconnected-empty-db-site" do
