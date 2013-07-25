@@ -117,15 +117,14 @@ execute "drush-site-install" do
   only_if db_empty
   notifies :run, "execute[post-install-script]"
 end
-
-bash "finish-install" do
+# the following resource is executed on every provision
+bash "finish-provision" do
   # post install script might be relative to project_root
-  cwd node['deploy-drupal']['project_root']
+  cwd node['deploy-drupal']['drupal_root']
   code <<-EOH
     bash drupal-perm
-    drush --root=#{node['deploy-drupal']['drupal_root']} cache-clear all
+    drush cache-clear all
   EOH
-  action :nothing
 end
 
 script_file = node['deploy-drupal']['install']['script']
