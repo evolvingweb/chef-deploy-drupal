@@ -12,6 +12,7 @@ end
 project = node['deploy-drupal']['project_root']
 gitclone = "git clone #{node['deploy-drupal']['get_project']['git_repo']} #{project};"
 gitcheckout = "cd #{project}; git checkout #{node['deploy-drupal']['get-project']['git_branch']}"
+# clone git repo and checkout branch
 execute "get-project-from-git" do
   command gitclone + git checkout
   group node['deploy-drupal']['dev_goup']
@@ -30,9 +31,9 @@ end
 
 index_exists = File.exists? "#{node['deploy-drupal']['drupal_root']}/index.php"
 drupal_root_msg = "there is " + ( index_exists ? "an" : "no" ) + 
-  "index.php file in the site directory #{node['deploy-drupal']['drupal_root']}" +
-  ( index_exists ? "sounds good!" : "this might not be what you want." )
+  " index.php file in the site directory #{node['deploy-drupal']['drupal_root']}" +
+  ( index_exists ? "sounds good!" : "this is probably not what you want." )
 
 log drupal_root_msg do
-  level :info
+  level index_exists ? :info : :warn
 end
