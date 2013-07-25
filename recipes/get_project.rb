@@ -17,7 +17,7 @@ execute "get-project-from-git" do
   command "#{gitclone}; #{gitcheckout}"
   group node['deploy-drupal']['dev_goup']
   creates node['deploy-drupal']['drupal_root'] + "/index.php"
-  not_if { node['deploy-drupal']['get_project']['git_repo'].nil? }
+  not_if { node['deploy-drupal']['get_project']['git_repo'].empty? }
   notifies :restart, "service[apache2]"
 end
 
@@ -25,7 +25,7 @@ execute "get-project-from-path" do
   command "cp -Rf '#{node['deploy-drupal']['get_project']['path']}/.' '#{node['deploy-drupal']['project_root']}'"
   group node['deploy-drupal']['dev_goup']
   creates node['deploy-drupal']['drupal_root'] + "/index.php"
-  not_if { node['deploy-drupal']['get_project']['path'].nil? }
+  not_if { node['deploy-drupal']['get_project']['path'].empty? }
   notifies :restart, "service[apache2]"
 end
 
