@@ -12,9 +12,13 @@ conf_file = node['nginx']['dir'] + "/sites-available/" +
 # as they will be used as pcre regular expressions for nginx
 ext_list = '\.(' + node['deploy-drupal']['nginx']['extension_block_list'].join('|') + ')$'
 location_list = '^(' +  node['deploy-drupal']['nginx']['location_block_list'].join('|') + ')$'
-keywork_list = '(' + node['deploy-drupal']['nginx']['keyword_block_list'].join('|') + ')'
+keyword_list = '(' + node['deploy-drupal']['nginx']['keyword_block_list'].join('|') + ')'
 static_list = '\.(' + node['deploy-drupal']['nginx']['static_content'].join('|') + ')(\.gz)?$'
-
+# custom blocks file might be relative to project root
+custom_file = node['deploy-drupal']['nginx']['custom_blocks_file']
+if custom_file[0] == '/' 
+  custom_file = "#{node['deploy-drupal']['project_root']}/#{custom_file}"
+end
 # load the nginx site template
 template conf_file do
   source "nginx_site.conf.erb"
@@ -25,7 +29,7 @@ template conf_file do
     :ext_list => ext_list,
     :location_list => location_list,
     :keyword_list => keyword_list,
-    :static_list => static_list
+    :static_list => static_list,
     :custom_file => node['deploy-drupal']['nginx']['custom_blocks_file']
   })
   notifies :reload, "service[nginx]"

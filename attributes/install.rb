@@ -16,5 +16,6 @@ default['deploy-drupal']['install']['sql_dump'] = ''
 # path to bash script file to be executed after installation
 # can be absolute or relative to project root
 default['deploy-drupal']['install']['script'] = ''
-# absolute path to custom file to be apended to local.settings.php
-default['deploy-drupal']['install']['settings'] = ''
+# path to custom file to be apended to local.settings.php
+# can be absolute or relative to project root
+default['deploy-drupal']['install']['custom_settings'] = ''
