@@ -21,6 +21,3 @@ $databases = array (
 <% else %>
   $db_url = "mysql://<%=@db_user%>:<%=@db_pass%>@localhost/<%=@db_name%>";
 <% end %>
-?>
-<%= IO.read(@custom_file) if !@custom_file.nil? and File.exists?(@custom_file) %>
-<?php

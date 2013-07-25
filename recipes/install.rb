@@ -47,6 +47,7 @@ template "/usr/local/bin/drupal-reset" do
     :db_name => db_name,
     :drupal_root => node['deploy-drupal']['drupal_root']
   })
+  action :create_if_missing
 end
 
 grant_sql = "GRANT ALL ON #{db_name}.* TO #{db_user} IDENTIFIED BY '#{db_pass}';"
