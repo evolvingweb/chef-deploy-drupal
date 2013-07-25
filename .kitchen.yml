@@ -4,10 +4,10 @@ driver_config:
   require_chef_omnibus: true
 
 platforms:
-- name: ubuntu-12.04
+- name: ubuntu-12.04-fresh
   driver_config:
     box: precise64
-    box_url: 'http://dl.dropbox.com/u/1537815/precise64.box'
+    box_url: http://dl.dropbox.com/u/1537815/precise64.box
   run_list:
     - recipe[deploy-drupal::dependencies]
   attributes: {
@@ -19,42 +19,71 @@ platforms:
   }
 
 suites:
-- name: download and install
+- name: download-and-install-7
   run_list: 
   - recipe[deploy-drupal::default]
   - recipe[minitest-handler]
-- name: download, populate, and install
+- name: download-populate-install
   run_list:
   - recipe[deploy-drupal::default]
   - recipe[minitest-handler]
   attributes: {
-    "deploy-drupal": {
-      "get_project" : { "git" : "" , "path" : "" },
+    "deploy-drupal" : {
+      "dev_group" : "vagrant"
     },
     "minitest": {
       "recipes": ["deploy-drupal::default"]
     }
   }
-- name: get project from filesystem
+- name: download-and-install-6
+  run_list: 
+  - recipe[deploy-drupal::default]
+  - recipe[minitest-handler]
+- name: download-populate-install
   run_list:
   - recipe[deploy-drupal::default]
   - recipe[minitest-handler]
   attributes: {
-    "deploy-drupal": {
-      "get_project" : { "git" : "" , "path" : "/vagrant/repo" }
+    "deploy-drupal" : {
+      "dev_group" : "vagrant",
+      "version" : "6"
     },
     "minitest": {
       "recipes": ["deploy-drupal::default"]
     }
   }
-- name: get project from git repo with db dump in repo
+
+- name: get-project-path
   run_list:
   - recipe[deploy-drupal::default]
   - recipe[minitest-handler]
   attributes: {
     "deploy-drupal": {
-      "get_project" : { "git_repo" : "file:///vagrant/repo" , "git_branch" : "foo" }
-      "install" : { "sql_dump" : "db/sql_dump",  "settings" : "settings-priv.php",}
+      "dev_group" : "vagrant",
+      "get_project" : { 
+        "git" : "" ,
+        "path" : "/vagrant/repo"
+      },
+    },
+    "minitest": {
+      "recipes": ["deploy-drupal::default"]
+    }
+  }
+- name: get-project-git-with-dump
+  run_list:
+  - recipe[deploy-drupal::default]
+  - recipe[minitest-handler]
+  attributes: {
+    "deploy-drupal": {
+      "dev_group" : "vagrant",
+      "get_project" : { 
+        "git_repo" : "file:///vagrant/repo" , 
+        "git_branch" : "foo" 
+      },
+      "install" : { 
+        "sql_dump" : "db/sql_dump",
+        "settings" : "settings-priv.php",
+      },
     },
     "minitest": {
       "recipes": ["deploy-drupal::default"]
@@ -67,12 +96,16 @@ suites:
   - recipe[minitest-handler]
   attributes: {
     "deploy-drupal": {
-      "get_project" : { "git" : "" , "path" : "" },
+      "dev_group" : "vagrant",
       "apache_port" : "8000",
-      "nginx" : { "port": "80" } 
+      "nginx" : { 
+        "port": "80"
+      },
     },
-    "apache" : { "listen_ports" : ["8000"] }
+    "apache" : { 
+      "listen_ports" : ["8000"]
+    },
     "minitest": {
       "recipes": ["deploy-drupal::default", "deploy-drupal::nginx"]
-    }
+    },
   }
