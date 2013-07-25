@@ -5,6 +5,7 @@
 ## make sure  project skeleton exists in deployment 
 
 directory node['deploy-drupal']['project_root'] do
+  group node['deploy-drupal']['dev_group']
   recursive true
 end
 
