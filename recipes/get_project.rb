@@ -9,8 +9,11 @@ directory node['deploy-drupal']['project_root'] do
   recursive true
 end
 
+project = node['deploy-drupal']['project_root']
+gitclone = "git clone #{node['deploy-drupal']['get_project']['git_repo']} #{project};"
+gitcheckout = "cd #{project}; git checkout #{node['deploy-drupal']['get-project']['git_branch']}"
 execute "get-project-from-git" do
-  command "git clone #{node['deploy-drupal']['get_project']['git']} #{node['deploy-drupal']['project_root']}"
+  command gitclone + git checkout
   group node['deploy-drupal']['dev_goup']
   creates node['deploy-drupal']['project_root']
   not_if { node['deploy-drupal']['get_project']['git'].nil? }

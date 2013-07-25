@@ -19,7 +19,7 @@ else
 end
 
 project_missing = node['deploy-drupal']['get_project']['path'].empty? &&
-                  node['deploy-drupal']['get_project']['git'].empty?
+                  node['deploy-drupal']['get_project']['git_repo'].empty?
 
 repo_url = "http://ftp.drupal.org/files/projects"
 
