@@ -30,7 +30,6 @@ suites:
   attributes: {
     "deploy-drupal": {
       "get_project" : { "git" : "" , "path" : "" },
-      "install" : { "sql_dump" : "/vagrant/prj/db/dump.sql.gz" }
     },
     "minitest": {
       "recipes": ["deploy-drupal::default"]
@@ -42,7 +41,7 @@ suites:
   - recipe[minitest-handler]
   attributes: {
     "deploy-drupal": {
-      "get_project" : { "git" : "" , "path" : "/vagrant/prj" }
+      "get_project" : { "git" : "" , "path" : "/vagrant/repo" }
     },
     "minitest": {
       "recipes": ["deploy-drupal::default"]
@@ -54,8 +53,8 @@ suites:
   - recipe[minitest-handler]
   attributes: {
     "deploy-drupal": {
-      "get_project" : { "git" : "file:///vagrant/repo" , "path" : "" }
-      "install" : { "install" : "db/sql_dump" }
+      "get_project" : { "git_repo" : "file:///vagrant/repo" , "git_branch" : "foo" }
+      "install" : { "sql_dump" : "db/sql_dump",  "settings" : "settings-priv.php",}
     },
     "minitest": {
       "recipes": ["deploy-drupal::default"]

@@ -21,8 +21,9 @@ if ( node['deploy-drupal']['get_project']['git_repo'].empty? &&
      node['deploy-drupal']['get_project']['path'].empty? )
   default['deploy-drupal']['drupal_root'] = "#{node['deploy-drupal']['project_root']}/site"
 else
-  default['deploy-drupal']['drupal_root'] = node['deploy-drupal']['project_root'] + "/"
-                                            node['deploy-drupal']['get_project']['site_dir']
+  default['deploy-drupal']['drupal_root'] = 
+    node['deploy-drupal']['project_root'] + "/" +
+    node['deploy-drupal']['get_project']['site_dir']
 end
 # absolute path to Drupal 'files' directory
 default['deploy-drupal']['files_dir'] = node['deploy-drupal']['drupal_root'] + "/sites/default/files"
