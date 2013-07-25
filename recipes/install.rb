@@ -72,8 +72,7 @@ template "settings.local.php" do
   })
 end
 
-append_code = "unset($db_url, $db_prefix, $databases);" + "\n" +
-              'include_once("settings.local.php");'
+append_code = 'include_once("settings.local.php");'
 # copy contents of default.settings.php
 # unset db crendential variables, and includes local.settings.php
 bash "configure-settings.php" do
