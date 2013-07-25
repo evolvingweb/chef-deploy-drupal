@@ -10,14 +10,14 @@ directory node['deploy-drupal']['project_root'] do
 end
 
 project = node['deploy-drupal']['project_root']
-gitclone = "git clone #{node['deploy-drupal']['get_project']['git_repo']} #{project};"
-gitcheckout = "cd #{project}; git checkout #{node['deploy-drupal']['get-project']['git_branch']}"
+gitclone = "git clone #{node['deploy-drupal']['get_project']['git_repo']} #{project}"
+gitcheckout = "cd #{project}; git checkout #{node['deploy-drupal']['get_project']['git_branch']}"
 # clone git repo and checkout branch
 execute "get-project-from-git" do
-  command gitclone + git checkout
+  command "#{gitclone}; #{gitcheckout}"
   group node['deploy-drupal']['dev_goup']
-  creates node['deploy-drupal']['project_root']
-  not_if { node['deploy-drupal']['get_project']['git'].nil? }
+  creates node['deploy-drupal']['drupal_root'] + "/index.php"
+  not_if { node['deploy-drupal']['get_project']['git_repo'].nil? }
   notifies :restart, "service[apache2]"
 end
 
@@ -35,5 +35,5 @@ drupal_root_msg = "there is " + ( index_exists ? "an" : "no" ) +
   ( index_exists ? "sounds good!" : "this is probably not what you want." )
 
 log drupal_root_msg do
-  level index_exists ? :info : :warn
+  level { index_exists ? :info : :warn }
 end
