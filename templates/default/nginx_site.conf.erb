@@ -9,7 +9,7 @@ log_format drupal_proxy '<%= node['deploy-drupal']['nginx']['log_format'] %>';
 # server block for <%= node['deploy-drupal']['project_name'] %>
 server {
   listen <%= node['deploy-drupal']['nginx']['port'] %> default;
-  root <%= node['deploy-drupal']['nginx']['root']  %>;
+  root '<%= node['deploy-drupal']['drupal_root']  %>';
   set $boost_query "_";
   # gzip is set to <%= node['nginx']['gzip'] %> in nginx.conf
   gzip_static <%= node['nginx']['gzip']%>;

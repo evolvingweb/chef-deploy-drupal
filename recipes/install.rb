@@ -102,7 +102,7 @@ dump_file = node['deploy-drupal']['install']['sql_dump']
 execute "populate-db" do
   # dump file path might be relative to project_root
   cwd node['deploy-drupal']['project_root']
-  command "zless '#{dump_file}' | #{mysql_connection} ;"
+  command "zless '#{dump_file}' | #{mysql_connection} --database=#{db_name};"
   only_if db_empty
   only_if "test -f '#{dump_file}'", :cwd => node['deploy-drupal']['project_root']
   notifies :run, "execute[post-install-script]"
