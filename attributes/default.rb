@@ -17,7 +17,7 @@ default['deploy-drupal']['project_name'] = 'cooked.drupal'
 default['deploy-drupal']['project_root'] = "/var/shared/sites/#{node['deploy-drupal']['project_name']}"
 
 # absolute path to Drupal site, may be identical to project_root
-if ( node['deploy-drupal']['get_project']['git'].empty? && 
+if ( node['deploy-drupal']['get_project']['git_repo'].empty? && 
      node['deploy-drupal']['get_project']['path'].empty? )
   default['deploy-drupal']['drupal_root'] = "#{node['deploy-drupal']['project_root']}/site"
 else
