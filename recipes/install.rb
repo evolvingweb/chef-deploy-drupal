@@ -27,6 +27,13 @@ template "/usr/local/bin/drupal-perm" do
   mode 0755
   owner "root"
   group "root"
+  variables({
+    :project_path =>  node['deploy-drupal']['project_path'],
+    :site_path    =>  node['deploy-drupal']['drupal_root'],
+    :files_path   =>  node['deploy-drupal']['files_dir'],
+    :user         =>  node['apache']['user'],
+    :group        =>  node['deploy-drupal']['dev_group']
+  })
 end
 # install reset script
 template "/usr/local/bin/drupal-reset" do
