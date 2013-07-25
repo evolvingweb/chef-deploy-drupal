@@ -19,18 +19,18 @@ server {
   location ~ ^\. {
     deny all;
   }
-  location ~ <%= @pcre_extension_block_list %> {
+  location ~ <%= @ext_list %> {
     deny all;
   }
-  location ~ <%= @pcre_location_block_list %> { 
+  location ~ <%= @location_list %> {
     deny all;
   }
-  location ~ <%= @pcre_keyword_block_list %> {
+  location ~ <%= @keyword_list %> {
     deny all;
   }
   # ------------------------
   ## Static Content Rules
-  location ~* <%= @pcre_static_content %> {
+  location ~* <%= @static_list %> {
     expires max;
     try_files $request_uri @drupal;
     break;

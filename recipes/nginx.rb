@@ -6,35 +6,26 @@
 # assemble all necessary query strings and paths
 include_recipe 'nginx::default'
 
-NGINX_SITE_FILE     = node['nginx']['dir'] + "/sites-available/" + 
-                      node['deploy-drupal']['project_name']
-
+conf_file = node['nginx']['dir'] + "/sites-available/" + 
+            node['deploy-drupal']['project_name']
 # the following strings must be assembled using single quotes
 # as they will be used as pcre regular expressions for nginx
-EXTENSION_BLOCK_LIST= '\.(' +
-                      node['deploy-drupal']['nginx']['extension_block_list'].join('|')+
-                      ')$'
-LOCATION_BLOCK_LIST = '^(' +
-                      node['deploy-drupal']['nginx']['location_block_list'].join('|') +
-                      ')$'
-KEYWORD_BLOCK_LIST  = '(' +
-                      node['deploy-drupal']['nginx']['keyword_block_list'].join('|') +
-                      ')'
-STATIC_CONTENT      = '\.(' +
-                      node['deploy-drupal']['nginx']['static_content'].join('|')+
-                      ')(\.gz)?$'
+ext_list = '\.(' + node['deploy-drupal']['nginx']['extension_block_list'].join('|') + ')$'
+location_list = '^(' +  node['deploy-drupal']['nginx']['location_block_list'].join('|') + ')$'
+keywork_list = '(' + node['deploy-drupal']['nginx']['keyword_block_list'].join('|') + ')'
+static_list = '\.(' + node['deploy-drupal']['nginx']['static_content'].join('|') + ')(\.gz)?$'
 
 # load the nginx site template
-template NGINX_SITE_FILE do
+template conf_file do
   source "nginx_site.conf.erb"
   mode 0644
   owner "root"
   group "root"
   variables({
-    :pcre_extension_block_list => EXTENSION_BLOCK_LIST,
-    :pcre_location_block_list => LOCATION_BLOCK_LIST,
-    :pcre_keyword_block_list => KEYWORD_BLOCK_LIST,
-    :pcre_static_content => STATIC_CONTENT,
+    :ext_list => ext_list,
+    :location_list => location_list,
+    :keyword_list => keyword_list,
+    :static_list => static_list
     :custom_file => node['deploy-drupal']['nginx']['custom_blocks_file']
   })
   notifies :reload, "service[nginx]"
