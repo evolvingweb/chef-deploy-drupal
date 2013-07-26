@@ -77,7 +77,6 @@ execute "install-disconnected-empty-db-site" do
   not_if DB_FULL
   not_if  "test -f '#{node['deploy-drupal']['sql_load_file']}'", :cwd => DEPLOY_PROJECT_DIR
   notifies :run, "execute[populate-fresh-installation-db]", :immediately
-  notifies :run, "execute[drush-cache-clear]", :delayed
   notifies :run, "execute[drush-suppress-http-status-error]", :delayed
   notifies :run, "execute[fix-drupal-permissions]", :delayed
 end
@@ -103,8 +102,8 @@ execute "populate-db" do
   command DRUSH_SQL_LOAD
   only_if  "test -f '#{node['deploy-drupal']['sql_load_file']}'", :cwd => DEPLOY_PROJECT_DIR
   not_if DB_FULL
-  notifies :run, "execute[run-post-install-script]"
-  notifies :run, "execute[drush-cache-clear]", :delayed
+  notifies :run, "execute[drush-cache-clear]", :immediately
+  notifies :run, "execute[run-post-install-script]", :delayed
   notifies :run, "execute[drush-suppress-http-status-error]", :delayed
   notifies :run, "execute[fix-drupal-permissions]", :delayed
 end
@@ -129,8 +128,15 @@ execute "drush-suppress-http-status-error" do
   action :nothing
 end
 
-# drush cache clear
+# ignore_failure is a workaround for the following errors:
+#    You have an error in your SQL syntax; check the manual that              [error]
+#    corresponds to your MySQL server version for the right syntax to use
+#    near &#039;) ORDER BY fit DESC LIMIT 0, 1&#039; at line 1
+#      query: SELECT * FROM menu_router WHERE path IN () ORDER BY fit DESC
+#    LIMIT 0, 1 in /var/shared/sites/muhc/site/includes/menu.inc on line
+#    317.
 execute "drush-cache-clear" do
   command "#{DRUSH} cache-clear all"
+  ignore_failure true
   action :nothing
 end
