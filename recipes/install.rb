@@ -28,7 +28,7 @@ template "/usr/local/bin/drupal-perm" do
   owner "root"
   group "root"
   variables({
-    :project_path =>  node['deploy-drupal']['project_path'],
+    :project_path =>  node['deploy-drupal']['project_root'],
     :site_path    =>  node['deploy-drupal']['drupal_root'],
     :files_path   =>  node['deploy-drupal']['files_dir'],
     :user         =>  node['apache']['user'],
@@ -107,7 +107,7 @@ execute "populate-db" do
   command "zless '#{dump_file}' | #{mysql_connection} --database=#{db_name};"
   only_if db_empty
   only_if "test -f '#{dump_file}'", :cwd => node['deploy-drupal']['project_root']
-  notifies :run, "execute[post-install-script]"
+  notifies :run, "execute[post-install-script]", :immediately
 end
 
 # fixes sendmail error https://drupal.org/node/1826652#comment-6706102
