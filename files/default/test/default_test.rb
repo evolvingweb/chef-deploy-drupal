@@ -66,10 +66,11 @@ end
 # Custom Tests:
 class TestDrupal < MiniTest::Chef::TestCase
   def test_that_drupal_is_served
+    drush = "drush --root='#{node['deploy-drupal']['drupal_root']}'"
+    site_name_cmd = 'drush vget site_name | sed "s/site_name:\s*\'\(.*\)\'/\1/"'
     txt = "tried to access the Drupal site #{node['deploy-drupal']['project_name']}\
            at localhost:#{node['deploy-drupal']['apache_port']}"
-    command = "curl --silent localhost:#{node['deploy-drupal']['apache_port']}\
-              | grep '<title>' | grep '#{node['deploy-drupal']['project_name']}'"
+    command = "curl --silent localhost:#{node['deploy-drupal']['apache_port']} | grep `#{site_name_cmd}`"
     assert_sh command, txt
   end
 end
