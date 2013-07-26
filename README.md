@@ -3,14 +3,15 @@
 [![BuildStatus](https://secure.travis-ci.org/amirkdv/chef-deploy-drupal.png)](http://travis-ci.org/amirkdv/chef-deploy-drupal)
 
 #### Description
-Installs, configures, and bootsraps a [Drupal 7](https://drupal.org/drupal-7.0)
-site running on MySQL and Apache. The cookbook supports two main use cases:
+Installs, configures, and bootsraps a [Drupal 6/7](https://drupal.org)
+site running on MySQL and Apache, and if desired with an Nginx reverse proxy. 
+The cookbook supports two main use cases:
 
 - You have an **existing** Drupal site (code base, database SQL dump, and maybe
   a bash script to run after everything is loaded) and want to
   configure a server to serve your site.
 - You want the server to download, install, and serve a **fresh** installation of
-  Drupal 7.
+  Drupal 6/7.
 
 To see how you can load an existing code base (from local filesystem or from a
 git repo) and populate the Drupal database with an existing database dump, refer
@@ -64,7 +65,7 @@ below can be accessed in the cookbook via
 
 |   Attribute Name    |Default |           Description           |
 | --------------------|:------:|:------------------------------: |
-|`get_project_from`| `''`| path to existing project or url to existing git repo (refer to Recipes for usage)
+|`get_project`| `''`| path to existing project or url to existing git repo (refer to Recipes for usage)
 |`drupal_dl_version`| `drupal-7`| Drupal version to download if no existing site is found (refer to Recipes for usage)
 |`sql_load_file`|`''`     | path to SQL dump, absolute **or** relative to project root
 |`post_install_script`|`''` |path to post-install script, absolute **or** relative to project root
@@ -89,14 +90,34 @@ and other configuration files.
 #### `deploy-drupal::dependencies`
 Includes dependency cookbooks, installs lamp stack packages to get Apache, MySQL, PHP, and Drush running.
 
+#### `deploy-drupal::download_drupal`
+Downloads drupal if no existing project is found. This recipe
+**only** downloads Drupal if both attributes `['get_project']['path']` and
+`['get_project']['path']` are left empty (as they are by default). This recipe
+will simply download and untar Drupal to a temporary directory and assign the
+path to this directory to `['get_project']['path']`. This recipe uses the
+`version` attribute which defaults to `'7'`. To use this
+attribute, you should provide the recipe with drupal version that
+
+1. `7` will download the latest recommended Drupal7 release (`'7.22'` as of now),
+1. `6` will download the latest recommended Drupal6 release (`'6.28'` as of
+now),
+1. `N.x.y` will try and download the exact provided version.
+
+This recipe does not by any means rely on cookbook dependencies and can be
+invoked independently (without having `deploy-drupal::dependencies` preceding
+it in the run list)
+
+
 #### `deploy-drupal::get_project`
 Loads existing project, if any, and makes sure the 
 project directory skeleton is created in deployment. To specify existing
-projects, the `get_project_from` attribute should be used:
+projects, the `get_project` attribute should be used:
 
 ``` ruby
 # use git repo as project
-:git => "url://to/git/repository.git"
+:git_repo => "url://to/git/repository.git",
+:git_branch => "foo" # defaults to "master"
 
 # use project in local file system
 :path => "path/to/existing/project"
@@ -110,43 +131,29 @@ If such project is found, it will be deployed at `<deploy_dir>/<project_name>`
 This recipes ensures that the directories `<deploy_dir>/<project_name>` and
 `<deploy_dir>/<project_name>/<drupal_root_dir>` are created.
 
-#### `deploy-drupal::download_drupal`
-Downloads drupal if no existing project is found. This recipe
-**only** downloads Drupal if after `get_project` there exists no `index.php` in the
-`<deploy_dir>/<project_name>/<drupal_root_dir>` directory. This recipe uses the
-`dl_drupal_version` attribute which defaults to `drupal-7`. To use this
-attribute, you should provide the recipe with drupal version that `drush dl`
-would understand:
-
-1. `drupal` will download the latest recommended Drupal release,
-1. `drupal-7` will download the latest stable version of Drupal 7 core,
-1. `drupal-7.x` will download the latest development version of Drupal 7 core,
-1. Furthermore, you can set `dl_drupal_version` to `'false'` to avoid downloading
-Drupal, even if that would mean there will be no site to be served.
-
 #### `deplpoy-drupal::prepare`
 Prepares the machine for Drupal installation: configures apache
 vhost, and if necessary, creates Drupal MySQL user with appropriate privileges,
 and, again, if necessary, creates an empty Drupal database.
 This recipe ensures that:
 
-* MySQL recognizes a user with username `<mysql_user>`, identified by
-`<mysql_password>`. The user is granted **all** privileges on the database
+* MySQL recognizes a user with username `<db_user>`, identified by
+`<db_pass>`. The user is granted **all** privileges on the database
 `db_name`.
 * Apache has a virtual host bound to port `<apache_port>` with the name
 `<project_name>`. The virtual host has its root directory at
-`<deploy_dir>/<project_name>/<drupal_root_dir>`.
+`<drupal_root>`.
 
 Additionally, this
 recipe installs two utility bash scripts under `/usr/local/bin/`:
 
-* `drupal-perm.sh`: fixes the fily system permissions and ownership of the
+* `drupal-perm`: fixes the fily system permissions and ownership of the
 project directory (automatically invoked in the `install` recipe). Refer to the
 description of the `deploy-drupal::install` recipe, below, for more information
 about the behavior of this script.
-* `drupal-reset.sh`: takes a `drush archive-dump` of the existing Drupal site,
+* `drupal-reset`: takes a `drush archive-dump` of the existing Drupal site,
 and reverts the system back to its state prior to Drupal
-installation: destroys project directory at `<deploy_dir>/<project_name>`,
+installation: destroys project directory at `<project_root>`,
 drops the Drupal Database `<db_name>` and MySQL user `<db_user>`.
 
 #### `deploy-drupal::install`
@@ -156,10 +163,10 @@ valid credentials **and** if the database `<db_name>` is entirely empty (no
 tables).
 
 It also populates the database if a database dump is found at
-`sql_load_file`. This attribute can be an absolute path in local file system
+`sql_dump`. This attribute can be an absolute path in local file system
 (for example, when you do not have an existing project), or
 relative to the project root (and therefore sought at
-`<deploy_dir>/<project_name>/<sql_load_file>`). Again, the database dump is
+`<project_root>/<sql_dump>`). Again, the database dump is
 **only** used if the `<db_name>` MySQL database is entirely empty.
 
 After installation, this recipe will run an optional bash script that you might
@@ -171,19 +178,18 @@ After installation, the expected state is as follows:
 1. The installed Drupal site recognizes `<admin_user>` (with password
 `<admin_pass>`) as "user one".
 1. The following directory structure holds in the provisioned machine:
-  - `<deploy_dir>`
-      - `<project_name>`
-          - `<drupal_root_dir>`
-              - `index.php`
-              - `includes`
-              - `modules`
-              - `sites`
-              - `themes`
-              - ...
-          - `db`
-              - `dump.sql.gz`
-          - `scripts`
-              - `post-install-script.sh`
+    - `/var/shared/sites/<project_name>`
+        - `<drupal_root>`
+            - `index.php`
+            - `includes`
+            - `modules`
+            - `sites`
+            - `themes`
+            - ...
+        - `db`
+            - `dump.sql.gz`
+        - `scripts`
+            - `post-install-script.sh`
 
 1. Note that `db` and `scripts` are just example subdirectories and are not
 controlled by the cookbook. You will be able to find the entire contents of
@@ -221,6 +227,11 @@ your tests against the cookbook:
         bundle install
         kitchen test 
 
+1. To speed up debugging/testing the included `Vagrantfile` uses a Vagrant box named
+`precise64-dev` which is merely a `precise64` VM having had
+`deploy-drupal::dependencies` run against it. You can checkout the list of all
+the packages and gems installed on this box
+[here](https://s3.amazonaws.com/vagrant-drupal/precise64-dev.txt)
 1. Note that the `vagrant-berkshelf` plugin should
 be installed using `vagrant plugin install` and not as an independent Ruby gem.
 1. Right now, [Travis-CI](https://travis-ci.org/) is being used only minimally;

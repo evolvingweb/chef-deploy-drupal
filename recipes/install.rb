@@ -65,11 +65,6 @@ conf_dir = "#{node['deploy-drupal']['drupal_root']}/sites/default"
 directory conf_dir do
   recursive true
 end
-# custom settings file might be relative to project root
-custom_file = node['deploy-drupal']['install']['custom_settings']
-if custom_file[0] == '/' 
-  custom_file = "#{node['deploy-drupal']['project_root']}/#{custom_file}"
-end
 
 template "settings.local.php" do
   source "settings.local.php.erb"
