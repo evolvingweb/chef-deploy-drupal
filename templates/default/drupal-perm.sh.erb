@@ -4,9 +4,9 @@
 # run this script in the Drupal root directory
 echo "setting filesystem permissions for Drupal root directory at <%= @project_path %> ..."
 
-find '<%= @project_path %>' ! -regex '<%= @site_path%>/?.*' | xargs chown root:<%= @group %>
-chmod -R u=rx,g=rwx,o=rx <%= @project_path %>
-chmod -R g+s '<%= @site_path %>'
+chown -R '<%= @project_path %>' :<%= @group %>
+chmod -R g=rwx '<%= @project_path %>'
+chmod -R g+s '<%= @project_path %>'
 
 chown -R <%= @user %>:<%= @group %> '<%= @site_path %>'
 find '<%= @site_path %>' -type f -exec chmod u=r,g=rw,o-rwx '{}' \;
