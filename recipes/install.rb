@@ -81,8 +81,7 @@ template "settings.local.php" do
   variables({
     :db_user => node['deploy-drupal']['install']['db_user'],
     :db_pass => db_pass,
-    :db_name => db_name,
-    :custom_file => custom_file
+    :db_name => db_name
   })
 end
 
