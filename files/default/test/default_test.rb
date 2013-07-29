@@ -18,7 +18,7 @@ describe_recipe 'deploy-drupal::default' do
       must_exist
     end
     it "has the expected ownership and permissions" do
-      file(node['deploy-drupal']['drupal_root']).
+      directory(node['deploy-drupal']['drupal_root']).
       must_exist.with(:owner, node['apache']['user'])
     end
 
@@ -67,10 +67,10 @@ end
 class TestDrupal < MiniTest::Chef::TestCase
   def test_that_drupal_is_served
     drush = "drush --root='#{node['deploy-drupal']['drupal_root']}'"
-    site_name_cmd = 'drush vget site_name | sed "s/site_name:\s*\'\(.*\)\'/\1/"'
+    site_name_cmd = drush + ' variable-get site_name | sed "s/site_name:\s*\'\(.*\)\'/\1/"'
     txt = "tried to access the Drupal site #{node['deploy-drupal']['project_name']}\
            at localhost:#{node['deploy-drupal']['apache_port']}"
-    command = "curl --silent localhost:#{node['deploy-drupal']['apache_port']} | grep `#{site_name_cmd}`"
+    command = "curl --silent localhost:#{node['deploy-drupal']['apache_port']} | grep \"`#{site_name_cmd}`\""
     assert_sh command, txt
   end
 end
