@@ -78,7 +78,6 @@ execute "install-disconnected-empty-db-site" do
   not_if  "test -f '#{node['deploy-drupal']['sql_load_file']}'", :cwd => DEPLOY_PROJECT_DIR
   notifies :run, "execute[populate-fresh-installation-db]", :immediately
   notifies :run, "execute[drush-suppress-http-status-error]", :delayed
-  notifies :run, "execute[fix-drupal-permissions]", :delayed
 end
 
 # load sql dump, if any, after fresh installation
@@ -105,7 +104,6 @@ execute "populate-db" do
   notifies :run, "execute[drush-cache-clear]", :immediately
   notifies :run, "execute[run-post-install-script]", :delayed
   notifies :run, "execute[drush-suppress-http-status-error]", :delayed
-  notifies :run, "execute[fix-drupal-permissions]", :delayed
 end
 
 execute "run-post-install-script" do
@@ -118,8 +116,6 @@ end
 # fix permissions of project root
 execute "fix-drupal-permissions" do
   command "bash drupal-perm"
-  # TODO this should be action :nothing and only notified by
-  # site-install, but that requires fixing ownership of deploy_dir
 end
 
 # TODO should only be used when Drupal is served through a forwarded port
