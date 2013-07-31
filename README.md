@@ -10,8 +10,8 @@ The cookbook supports two main use cases:
 - You have an **existing** Drupal site (code base, database SQL dump, and maybe
   a bash script to run after everything is loaded) and want to
   configure a server to serve your site.
-- You want the server to download, install, and serve a **fresh** installation of
-  Drupal 6/7.
+- You want to quickly configure a server that serves a fresh installation of
+  Drupal.
 
 To see how you can load an existing code base (from local filesystem or from a
 git repo) and populate the Drupal database with an existing database dump, refer
@@ -58,33 +58,55 @@ download a fresh stable release of Drupal 7 from [drupal.org](http://drupal.org)
 and will configure MySQL and Apache, according to cookbook attributes, to serve
 a installed site (no manual installation required).
 
-The following are the main attributes that this cookbook uses. All attributes mentioned
-below can be accessed in the cookbook via 
-`node['deploy_drupal']['<attribute_name>']`:
+Cookbook attributes are divided to 4 groups (`default`, `install`, `get_project`,
+and `nginx`). All attributes mentioned below can be accessed in the cookbook via 
+`node['deploy_drupal']['<attribute_group>']['<attribute_name>']`:
 
-
+* Core attributes (`default`):
 |   Attribute Name    |Default |           Description           |
 | --------------------|:------:|:------------------------------: |
-|`get_project`| `''`| path to existing project or url to existing git repo (refer to Recipes for usage)
-|`drupal_dl_version`| `drupal-7`| Drupal version to download if no existing site is found (refer to Recipes for usage)
-|`sql_load_file`|`''`     | path to SQL dump, absolute **or** relative to project root
-|`post_install_script`|`''` |path to post-install script, absolute **or** relative to project root
-|`drupal_root_dir`|`site`| name (no path) of Drupal site root directory (in source & in deployment), relative to project root
-|`drupal_files_dir`|`sites/default/files`| Drupal "files", relative to site root
-|`deploy_dir`|`/var/shared/sites`| absolute path to deployment directory
-|`project_name`|`cooked.drupal`| Virtual Host name and deployed project directory (relative inside `deploy_dir`)
-|`admin_user`   |`admin`  | username for "user one" in the installed site
-|`admin_user`   |`admin`  | password for "user one" in the installed site
-|`apache_port`|80       | must be consistent with`node['apache']['listen_ports']`
-|`admin_pass` |`admin`  | Drupal site administrator password
-|`dev_group_name` |`root` | System group owning site root (user owner is `node['apache']['user']`), must be already recognized by the operating system
-|`db_name`      |`drupal` | MySQL database used by Drupal
-|`mysql_user`   |`drupal_db`| MySQL user used by Drupal
-|`mysql_pass`   |`drupal_db`| MySQL password used by Drupal
+|`version`| `7`| Drupal version to be configured and/or downloaded, can be `N`, `N.x`, or `N.x.y`
+|`apache_port`| `80`| Port to which Apache virtual host for Drupal listens, must be consistent with `node['apache']['listen_ports']`
+|`dev_group`|`'root'`| user group owning drupal codebase files, cookbook does *not* create the group if it does not exist
+|`project_name`| `'cooked.drupal'` | Used as project identifier in configuration files: Apache VHost name, Nginx site name
+|`project_root`| `/var/shared/sites/<project_name>` | absolute path to project directory
+|`drupal_root` | r.f `attributes/default.rb` | absolute path to Drupal site, if `['get_project']['git_repo']` or `['get_project']['path']` is set, defaults to `<project_root>/X` where `X` is the Drupal root directory in existing project, otherwise defaults to `<project_root>/site`
+|`writable_dirs`|   `[ '/sites/default/files' ]` | relative path to directories in Drupal root to which Apache will be granted write access
+
+* Project attributes (`get_project`):
+|   Attribute Name    |Default |           Description           |
+| --------------------|:------:|:------------------------------: |
+|`path` | `''` | absolute path to a project directory in filesystem, will be copied to `<project_root>`, will be ignored if `git_repo` is specified.
+|`git_repo`| `''` | git URL to a project repository, will be cloned to `<project_root>`
+|`git_branch` | `master` | branch to checkout from project repository
+|`site_dir` | `site` | Drupal site directory relative to project path, will be disregarded if no path or git url is specified (Drupal will be downloaded to `<project_root>/site`
+
+* Installation attributes (`install`):
+|   Attribute Name    |Default |           Description           |
+| --------------------|:------:|:------------------------------: |
+| `db_user`| `drupal` | Database user for Drupal
+| `db_pass`| `drupal` | Database password for Drupal user
+| `db_name`| `drupal` | Drupal Database name
+| `admin_user`| `admin` | username for Drupal user one
+| `admin_pass`| `admin` | password for Drupal user one
+| `sql_dump`| `''` | path to sql dump file (can be .sql.gz) to populate the database, can be absolute *or* relative to project root
+| `script` | `''` | path to bash script file to be executed after installation, can be absolute *or* relative to project root
+
+* Nginx attributes (`nginx`):
+* Installation attributes (`install`):
+|   Attribute Name    |Default |           Description           |
+| --------------------|:------:|:------------------------------: |
+|`port` | `80` | defaults to the same port as Apache, but `deploy-drupal::nginx` is not included in the default recipe, must update `apache_port` if setting up Nginx
+|`log_format` | r.f `attributes/nginx.rb` | log format for the `<project_name>` Nginx site
+|`extension_block_list` | r.f `attributes/nginx.rb` | list of PCRE patterns to deny request if any pattern matches the requested file extenstion
+|`location_block_list` | r.f `attributes/nginx.rb` | list of PCRE patterns to deny request if any pattern matches the entire request location
+|`keyword_block_list` | r.f `attributes/nginx.rb` | list of pcre patterns to deny request if any pattern matches any part of request location
+|`static_content` | r.f `attributes/nginx.rb` | list of pcre patterns to serve files if any pattern matches requested file extension (will be matched against `[<pattern>](\.gz)?` )
+|`custom_blocks_file` | `''` | path to file to be appended to the Nginx server block, can be absolute *or* relative to project root
 
 ## Recipes
 In what follows, a **project** is a directory containing a Drupal site root
-directory (`drupal_root_dir`), and potentially database dumps, scripts
+directory (`drupal_root`), and potentially database dumps, scripts
 and other configuration files.
 
 #### `deploy-drupal::dependencies`
@@ -102,12 +124,11 @@ attribute, you should provide the recipe with drupal version that
 1. `7` will download the latest recommended Drupal7 release (`'7.22'` as of now),
 1. `6` will download the latest recommended Drupal6 release (`'6.28'` as of
 now),
-1. `N.x.y` will try and download the exact provided version.
+1. `N.x` and `N.x.y` will try to download the exact provided version.
 
 This recipe does not by any means rely on cookbook dependencies and can be
 invoked independently (without having `deploy-drupal::dependencies` preceding
 it in the run list)
-
 
 #### `deploy-drupal::get_project`
 Loads existing project, if any, and makes sure the 
@@ -131,54 +152,49 @@ If such project is found, it will be deployed at `<deploy_dir>/<project_name>`
 This recipes ensures that the directories `<deploy_dir>/<project_name>` and
 `<deploy_dir>/<project_name>/<drupal_root_dir>` are created.
 
-#### `deplpoy-drupal::prepare`
-Prepares the machine for Drupal installation: configures apache
-vhost, and if necessary, creates Drupal MySQL user with appropriate privileges,
-and, again, if necessary, creates an empty Drupal database.
-This recipe ensures that:
+#### `deplpoy-drupal::install`
+Installs Drupal and utility scripts on the machine: configures apache
+vhost, if necessary, creates Drupal MySQL user with appropriate privileges,
+and, populates the database (first, if dump file is provided, otherwise with
+`drush site-install`).
 
+This recipe ensures that:
 * MySQL recognizes a user with username `<db_user>`, identified by
 `<db_pass>`. The user is granted **all** privileges on the database
 `db_name`.
 * Apache has a virtual host bound to port `<apache_port>` with the name
 `<project_name>`. The virtual host has its root directory at
 `<drupal_root>`.
+* Drupal root directory contains valid credentials to connect to its database. A
+`settings.local.php` file is generated according to Drupal version and
+provided credentials. *Note*: `settings.php` is created and configured to
+include `settings.local.php` *only if* the provided code base does not include a
+`settings.php` file (typically only happens if Drupal is downloaded).
 
-Additionally, this
-recipe installs two utility bash scripts under `/usr/local/bin/`:
+Additionally, this recipe installs two utility bash scripts under `/usr/local/bin/`:
 
 * `drupal-perm`: fixes the fily system permissions and ownership of the
-project directory (automatically invoked in the `install` recipe). Refer to the
-description of the `deploy-drupal::install` recipe, below, for more information
-about the behavior of this script.
+project directory (automatically invoked after database population).
 * `drupal-reset`: takes a `drush archive-dump` of the existing Drupal site,
 and reverts the system back to its state prior to Drupal
 installation: destroys project directory at `<project_root>`,
 drops the Drupal Database `<db_name>` and MySQL user `<db_user>`.
 
-#### `deploy-drupal::install`
-Makes sure that the Drupal site is connected to a Drupal database. Drush
-site-install is used **only** if the loaded (or downloaded) site does not have
-valid credentials **and** if the database `<db_name>` is entirely empty (no
-tables).
+Note that `drush site-install` is used **only** if the the database 
+`<db_name>` is entirely empty (no tables) and no database dump file is provided
+(or the dump file is empty). `site-install` is not invoked for
+generating credentials in `settings.php`. *Note*: The database dump is used
+*only if* the `<db_name>` MySQL database is entirely empty.
 
-It also populates the database if a database dump is found at
-`sql_dump`. This attribute can be an absolute path in local file system
-(for example, when you do not have an existing project), or
-relative to the project root (and therefore sought at
-`<project_root>/<sql_dump>`). Again, the database dump is
-**only** used if the `<db_name>` MySQL database is entirely empty.
-
-After installation, this recipe will run an optional bash script that you might
-provide under `post_install_script`, which, similar to `sql_load_file`, can be
-absolute or relative to project root.
+After installation, this recipe will optionally run a bash script that you might
+provide as the attribute `['deploy-drupal']['install']['script']`.
 
 After installation, the expected state is as follows:
 
 1. The installed Drupal site recognizes `<admin_user>` (with password
 `<admin_pass>`) as "user one".
 1. The following directory structure holds in the provisioned machine:
-    - `/var/shared/sites/<project_name>`
+    - `<project_root>`
         - `<drupal_root>`
             - `index.php`
             - `includes`
@@ -193,14 +209,15 @@ After installation, the expected state is as follows:
 
 1. Note that `db` and `scripts` are just example subdirectories and are not
 controlled by the cookbook. You will be able to find the entire contents of
-the `<get_project_from[:path]>` directory, or the `<get_project_from[:git]>`
-repo at `<deploy_dir>/<project_name>`
-1. The provided `dev_group_name` 
-system to be provisioned. This user group will own the project root directory. 
+the `<['get_project']['path']>` directory, or the
+`<['get_project']['git_repo']>` git repo (`git_branch` will be checked out) `<project_root>`.
+1. The provided `dev_group` user group will own the project root directory. 
 1. Ownership and permission settings of the deployed project root directory
-(loated at `<deploy_dir>/<project_name>`) are set as follows:
-  1. The user and group owners of all current files and subdirectories are
-  `<node['apache']['user']>` and `<dev_group_name>`, respectively.
+(loated at `<project_root>`) are set as follows:
+  1. Only the group owner of `<project_root>` is set (`<dev_group>`).
+  1. The user and group owners of all files and subdirectories under
+  `<drupal_root>` are
+  `<node['apache']['user']>` and `<dev_group>`, respectively.
   1. The group owner of all files and subdirectories created in the future will be
   `dev_group` (the `setgid` flag is set for all subdirectories). The user owner 
   of future files and directories will depend on the
@@ -210,6 +227,8 @@ system to be provisioned. This user group will own the project root directory.
   and `r-x rwx ---`, respectively. The only exception is the "files"
   directories (refer to the `drupal_files_dir` attribute) and all its
   contents, which has its permissions set to `rwx rwx ---`.
+  1. `node['apache']['user']` will be grant write access (`chmod -R u+w`) to all
+  directories specified in `<writable_dirs>`.
 
 #### Testing/Development
 1. The cookbook includes test cases written using the

@@ -17,12 +17,14 @@ Vagrant.configure('2') do |config|
   config.vm.provision :chef_solo do |chef|
     chef.add_recipe 'deploy-drupal::default'
     chef.add_recipe 'deploy-drupal::nginx'
+    #chef.add_recipe 'drupal-solr'
     chef.add_recipe 'minitest-handler'
 
     chef.json.merge!({
       'deploy-drupal' => { 
         'dev_group' => 'vagrant',
         'apache_port' => '8000',
+        'writable_dirs' => [ "sites/default/files", "cache" ]
       },
       'apache' => {
         'listen_ports' => ['8000'],
@@ -38,7 +40,7 @@ Vagrant.configure('2') do |config|
         'server_repl_password' => 'root',
       },  
       'minitest' =>{ 
-        'recipes' => [ 'deploy-drupal::default' , 'deploy-drupal::nginx' ],
+        'recipes' => [ 'deploy-drupal::default' , 'deploy-drupal::nginx', ],
       },  
       'run_list' =>[ 'deploy-drupal::nginx', 'minitest-handler' ]
     })   
