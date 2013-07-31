@@ -2,10 +2,6 @@
 ## Recipe:: install
 ##
 
-# make sure the files directory exists
-directory node['deploy-drupal']['files_dir'] do
-  recursive true
-end
 
 mysql_connection = "mysql --user='root' --host='localhost' --password='#{node['mysql']['server_root_password']}'"
 db_user = "'#{node['deploy-drupal']['install']['db_user']}'@'localhost'"
@@ -30,7 +26,7 @@ template "/usr/local/bin/drupal-perm" do
   variables({
     :project_path =>  node['deploy-drupal']['project_root'],
     :site_path    =>  node['deploy-drupal']['drupal_root'],
-    :files_path   =>  node['deploy-drupal']['files_dir'],
+    :writable_dirs=>  node['deploy-drupal']['writable_dirs'],
     :user         =>  node['apache']['user'],
     :group        =>  node['deploy-drupal']['dev_group']
   })

@@ -25,5 +25,5 @@ else
     node['deploy-drupal']['project_root'] + "/" +
     node['deploy-drupal']['get_project']['site_dir']
 end
-# absolute path to Drupal 'files' directory
-default['deploy-drupal']['files_dir'] = node['deploy-drupal']['drupal_root'] + "/sites/default/files"
+# relative path to directories in Drupal root to which Apache will be granted write access
+default['deploy-drupal']['writable_dirs'] = [ "/sites/default/files" ]

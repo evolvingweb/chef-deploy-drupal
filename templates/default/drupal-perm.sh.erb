@@ -12,4 +12,7 @@ chmod -R g+s '<%= @project_path %>'
 chown -R <%= @user %>:<%= @group %> '<%= @site_path %>'
 find '<%= @site_path %>' -type f -exec chmod u=r,g=rw,o-rwx '{}' \;
 find '<%= @site_path %>' -type d -exec chmod u=rx,g=rwx,o-rwx '{}' \;
-chmod -R ug=rwx,o-rwx <%= @files_path %>
+
+<% @writable_dirs.each do |dir| %>
+chmod -R u+w <%= "#{@site_path}/#{dir}" %>
+<% end %>
