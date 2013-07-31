@@ -63,6 +63,7 @@ and `nginx`). All attributes mentioned below can be accessed in the cookbook via
 `node['deploy_drupal']['<attribute_group>']['<attribute_name>']`:
 
 * Core attributes (`default`):
+
 |   Attribute Name    |Default |           Description           |
 | --------------------|:------:|:------------------------------: |
 |`version`| `7`| Drupal version to be configured and/or downloaded, can be `N`, `N.x`, or `N.x.y`
@@ -71,9 +72,10 @@ and `nginx`). All attributes mentioned below can be accessed in the cookbook via
 |`project_name`| `'cooked.drupal'` | Used as project identifier in configuration files: Apache VHost name, Nginx site name
 |`project_root`| `/var/shared/sites/<project_name>` | absolute path to project directory
 |`drupal_root` | r.f `attributes/default.rb` | absolute path to Drupal site, if `['get_project']['git_repo']` or `['get_project']['path']` is set, defaults to `<project_root>/X` where `X` is the Drupal root directory in existing project, otherwise defaults to `<project_root>/site`
-|`writable_dirs`|   `[ '/sites/default/files' ]` | relative path to directories in Drupal root to which Apache will be granted write access
+|`writable_dirs`|   `[ '/sites/default/files' ]` | array of relative paths (to `drupal_root`) to directories in Drupal root to which Apache will be granted write access
 
 * Project attributes (`get_project`):
+ 
 |   Attribute Name    |Default |           Description           |
 | --------------------|:------:|:------------------------------: |
 |`path` | `''` | absolute path to a project directory in filesystem, will be copied to `<project_root>`, will be ignored if `git_repo` is specified.
@@ -82,6 +84,7 @@ and `nginx`). All attributes mentioned below can be accessed in the cookbook via
 |`site_dir` | `site` | Drupal site directory relative to project path, will be disregarded if no path or git url is specified (Drupal will be downloaded to `<project_root>/site`
 
 * Installation attributes (`install`):
+
 |   Attribute Name    |Default |           Description           |
 | --------------------|:------:|:------------------------------: |
 | `db_user`| `drupal` | Database user for Drupal
@@ -89,11 +92,11 @@ and `nginx`). All attributes mentioned below can be accessed in the cookbook via
 | `db_name`| `drupal` | Drupal Database name
 | `admin_user`| `admin` | username for Drupal user one
 | `admin_pass`| `admin` | password for Drupal user one
-| `sql_dump`| `''` | path to sql dump file (can be .sql.gz) to populate the database, can be absolute *or* relative to project root
+| `sql_dump`| `''` | path to sql dump file (can be `.sql.gz`) to populate the database, can be absolute *or* relative to project root
 | `script` | `''` | path to bash script file to be executed after installation, can be absolute *or* relative to project root
 
 * Nginx attributes (`nginx`):
-* Installation attributes (`install`):
+
 |   Attribute Name    |Default |           Description           |
 | --------------------|:------:|:------------------------------: |
 |`port` | `80` | defaults to the same port as Apache, but `deploy-drupal::nginx` is not included in the default recipe, must update `apache_port` if setting up Nginx
