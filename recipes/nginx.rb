@@ -15,7 +15,7 @@ location_list = '^(' +  node['deploy-drupal']['nginx']['location_block_list'].jo
 keyword_list = '(' + node['deploy-drupal']['nginx']['keyword_block_list'].join('|') + ')'
 static_list = '\.(' + node['deploy-drupal']['nginx']['static_content'].join('|') + ')(\.gz)?$'
 # custom blocks file might be relative to project root
-custom_file = node['deploy-drupal']['nginx']['custom_blocks_file']
+custom_file = node['deploy-drupal']['nginx']['custom_site_file']
 if custom_file[0] == '/' 
   custom_file = "#{node['deploy-drupal']['project_root']}/#{custom_file}"
 end
@@ -30,7 +30,7 @@ template conf_file do
     :location_list => location_list,
     :keyword_list => keyword_list,
     :static_list => static_list,
-    :custom_file => node['deploy-drupal']['nginx']['custom_blocks_file']
+    :custom_file => custom_file
   })
   notifies :reload, "service[nginx]"
 end

@@ -105,7 +105,7 @@ and `nginx`). All attributes mentioned below can be accessed in the cookbook via
 |`location_block_list` | r.f `attributes/nginx.rb` | list of PCRE patterns to deny request if any pattern matches the entire request location
 |`keyword_block_list` | r.f `attributes/nginx.rb` | list of pcre patterns to deny request if any pattern matches any part of request location
 |`static_content` | r.f `attributes/nginx.rb` | list of pcre patterns to serve files if any pattern matches requested file extension (will be matched against `[<pattern>](\.gz)?` )
-|`custom_blocks_file` | `''` | path to file to be appended to the Nginx server block, can be absolute *or* relative to project root
+|`custom_site_file` | `''` | path to file to be copied to the Nginx site file, can be absolute *or* relative to project root (if this file exists, the cookbook would not add any content to the site file)
 
 ## Recipes
 In what follows, a **project** is a directory containing a Drupal site root

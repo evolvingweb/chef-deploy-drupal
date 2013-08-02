@@ -66,7 +66,7 @@ class TestNginx < MiniTest::Chef::TestCase
       # tail apache access log in the background and curl nginx
       # test will fail if any access to apache is recorded
       system "touch #{minitest_log_file} ; \
-              touch #{node['deploy-drupal']['drupal_root']}/#{test_file} \
+              touch #{node['deploy-drupal']['drupal_root']}/#{test_file} ; \
               ( tail -n0 -F #{apache_access_log} \
                 | grep #{test_file} \
                 | while read X; do echo $X >> #{minitest_log_file}; done\
