@@ -20,7 +20,7 @@ default['deploy-drupal']['nginx']['location_block_list'] =
 
 # list of pcre patterns to deny request if
 # any pattern matches any part of request location
-default['deploy-drupal']['nginx']['keyword_block_list'] = ['boost_crawler']
+default['deploy-drupal']['nginx']['keyword_block_list'] = ['boost-crawler']
 
 # list of pcre patterns to serve files if
 # any pattern matches requested file extension

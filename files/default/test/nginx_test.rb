@@ -61,17 +61,19 @@ class TestNginx < MiniTest::Chef::TestCase
       
       txt = "expected Nginx to not proxy pass a request to\
              http://localhost:#{node['deploy-drupal']['nginx']['port']}/#{test_file}"
-      
-      Chef::Log.info "curling http://localhost:#{node['deploy-drupal']['nginx']['port']}/#{test_file}"
+      url = "localhost:#{node['deploy-drupal']['nginx']['port']}/#{test_file}"
+      Chef::Log.info "curling #{url}..."
       # tail apache access log in the background and curl nginx
       # test will fail if any access to apache is recorded
       system "touch #{minitest_log_file} ; \
+              touch #{node['deploy-drupal']['drupal_root']}/#{test_file} \
               ( tail -n0 -F #{apache_access_log} \
                 | grep #{test_file} \
                 | while read X; do echo $X >> #{minitest_log_file}; done\
               ) & \
-              curl localhost://#{test_file} > /dev/null 2>&1 ;\
-              sleep 1; kill $( ps | grep tail | awk '{print $1;}' ) > /dev/null 2>&1"
+              curl -G #{url} > /dev/null 2>&1 ;\
+              sleep 1; kill $( ps | grep tail | awk '{print $1;}' ) > /dev/null 2>&1 \
+              rm -f #{node['deploy-drupal']['drupal_root']}/#{test_file}"
       assert_sh "cat #{minitest_log_file} | wc -l | xargs test 0 -eq", txt
     end
     system "rm -rf #{minitest_log_dir}"

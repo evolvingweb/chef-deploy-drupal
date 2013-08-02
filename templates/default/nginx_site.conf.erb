@@ -32,19 +32,19 @@ server {
   ## Static Content Rules
   location ~* <%= @static_list %> {
     expires max;
-    try_files $request_uri @drupal;
+    try_files $uri @drupal;
     break;
   }
   # for css,js files try Boost cache too
   location ~* \.(css|js)(\.gz)?$ {
     expires max;
-    try_files $request_uri /cache/perm/$http_host$request_uri$boost_query.$1 @drupal;
+    try_files $uri /cache/perm/$http_host$request_uri$boost_query.$1 @drupal;
     break;
   }
   # add_header for html and xml files
   location ~* \.(html|xml)$ {
     add_header Cache-Control no-cache,no-store,must-validate;
-    try_files $request_uri @drupal;
+    try_files $uri @drupal;
     break;
   }
   # -------------------------
