@@ -16,7 +16,7 @@ keyword_list = '(' + node['deploy-drupal']['nginx']['keyword_block_list'].join('
 static_list = '\.(' + node['deploy-drupal']['nginx']['static_content'].join('|') + ')(\.gz)?$'
 # custom blocks file might be relative to project root
 custom_file = node['deploy-drupal']['nginx']['custom_site_file']
-if custom_file[0] == '/' 
+if custom_file[0] != '/' 
   custom_file = "#{node['deploy-drupal']['project_root']}/#{custom_file}"
 end
 # load the nginx site template
