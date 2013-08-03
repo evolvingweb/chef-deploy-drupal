@@ -38,3 +38,21 @@ end
 # by default is set to enabled = true and timing = delayed
 nginx_site node['deploy-drupal']['project_name'] do
 end
+
+# install Apacahe rpaf module for remote address resolution behind reverse proxy
+package value_for_platform(
+  [ 'centos', 'redhat', 'fedora' ] => { 'default' => 'dba-apache2-mod_rpaf' },
+  [ 'debian', 'ubuntu' ] => { 'default' => 'libapache2-mod-rpaf' }
+)
+# write over rpaf.conf to work around
+# https://bugs.launchpad.net/ubuntu/+source/libapache2-mod-rpaf/+bug/1002571
+template "#{node['apache']['dir']}/mods-available/rpaf.conf" do
+  source "rpaf.conf.erb"
+  mode 0644
+  owner "root"
+  group "root"
+  variables ({ 
+    :rpaf_module => `strings #{node['apache']['libexecdir']}/mod_rpaf.so | grep mod_rpaf.*\.c`.strip 
+  })
+  notifies :reload, "service[apache2]"
+end
