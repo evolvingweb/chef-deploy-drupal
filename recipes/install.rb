@@ -126,8 +126,8 @@ bash "finish-provision" do
   # post install script might be relative to project_root
   cwd node['deploy-drupal']['drupal_root']
   code <<-EOH
-    bash drupal-perm
     drush cache-clear all
+    bash drupal-perm
   EOH
 end
 
