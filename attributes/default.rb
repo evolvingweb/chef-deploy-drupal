@@ -27,3 +27,4 @@ else
 end
 # relative path to directories in Drupal root to which Apache will be granted write access
 default['deploy-drupal']['writable_dirs'] = [ "/sites/default/files" ]
+default['deploy-drupal']['apc_shm_size'] = '64M'

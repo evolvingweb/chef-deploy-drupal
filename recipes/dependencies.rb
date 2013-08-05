@@ -27,11 +27,10 @@ pkgs = value_for_platform(
 # install all packages
 pkgs.each {|pkg| package ( pkg ) { action :install } }
 
-# Install uploadprogress for better feedback during Drupal file uploads.
 # php_pear LWRP is installed as part of the PHP cookbook
-
+# Install uploadprogress for better feedback during Drupal file uploads.
 php_pear ('uploadprogress') { action :install }
 php_pear "APC" do
   action :install
-  directives( :shm_size => "128M" )
+  directives( :shm_size => node['deploy-drupal']['apc_shm_size'] )
 end
