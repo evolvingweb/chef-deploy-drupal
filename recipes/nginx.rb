@@ -51,8 +51,5 @@ template "#{node['apache']['dir']}/mods-available/rpaf.conf" do
   mode 0644
   owner "root"
   group "root"
-  variables ({ 
-    :rpaf_module => `strings #{node['apache']['libexecdir']}/mod_rpaf.so | grep mod_rpaf.*\.c`.strip 
-  })
   notifies :reload, "service[apache2]"
 end
