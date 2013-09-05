@@ -5,7 +5,7 @@
 
 php_pear "APC" do
   action :install
-  # directives ( node['deploy-drupal']['apc'] )
+  # directives ( node['deploy-drupal']['apc_directives'] )
 end
 
 # we have to generate apc.ini since PHP cookbook's APC.ini breaks

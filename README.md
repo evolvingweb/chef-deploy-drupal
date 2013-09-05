@@ -130,6 +130,9 @@ and other configuration files.
 #### `deploy-drupal::dependencies`
 Includes dependency cookbooks, installs lamp stack packages to get Apache, MySQL, PHP, and Drush running.
 
+#### `deploy-drupal::apc`
+Install APC and configures `apc.ini`.
+
 #### `deploy-drupal::download_drupal`
 Downloads drupal if no existing project is found. This recipe
 **only** downloads Drupal if both attributes `['get_project']['path']` and
