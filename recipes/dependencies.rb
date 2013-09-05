@@ -32,5 +32,12 @@ pkgs.each {|pkg| package ( pkg ) { action :install } }
 php_pear ('uploadprogress') { action :install }
 php_pear "APC" do
   action :install
-  directives( :shm_size => node['deploy-drupal']['apc_shm_size'] )
+end
+
+template "#{node['php']['ext_conf_dir']}/deploy-drupal.ini"  do
+  source "deploy-drupal.ini.erb"
+  mode 0644
+  owner "root"
+  group "root"
+  notifies :reload, "service[apache2]"
 end
