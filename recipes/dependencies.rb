@@ -30,10 +30,8 @@ pkgs.each {|pkg| package ( pkg ) { action :install } }
 # php_pear LWRP is installed as part of the PHP cookbook
 # Install uploadprogress for better feedback during Drupal file uploads.
 php_pear ('uploadprogress') { action :install }
-php_pear "APC" do
-  action :install
-end
 
+# deploy-drupal.ini file for custom PHP directives
 template "#{node['php']['ext_conf_dir']}/deploy-drupal.ini"  do
   source "deploy-drupal.ini.erb"
   mode 0644

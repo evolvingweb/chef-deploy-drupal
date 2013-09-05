@@ -73,6 +73,7 @@ and `nginx`). All attributes mentioned below can be accessed in the cookbook via
 |`project_root`| `/var/shared/sites/<project_name>` | absolute path to project directory
 |`drupal_root` | r.f `attributes/default.rb` | absolute path to Drupal site, if `['get_project']['git_repo']` or `['get_project']['path']` is set, defaults to `<project_root>/X` where `X` is the Drupal root directory in existing project, otherwise defaults to `<project_root>/site`
 |`writable_dirs`|   `[ '/sites/default/files' ]` | array of relative paths (to `drupal_root`) to directories in Drupal root to which Apache will be granted write access
+|`ini_directives`| `[ ]` | hash containing PHP ini directives that will be written to `deploy-drupal.ini` in the PHP extension directory in the form `<key>=<value>`
 
 * Project attributes (`get_project`):
  
@@ -106,6 +107,16 @@ and `nginx`). All attributes mentioned below can be accessed in the cookbook via
 |`keyword_block_list` | r.f `attributes/nginx.rb` | list of pcre patterns to deny request if any pattern matches any part of request location
 |`static_content` | r.f `attributes/nginx.rb` | list of pcre patterns to serve files if any pattern matches requested file extension (will be matched against `[<pattern>](\.gz)?` )
 |`custom_site_file` | `''` | path to file to be copied to the Nginx site file, can be absolute *or* relative to project root (if this file exists, the cookbook would not add any content to the site file)
+
+* APC attributes (`apc`):
+|   Attribute Name    |Default |           Description           |
+| --------------------|:------:|:------------------------------: |
+|`shm_size` | `64M` | (C.f `ini_directives` above) hash containing PHP ini directives for APC that will be written to `apc.ini` in the PHP extension directory in the form `apc.<key>=<value>`
+
+*note*: APC directives are controlled by this cookbook because the PHP cookbook
+creates broken `ini` files. When the issue is resolved in the PHP cookbook, APC
+attributes will be still available, but they will be passed to the PHP cookbook
+as opposed to the `apc.ini.erb` template (look at issue #28).
 
 ## Recipes
 In what follows, a **project** is a directory containing a Drupal site root
