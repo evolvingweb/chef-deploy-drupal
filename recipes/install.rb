@@ -8,9 +8,12 @@ db_user = "'#{node['deploy-drupal']['install']['db_user']}'@'localhost'"
 db_pass = node['deploy-drupal']['install']['db_pass']
 db_name = node['deploy-drupal']['install']['db_name']
 
+apache_vhost_ip = node['deploy-drupal']['lock_apache'] ? "127.0.0.1" : "*"
+
 web_app node['deploy-drupal']['project_name'] do
   template "web_app.conf.erb"
-  port node['deploy-drupal']['apache_port']
+  listen_ip apache_vhost_ip
+  listen_port node['deploy-drupal']['apache_port']
   server_name node['deploy-drupal']['project_name']
   server_aliases [node['deploy-drupal']['project_name']]
   docroot node['deploy-drupal']['drupal_root']
