@@ -5,7 +5,6 @@
 
 # assemble all necessary query strings and paths
 include_recipe 'nginx::default'
-
 conf_file = node['nginx']['dir'] + "/sites-available/" + 
             node['deploy-drupal']['project_name']
 # the following strings must be assembled using single quotes
@@ -16,7 +15,7 @@ keyword_list = '(' + node['deploy-drupal']['nginx']['keyword_block_list'].join('
 static_list = '\.(' + node['deploy-drupal']['nginx']['static_content'].join('|') + ')(\.gz)?$'
 # custom blocks file might be relative to project root
 custom_file = node['deploy-drupal']['nginx']['custom_site_file']
-if custom_file[0] != '/' 
+if ( custom_file[0] != '/' && !custom_file.empty? )
   custom_file = "#{node['deploy-drupal']['project_root']}/#{custom_file}"
 end
 # load the nginx site template
