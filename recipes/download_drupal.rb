@@ -27,6 +27,7 @@ if project_missing
   remote_file "#{tmp_dir}/drupal-#{version}.tar.gz" do
     source "#{repo_url}/drupal-#{version}.tar.gz"
     mode 0644
+    action :create_if_missing
   end
   
   execute "untar-drupal" do
