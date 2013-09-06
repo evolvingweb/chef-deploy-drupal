@@ -14,5 +14,7 @@ find '<%= @site_path %>' -type f -exec chmod u=r,g=rw,o-rwx '{}' \;
 find '<%= @site_path %>' -type d -exec chmod u=rx,g=rwx,o-rwx '{}' \;
 
 <% @writable_dirs.each do |dir| %>
-chmod -R u+w <%= "#{@site_path}/#{dir}" %>
+if test -d <%= "#{@site_path}/#{dir}" %>; then
+  chmod -R u+w <%= "#{@site_path}/#{dir}" %>
+fi
 <% end %>
