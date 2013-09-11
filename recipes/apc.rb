@@ -3,9 +3,10 @@
 ##
 ## install and configure APC
 
-php_pear "APC" do
-  action :install
-  # directives ( node['deploy-drupal']['apc_directives'] )
+execute "install-apc" do
+  # pecl install initiates prompts that we do not want to interact with
+  # pecl upgrade is the idempotent version of pecl install
+  command 'printf "\n" | pecl upgrade apc'
 end
 
 # we have to generate apc.ini since PHP cookbook's APC.ini breaks
