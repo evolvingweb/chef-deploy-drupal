@@ -28,4 +28,3 @@ end
 # relative path to directories in Drupal root to which Apache will be granted write access
 default['deploy-drupal']['writable_dirs'] = [ "/sites/default/files" ]
 default['deploy-drupal']['ini_directives'] = Hash.new
-default['deploy-drupal']['lock_apache'] = FALSE
