@@ -8,21 +8,31 @@ include_recipe 'nginx::default'
 conf_file = node['nginx']['dir'] + "/sites-available/" + 
             node['deploy-drupal']['project_name']
 
-# custom blocks file might be relative to project root
+
 custom_file = node['deploy-drupal']['nginx']['custom_site_file']
-if ( custom_file[0] != '/' && !custom_file.empty? )
-  custom_file = "#{node['deploy-drupal']['project_root']}/#{custom_file}"
+if custom_file.nil? then
+  template conf_file do
+    source "nginx_site.conf.erb"
+    mode 0644
+    owner "root"
+    group "root"
+    variables ({ 'custom_file' => custom_file })
+    notifies :reload, "service[nginx]"
+  end
+else
+  # custom blocks file might be relative to project root
+  if ( custom_file[0] != '/' )
+    custom_file = "#{node['deploy-drupal']['project_root']}/#{custom_file}"
+  end
+  execute "copy-nginx-site-file" do
+    user "root"
+    command "cp #{custom_file} #{conf_file}"
+    only_if "test -f #{custom_file}"
+    notifies :reload, "service[nginx]"
+  end
 end
 
-# load the nginx site template
-template conf_file do
-  source "nginx_site.conf.erb"
-  mode 0644
-  owner "root"
-  group "root"
-  variables ({ 'custom_file' => custom_file })
-  notifies :reload, "service[nginx]"
-end
+
 
 # by default is set to enabled = true and timing = delayed
 nginx_site node['deploy-drupal']['project_name'] do
