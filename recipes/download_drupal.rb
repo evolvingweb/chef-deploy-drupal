@@ -16,10 +16,10 @@ project_missing = node['deploy-drupal']['get_project']['path'].empty? &&
                   node['deploy-drupal']['get_project']['git_repo'].empty?
 
 if project_missing
-  tmp_dir = "#{Chef::Config[:file_cache_path]}/#{node['deploy-drupal']['project_name']}"
+  tmp_dir = Chef::Config[:file_cache_path]
   
   # temporary site directory where drupal will be extracted
-  directory "#{tmp_dir}/site" do
+  directory "#{tmp_dir}/#{node['deploy-drupal']['project_name']}/site" do
     recursive true
   end
   repo_url = "http://ftp.drupal.org/files/projects"
@@ -32,7 +32,7 @@ if project_missing
   
   execute "untar-drupal" do
     cwd tmp_dir
-    command "tar -xzf drupal-#{version}.tar.gz -C site --strip-components=1"
+    command "tar -xzf drupal-#{version}.tar.gz -C #{node['deploy-drupal']['project_name']}/site --strip-components=1"
   end
-  node.set['deploy-drupal']['get_project']['path'] = tmp_dir
+  node.set['deploy-drupal']['get_project']['path'] = tmp_dir + "/" +node['deploy-drupal']['project_name']
 end
