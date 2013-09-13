@@ -2,12 +2,20 @@
 ## Recipe:: install
 ##
 
-
 mysql_connection = "mysql --user='root' --host='localhost' --password='#{node['mysql']['server_root_password']}'"
 db_user = "'#{node['deploy-drupal']['install']['db_user']}'@'localhost'"
 db_pass = node['deploy-drupal']['install']['db_pass']
 db_name = node['deploy-drupal']['install']['db_name']
 
+ruby_block "find-drupal-version" do
+  version_sed = 's/.*"drupal-version":"\([0-9]\+\.[0-9]\+\)".*/\1/'
+  version_cmd = "drush --root=#{node['deploy-drupal']['drupal_root']} status --format=json | sed '#{version_sed}'"
+  block do
+    version = Mixlib::ShellOut.new(version_cmd).run_command.stdout.strip
+    Chef::Log.info("Amir speaking: command was: #{version_cmd}, and version was found to be #{version}")
+    node.set['deploy-drupal']['version'] = version
+  end
+end
 
 web_app node['deploy-drupal']['project_name'] do
   template "web_app.conf.erb"

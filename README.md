@@ -66,7 +66,6 @@ and `nginx`). All attributes mentioned below can be accessed in the cookbook via
 
 |   Attribute Name    |Default |           Description           |
 | --------------------|:------:|:------------------------------: |
-|`version`| `7`| Drupal version to be configured and/or downloaded, can be `N`, `N.x`, or `N.x.y`
 |`apache_port`| `80`| Port to which Apache virtual host for Drupal listens, must be consistent with `node['apache']['listen_ports']`
 |`dev_group`|`'root'`| user group owning drupal codebase files, cookbook does *not* create the group if it does not exist
 |`project_name`| `'cooked.drupal'` | Used as project identifier in configuration files: Apache VHost name, Nginx site name
@@ -121,6 +120,13 @@ creates the line `key=value` in
 This behavior is inherited from the PHP cookbook (`php_pear` LWRP) which writes
 extension directives in the `extension.key=value`  form. Furthermore, as in the
 case of `ini_directives` attribute, you can add any APC related directive to this hash.
+
+* Download drupal attributes (`download_drupal`):
+
+|   Attribute Name    |Default |           Description           |
+| --------------------|:------:|:------------------------------: |
+|`version` | `7` | Version of Drupal to be downloaded.
+
 
 ## Recipes
 In what follows, a **project** is a directory containing a Drupal site root

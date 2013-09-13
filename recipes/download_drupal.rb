@@ -3,13 +3,11 @@
 ##
 ## download drupal if necessary
 
-case node['deploy-drupal']['version']
+case version = node['deploy-drupal']['download_drupal']['version']
 when '7' 
   version = '7.22'
 when '6'
   version = '6.28'
-else 
-  version = node['deploy-drupal']['version']
 end
 
 project_missing = node['deploy-drupal']['get_project']['path'].empty? &&
