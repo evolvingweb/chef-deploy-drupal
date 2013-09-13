@@ -12,7 +12,7 @@ conf_file = node['nginx']['dir'] + "/sites-available/" +
 custom_file = node['deploy-drupal']['nginx']['custom_site_file']
 if custom_file.nil? then
   template conf_file do
-    source "nginx_site.conf.erb"
+    source "nginx_site.erb"
     mode 0644
     owner "root"
     group "root"
@@ -31,8 +31,6 @@ else
     notifies :reload, "service[nginx]"
   end
 end
-
-
 
 # by default is set to enabled = true and timing = delayed
 nginx_site node['deploy-drupal']['project_name'] do
