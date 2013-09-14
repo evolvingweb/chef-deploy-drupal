@@ -8,12 +8,19 @@ db_pass = node['deploy-drupal']['install']['db_pass']
 db_name = node['deploy-drupal']['install']['db_name']
 
 ruby_block "find-drupal-version" do
-  version_sed = 's/.*"drupal-version":"\([0-9]\+\.[0-9]\+\)".*/\1/'
-  version_cmd = "drush --root=#{node['deploy-drupal']['drupal_root']} status --format=json | sed '#{version_sed}'"
+  docroot = node['deploy-drupal']['drupal_root'] 
+  drush_sed = 's/.*"drupal-version":"\([0-9]\+\.[0-9]\+\)".*/\1/'
+  drush_cmd = "drush --root=#{docroot} status --format=json | sed '#{drush_sed}'"
+  # in the common case that settings.php is commited to the repo and settings.local.php 
+  # is not, `drush status` will fail. Fallback on insepcting CHANGELOG.txt
+  changelog_sed = 's/Drupal\s\([0-9]\+\.[0-9]\+\).*/\1/'  
+  changelog_cmd = "grep -m 1 Drupal #{docroot}/CHANGELOG.txt | sed '#{changelog_sed}'"
   block do
-    version = Mixlib::ShellOut.new(version_cmd).run_command.stdout.strip
-    Chef::Log.info("Amir speaking: command was: #{version_cmd}, and version was found to be #{version}")
-    node.set['deploy-drupal']['version'] = version
+    version = Mixlib::ShellOut.new(drush_cmd).run_command.stdout.strip
+    # fallback on CHANGELOG.txt if drush command did not return proper version
+    version = Mixlib::ShellOut.new(changelog_cmd).run_command.stdout.strip if version !~ /\d+\.\d+/
+    # ser attribute value only if we found a proper version
+    node.set['deploy-drupal']['version'] = version if version =~ /\d+\.\d+/
   end
 end
 
@@ -87,7 +94,7 @@ end
 
 append_code = 'include_once("settings.local.php");'
 # copy contents of default.settings.php
-# unset db crendential variables, and includes local.settings.php
+# unset db crendential variables, and include local.settings.php
 bash "configure-settings.php" do
   cwd conf_dir
   code <<-EOH
