@@ -20,7 +20,7 @@ ruby_block "find-drupal-version" do
     # fallback on CHANGELOG.txt if drush command did not return proper version
     version = Mixlib::ShellOut.new(changelog_cmd).run_command.stdout.strip if version !~ /\d+\.\d+/
     # ser attribute value only if we found a proper version
-    node.force_override['deploy-drupal']['version'] = version if (version =~ /\d+\.\d+/)
+    node.set['deploy-drupal']['version'] = version if (version =~ /\d+\.\d+/)
   end
 end
 

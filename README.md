@@ -76,9 +76,9 @@ and `nginx`). All attributes mentioned below can be accessed in the cookbook via
 
 **note**: The `version` attribute (not to be confused with
 `'download_drupal'=>'version'` see below) is used internally by the cookbook to workaround
-certain breaking changes between `<= 6` and `>= 7` versions. It is (almost)
-always `force_override`n in the `install.rb` recipe. Do not use this attribute
-to configure cookbooks behaviour.
+certain breaking changes between `<= 6` and `>= 7` versions. It should not be
+assigned by the user of the cookbook. If you want a specific version to be
+_download_ed just specify it as `['deploy-drupal']['download_drupal']['version']`.
 
 
 * Project attributes (`get_project`):
