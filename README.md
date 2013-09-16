@@ -127,6 +127,10 @@ case of `ini_directives` attribute, you can add any APC related directive to thi
 | --------------------|:------:|:------------------------------: |
 |`version` | `7` | Version of Drupal to be downloaded.
 
+**note**: This attribute is used internally by the cookbook to workaround
+certain breaking changes between `<= 6` and `>= 7` versions. It is (almost)
+always `force_override`n in the `install.rb` recipe. Do not use this attribute
+to configure cookbooks behaviour.
 
 ## Recipes
 In what follows, a **project** is a directory containing a Drupal site root
