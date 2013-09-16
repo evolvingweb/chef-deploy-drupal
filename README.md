@@ -74,6 +74,13 @@ and `nginx`). All attributes mentioned below can be accessed in the cookbook via
 |`writable_dirs`|   `[ '/sites/default/files' ]` | array of relative paths (to `drupal_root`) to directories in Drupal root to which Apache will be granted write access
 |`ini_directives`| `[ ]` | hash containing PHP ini directives that will be written to `deploy-drupal.ini` in the PHP extension directory in the form `<key>=<value>`
 
+**note**: The `version` attribute (not to be confused with
+`'download_drupal'=>'version'` see below) is used internally by the cookbook to workaround
+certain breaking changes between `<= 6` and `>= 7` versions. It is (almost)
+always `force_override`n in the `install.rb` recipe. Do not use this attribute
+to configure cookbooks behaviour.
+
+
 * Project attributes (`get_project`):
  
 |   Attribute Name    |Default |           Description           |
@@ -127,10 +134,6 @@ case of `ini_directives` attribute, you can add any APC related directive to thi
 | --------------------|:------:|:------------------------------: |
 |`version` | `7` | Version of Drupal to be downloaded.
 
-**note**: This attribute is used internally by the cookbook to workaround
-certain breaking changes between `<= 6` and `>= 7` versions. It is (almost)
-always `force_override`n in the `install.rb` recipe. Do not use this attribute
-to configure cookbooks behaviour.
 
 ## Recipes
 In what follows, a **project** is a directory containing a Drupal site root
