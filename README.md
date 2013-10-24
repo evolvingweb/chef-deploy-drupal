@@ -1,6 +1,6 @@
 ## Deploy Drupal Cookbook
 
-[![BuildStatus](https://secure.travis-ci.org/amirkdv/chef-deploy-drupal.png)](http://travis-ci.org/amirkdv/chef-deploy-drupal)
+[![Build Status](https://travis-ci.org/evolvingweb/chef-deploy-drupal.png?branch=master)](https://travis-ci.org/evolvingweb/chef-deploy-drupal)
 
 #### Description
 Installs, configures, and bootsraps a [Drupal 6/7](https://drupal.org)
