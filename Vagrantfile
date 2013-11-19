@@ -8,10 +8,14 @@ Vagrant.configure('2') do |config|
   config.vm.network :forwarded_port, guest: 80,   host: 8000    #nginx
   config.vm.network :forwarded_port, guest: 8000, host: 8001    #apache
 
-  config.vm.synced_folder './db', '/home/vagrant/drush-backups/'
-  # precise64.box doesn't have chef 11, which we require
+  # config.vm.synced_folder './db', '/home/vagrant/drush-backups/'
+  # precise64.box doesn't have chef 11, which this cookbook requires
+  # precise64.box also uses Ruby 1.8.7 which breaks certain cookbooks
+  # using Ruby 1.9 specific syntax
   config.vm.provision :shell, :inline => <<-HEREDOC
-    gem install chef --version 11.0.0 --no-rdoc --no-ri --conservative
+    apt-get update
+    apt-get install -q -y ruby1.9.1 ruby1.9.1-dev build-essential
+    gem install chef --version '>=11.0.0' --no-rdoc --no-ri --conservative
   HEREDOC
 
   config.vm.provision :chef_solo do |chef|
@@ -42,7 +46,7 @@ Vagrant.configure('2') do |config|
         'listen' => '127.0.0.1'
       },
       'minitest' =>{
-        'recipes' => [ 'deploy-drupal::default' , 'deploy-drupal::nginx', ],
+        'recipes' => [ 'deploy-drupal::default' ] #, 'deploy-drupal::nginx', ],
       }
     }) 
   end
