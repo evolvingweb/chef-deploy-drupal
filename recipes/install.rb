@@ -119,7 +119,8 @@ execute "populate-db" do
   command "zless '#{dump_file}' | #{mysql_connection} --database=#{db_name};"
   only_if db_empty
   only_if "test -f '#{dump_file}'", :cwd => node['deploy-drupal']['project_root']
-  notifies :run, "execute[post-install-script]", :immediately
+  notifies :run, "bash[finish-provision]", :immediately
+  notifies :run, "execute[post-install-script]"
 end
 
 # fixes sendmail error https://drupal.org/node/1826652#comment-6706102
@@ -139,7 +140,6 @@ execute "drush-site-install" do
 end
 # the following resource is executed on every provision
 bash "finish-provision" do
-  # post install script might be relative to project_root
   cwd node['deploy-drupal']['drupal_root']
   code <<-EOH
     drush cache-clear all
@@ -151,6 +151,7 @@ script_file = node['deploy-drupal']['install']['script']
 # the post install script is only executed if the Drupal database 
 # is populated from scratch, either by drush site-install or from sql dump file
 execute "post-install-script" do
+  # post install script might be relative to project_root
   cwd node['deploy-drupal']['project_root']
   command "bash '#{script_file}'"
   only_if "test -f '#{script_file}'", :cwd => node['deploy-drupal']['project_root']
