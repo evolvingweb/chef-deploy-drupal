@@ -124,7 +124,7 @@ execute "populate-db" do
 end
 
 # fixes sendmail error https://drupal.org/node/1826652#comment-6706102
-drush = "php -d sendmail_path=/bin/true  /usr/share/php/drush/drush.php"
+drush = "PHP_OPTIONS='-d sendmail_path=/bin/true' drush"
 
 drush_install = "#{drush} site-install --debug -y\
   --account-name=#{node['deploy-drupal']['install']['admin_user']}\
