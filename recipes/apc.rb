@@ -3,7 +3,7 @@
 ##
 ## install and configure APC
 
-php_pear ('apc') { action :install }
+php_pear ('APC') { action :install }
 
 # we have to generate apc.ini since PHP cookbook's APC.ini breaks
 template "#{node['php']['ext_conf_dir']}/apc.ini"  do
