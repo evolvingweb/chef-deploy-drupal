@@ -1,0 +1,5 @@
+site 'https://supermarket.getchef.com/api/v1'
+
+cookbook 'drush', :git => 'git://github.com/homemade/chef-drush.git'
+cookbook 'deploy-drupal', :path => '.'
+cookbook 'minitest-handler'

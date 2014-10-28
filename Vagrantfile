@@ -16,6 +16,9 @@ Vagrant.configure('2') do |config|
     apt-get update
     apt-get install -q -y ruby1.9.1 ruby1.9.1-dev build-essential
     gem install chef --version '>=11.0.0' --no-rdoc --no-ri --conservative
+    # NOTE uncomment the following to use librarian-chef instead of vagrant-berkshelf
+    # apt-get install -y git && gem install librarian-chef
+    # cd /vagrant ; rm -f Cheffile.lock; librarian-chef install
   HEREDOC
 
   config.vm.provision :chef_solo do |chef|
