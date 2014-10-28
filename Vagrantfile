@@ -48,6 +48,8 @@ Vagrant.configure('2') do |config|
       'minitest' =>{
         'recipes' => [ 'deploy-drupal::default' ] #, 'deploy-drupal::nginx', ],
       }
-    }) 
+    })
+    # see https://github.com/mitchellh/vagrant/issues/4270
+    chef.custom_config_path = 'Vagrantfile.chef'
   end
 end

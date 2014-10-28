@@ -1,0 +1,4 @@
+# this file contains chef-solo configuration that are not available through the
+# Vagrant abstraction yet.
+Chef::Config.ssl_verify_mode = :verify_peer
+Chef::Config.log_level = :debug
