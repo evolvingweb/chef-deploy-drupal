@@ -8,12 +8,12 @@ db_pass = node['deploy-drupal']['install']['db_pass']
 db_name = node['deploy-drupal']['install']['db_name']
 
 ruby_block "find-drupal-version" do
-  docroot = node['deploy-drupal']['drupal_root'] 
+  docroot = node['deploy-drupal']['drupal_root']
   drush_sed = 's/.*"drupal-version":"\([0-9]\+\.[0-9]\+\)".*/\1/'
   drush_cmd = "drush --root=#{docroot} status --format=json | sed '#{drush_sed}'"
-  # in the common case that settings.php is commited to the repo and settings.local.php 
+  # in the common case that settings.php is commited to the repo and settings.local.php
   # is not, `drush status` will fail. Fallback on insepcting CHANGELOG.txt
-  changelog_sed = 's/Drupal\s\([0-9]\+\.[0-9]\+\).*/\1/'  
+  changelog_sed = 's/Drupal\s\([0-9]\+\.[0-9]\+\).*/\1/'
   changelog_cmd = "grep -m 1 Drupal #{docroot}/CHANGELOG.txt | sed '#{changelog_sed}'"
   block do
     version = Mixlib::ShellOut.new(drush_cmd).run_command.stdout.strip
@@ -98,7 +98,7 @@ append_code = 'include_once("settings.local.php");'
 bash "configure-settings.php" do
   cwd conf_dir
   code <<-EOH
-    cat default.settings.php > settings.php; 
+    cat default.settings.php > settings.php;
     echo '#{append_code}' >> settings.php;
   EOH
   not_if "test -f settings.php", :cwd => conf_dir
@@ -148,7 +148,7 @@ bash "finish-provision" do
 end
 
 script_file = node['deploy-drupal']['install']['script']
-# the post install script is only executed if the Drupal database 
+# the post install script is only executed if the Drupal database
 # is populated from scratch, either by drush site-install or from sql dump file
 execute "post-install-script" do
   # post install script might be relative to project_root
