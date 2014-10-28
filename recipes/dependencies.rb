@@ -7,7 +7,7 @@ base  = %w{ apt build-essential git curl vim }
 apache= %w{ apache2 apache2::mod_rewrite apache2::mod_php5 apache2::mod_expires }
 php   = %w{ php php::module_mysql php::module_memcache php::module_gd php::module_curl}
 mysql = %w{ mysql::server}
-drupal= %w{ drush xhprof memcached }
+drupal= %w{ drush memcached }
 
 # include all recipes
 [base, apache, php, mysql, drupal].each do |group|
