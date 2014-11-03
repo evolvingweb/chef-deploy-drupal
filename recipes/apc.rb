@@ -3,13 +3,9 @@
 ##
 ## install and configure APC
 
-php_pear ('APC') { action :install }
-
-# we have to generate apc.ini since PHP cookbook's APC.ini breaks
-template "#{node['php']['ext_conf_dir']}/apc.ini"  do
-  source "apc.ini.erb"
-  mode 0644
-  owner "root"
-  group "root"
-  notifies :reload, "service[apache2]"
+# NOTE changing the directives in dna.json does not update apc.ini if APC is
+# already installed.
+php_pear 'apc' do
+  action :install
+  directives(node['deploy-drupal']['apc_directives'])
 end
