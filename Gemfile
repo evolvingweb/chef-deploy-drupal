@@ -1,12 +1,21 @@
-source "https://rubygems.org"
-
-gem "bundler"
-gem "rake"
-
-gem "chef", ">=11.0.0"
-#moneta 0.7.0 breaks chef http://lists.opscode.com/sympa/arc/chef-dev/2012-12/msg00101.html
-gem "moneta", '~> 0.6.0'
-gem "foodcritic"
-
-gem "test-kitchen", "1.0.0.alpha.7"
-gem "kitchen-vagrant", "0.10.0"
+source :rubygems
+require 'rubygems'
+gem 'chef', '= 11.6.0'
+gem 'rake', '= 10.1.0'
+gem 'mixlib-config', '= 1.1.2'
+gem 'mixlib-cli', '= 1.3.0'
+gem 'mixlib-log', '= 1.6.0'
+gem 'mixlib-authentication', '= 1.3.0'
+gem 'mixlib-shellout', '= 1.2.0'
+gem 'ohai', '= 6.18.0'
+gem 'rest-client', '= 1.6.7'
+gem 'json', '= 1.7.7'
+gem 'yajl-ruby', '= 1.1.0'
+gem 'net-ssh', '= 2.7.0'
+gem 'net-ssh-multi', '= 1.1'
+gem 'highline', '= 1.6.19'
+gem 'erubis', '= 2.7.0'
+gem 'systemu', '= 2.5.2'
+gem 'ipaddress', '= 0.8.0'
+gem 'mime-types', '= 1.25'
+gem 'net-ssh-gateway', '= 1.2.0'

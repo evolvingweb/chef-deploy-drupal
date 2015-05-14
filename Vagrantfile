@@ -13,9 +13,10 @@ Vagrant.configure('2') do |config|
   # precise64.box also uses Ruby 1.8.7 which breaks certain cookbooks
   # using Ruby 1.9 specific syntax
   config.vm.provision :shell, :inline => <<-HEREDOC
-    apt-get update
-    apt-get install -q -y ruby1.9.1 ruby1.9.1-dev build-essential
-    gem install chef --version '>=11.0.0' --no-rdoc --no-ri --conservative
+    apt-get update -qqy
+    apt-get install -qqy ruby1.9.1 ruby1.9.1-dev build-essential
+    gem install bundler --no-rdoc --no-ri
+    BUNDLE_GEMFILE=/vagrant/Gemfile bundle install
     # NOTE uncomment the following to use librarian-chef instead of vagrant-berkshelf
     # apt-get install -y git && gem install librarian-chef
     # cd /vagrant ; rm -f Cheffile.lock; librarian-chef install
