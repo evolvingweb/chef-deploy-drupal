@@ -1,4 +1,4 @@
-source :rubygems
+source 'https://rubygems.org'
 require 'rubygems'
 gem 'chef', '= 11.6.0'
 gem 'rake', '= 10.1.0'
@@ -19,3 +19,6 @@ gem 'systemu', '= 2.5.2'
 gem 'ipaddress', '= 0.8.0'
 gem 'mime-types', '= 1.25'
 gem 'net-ssh-gateway', '= 1.2.0'
+
+# for CI
+gem 'foodcritic', '= 4.0.0'
