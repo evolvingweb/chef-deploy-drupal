@@ -5,8 +5,8 @@ Vagrant.configure('2') do |config|
   config.vm.box = 'hashicorp/precise64'
   config.vm.box_url = 'https://atlas.hashicorp.com/hashicorp/boxes/precise64'
 
-  config.vm.network :forwarded_port, guest: 80,   host: 8000    #nginx
-  config.vm.network :forwarded_port, guest: 8000, host: 8001    #apache
+  config.vm.network :forwarded_port, guest: 80,   host: 11000    #nginx
+  config.vm.network :forwarded_port, guest: 8000, host: 11001    #apache
 
   # config.vm.synced_folder './db', '/home/vagrant/drush-backups/'
   # precise64.box doesn't have chef 11, which this cookbook requires
