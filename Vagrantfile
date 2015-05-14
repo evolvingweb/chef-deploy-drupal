@@ -2,8 +2,8 @@
 # vi: set ft=ruby :
 
 Vagrant.configure('2') do |config|
-  config.vm.box = 'precise64'
-  config.vm.box_url = 'http://dl.dropbox.com/u/1537815/precise64.box'
+  config.vm.box = 'hashicorp/precise64'
+  config.vm.box_url = 'https://atlas.hashicorp.com/hashicorp/boxes/precise64'
 
   config.vm.network :forwarded_port, guest: 80,   host: 8000    #nginx
   config.vm.network :forwarded_port, guest: 8000, host: 8001    #apache
