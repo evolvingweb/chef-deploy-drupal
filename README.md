@@ -186,7 +186,7 @@ If such project is found, it will be deployed at `<deploy_dir>/<project_name>`
 This recipes ensures that the directories `<deploy_dir>/<project_name>` and
 `<deploy_dir>/<project_name>/<drupal_root_dir>` are created.
 
-#### `deplpoy-drupal::install`
+#### `deploy-drupal::install`
 Installs Drupal and utility scripts on the machine: configures apache
 vhost, if necessary, creates Drupal MySQL user with appropriate privileges,
 and, populates the database (first, if dump file is provided, otherwise with
